@@ -17,13 +17,13 @@ declare(strict_types=1);
 namespace Quantum\Tracer;
 
 use Quantum\Storage\Contracts\LocalFilesystemAdapterInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Quantum\Renderer\Exceptions\RendererException;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\View\Factories\ViewFactory;
 use Quantum\Di\Exceptions\DiException;
-use DebugBar\DebugBarException;
 use Quantum\Logger\Logger;
 use ReflectionException;
 use Psr\Log\LogLevel;
@@ -63,6 +63,7 @@ class ErrorHandler
     ];
 
     private ?Logger $logger = null;
+    private ?OutputInterface $cliOutput = null;
 
     private function __clone()
     {
@@ -75,6 +76,11 @@ class ErrorHandler
 
         set_error_handler([$this, 'handleError']);
         set_exception_handler([$this, 'handleException']);
+    }
+
+    public function setCliOutput(OutputInterface $output): void
+    {
+        $this->cliOutput = $output;
     }
 
     /**
@@ -90,7 +96,7 @@ class ErrorHandler
     }
 
     /**
-     * @throws ConfigException|RendererException|DebugBarException|DiException|BaseException|ReflectionException
+     * @throws ConfigException|RendererException|DiException|BaseException|ReflectionException
      */
     public function handleException(Throwable $throwable): void
     {
@@ -103,7 +109,7 @@ class ErrorHandler
 
     private function handleCliException(Throwable $throwable): void
     {
-        $output = new ConsoleOutput();
+        $output = $this->cliOutput ?? new ConsoleOutput();
         $output->writeln('<error>' . $throwable->getMessage() . '</error>');
     }
 
