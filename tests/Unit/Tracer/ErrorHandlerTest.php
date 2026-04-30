@@ -273,11 +273,17 @@ class ErrorHandlerTest extends AppTestCase
         $factory = Di::get(FileSystemFactory::class);
         $instancesProperty = new \ReflectionProperty(FileSystemFactory::class, 'instances');
         $instancesProperty->setAccessible(true);
-        $instancesProperty->setValue($factory, ['local' => new FileSystem($adapter)]);
+        $originalInstances = $instancesProperty->getValue($factory);
 
-        $code = $this->invokePrivateMethod('getSourceCode', [__FILE__, 10, 'error-line']);
+        try {
+            $instancesProperty->setValue($factory, ['local' => new FileSystem($adapter)]);
 
-        $this->assertSame('', $code);
+            $code = $this->invokePrivateMethod('getSourceCode', [__FILE__, 10, 'error-line']);
+
+            $this->assertSame('', $code);
+        } finally {
+            $instancesProperty->setValue($factory, $originalInstances);
+        }
     }
 
     public function testGetSourceCodeBuildsOrderedListForLocalAdapter(): void
