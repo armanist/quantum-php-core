@@ -160,6 +160,54 @@ class MigrationManagerTest extends AppTestCase
         $this->assertSame('create_table_alpha_table_2001', $entries[0]['migration']);
     }
 
+    public function testApplyMigrationsUpgradeThrowsWhenNothingToMigrate(): void
+    {
+        $this->createMigrationsTable();
+        $manager = new MigrationManager();
+
+        $this->expectException(MigrationException::class);
+        $this->expectExceptionMessage('Nothing to migrate');
+
+        $manager->applyMigrations(MigrationManager::UPGRADE);
+    }
+
+    public function testApplyMigrationsUpgradeThrowsForInvalidMigrationClass(): void
+    {
+        $this->createMigrationsTable();
+        $this->createInvalidMigrationFile('create_table_gamma_table_1003');
+
+        $manager = new MigrationManager();
+
+        $this->expectException(MigrationException::class);
+        $this->expectExceptionMessage('Migration class `create_table_gamma_table_1003` must extend QtMigration');
+
+        $manager->applyMigrations(MigrationManager::UPGRADE);
+    }
+
+    public function testApplyMigrationsDowngradeThrowsWhenMigrationTableMissing(): void
+    {
+        Database::execute('DROP TABLE IF EXISTS ' . MigrationTable::TABLE);
+
+        $manager = new MigrationManager();
+
+        $this->expectException(\Quantum\Database\Exceptions\DatabaseException::class);
+        $this->expectExceptionMessage('The table `migrations` does not exists');
+
+        $manager->applyMigrations(MigrationManager::DOWNGRADE);
+    }
+
+    public function testApplyMigrationsDowngradeThrowsWhenNoEntriesExist(): void
+    {
+        $this->createMigrationsTable();
+
+        $manager = new MigrationManager();
+
+        $this->expectException(MigrationException::class);
+        $this->expectExceptionMessage('Nothing to migrate');
+
+        $manager->applyMigrations(MigrationManager::DOWNGRADE);
+    }
+
     private function createValidMigrationFile(string $className, string $tableName): void
     {
         $content = "<?php\n"
@@ -173,6 +221,16 @@ class MigrationManagerTest extends AppTestCase
             . "    {\n"
             . "        \\Quantum\\Database\\Database::execute('DROP TABLE IF EXISTS " . $tableName . "');\n"
             . "    }\n"
+            . "}\n";
+
+        file_put_contents($this->migrationDir . DS . $className . '.php', $content);
+    }
+
+    private function createInvalidMigrationFile(string $className): void
+    {
+        $content = "<?php\n"
+            . 'class ' . $className . "\n"
+            . "{\n"
             . "}\n";
 
         file_put_contents($this->migrationDir . DS . $className . '.php', $content);
