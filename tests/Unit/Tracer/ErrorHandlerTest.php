@@ -19,25 +19,16 @@ use Mockery;
 class ErrorHandlerTest extends AppTestCase
 {
     private ErrorHandler $errorHandler;
-    private string $traceViewPath;
-    private string $error500ViewPath;
 
     public function setUp(): void
     {
         parent::setUp();
 
         $this->errorHandler = new ErrorHandler();
-        $this->traceViewPath = PROJECT_ROOT . DS . 'shared' . DS . 'views' . DS . 'errors' . DS . 'trace.php';
-        $this->error500ViewPath = PROJECT_ROOT . DS . 'shared' . DS . 'views' . DS . 'errors' . DS . '500.php';
-
-        $this->createFile($this->traceViewPath, '<div>TRACE VIEW <?= $severity ?> :: <?= $errorMessage ?> :: <?= count($stackTrace) ?></div>');
-        $this->createFile($this->error500ViewPath, '<div>ERROR 500 VIEW</div>');
     }
 
     public function tearDown(): void
     {
-        $this->removeFile($this->traceViewPath);
-        $this->removeFile($this->error500ViewPath);
         restore_error_handler();
         restore_exception_handler();
         parent::tearDown();
