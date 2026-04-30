@@ -173,33 +173,35 @@ class ErrorHandlerTest extends AppTestCase
         $sourceFile = PROJECT_ROOT . DS . 'shared' . DS . 'trace-source.php';
         $this->createFile($sourceFile, "<?php\nline1\nline2\nline3\nline4\nline5\n");
 
-        $throwable = new Exception('trace');
-        $throwableProperty = new \ReflectionProperty(Exception::class, 'file');
-        $throwableProperty->setAccessible(true);
-        $throwableProperty->setValue($throwable, $sourceFile);
+        try {
+            $throwable = new Exception('trace');
+            $throwableProperty = new \ReflectionProperty(Exception::class, 'file');
+            $throwableProperty->setAccessible(true);
+            $throwableProperty->setValue($throwable, $sourceFile);
 
-        $lineProperty = new \ReflectionProperty(Exception::class, 'line');
-        $lineProperty->setAccessible(true);
-        $lineProperty->setValue($throwable, 3);
+            $lineProperty = new \ReflectionProperty(Exception::class, 'line');
+            $lineProperty->setAccessible(true);
+            $lineProperty->setValue($throwable, 3);
 
-        $traceProperty = new \ReflectionProperty(Exception::class, 'trace');
-        $traceProperty->setAccessible(true);
-        $traceProperty->setValue($throwable, [
-            ['class' => ErrorHandler::class, 'file' => $sourceFile, 'line' => 2],
-            ['class' => 'ExternalClass', 'file' => $sourceFile, 'line' => 4],
-            ['class' => 'NoFileClass'],
-        ]);
+            $traceProperty = new \ReflectionProperty(Exception::class, 'trace');
+            $traceProperty->setAccessible(true);
+            $traceProperty->setValue($throwable, [
+                ['class' => ErrorHandler::class, 'file' => $sourceFile, 'line' => 2],
+                ['class' => 'ExternalClass', 'file' => $sourceFile, 'line' => 4],
+                ['class' => 'NoFileClass'],
+            ]);
 
-        $trace = $this->invokePrivateMethod('composeStackTrace', [$throwable]);
+            $trace = $this->invokePrivateMethod('composeStackTrace', [$throwable]);
 
-        $this->removeFile($sourceFile);
-
-        $this->assertCount(2, $trace);
-        $this->assertSame($sourceFile, $trace[0]['file']);
-        $this->assertStringContainsString('<ol start="1">', $trace[0]['code']);
-        $this->assertStringContainsString('class="error-line"', $trace[0]['code']);
-        $this->assertSame($sourceFile, $trace[1]['file']);
-        $this->assertStringContainsString('class="switch-line"', $trace[1]['code']);
+            $this->assertCount(2, $trace);
+            $this->assertSame($sourceFile, $trace[0]['file']);
+            $this->assertStringContainsString('<ol start="1">', $trace[0]['code']);
+            $this->assertStringContainsString('class="error-line"', $trace[0]['code']);
+            $this->assertSame($sourceFile, $trace[1]['file']);
+            $this->assertStringContainsString('class="switch-line"', $trace[1]['code']);
+        } finally {
+            $this->removeFile($sourceFile);
+        }
     }
 
     public function testGetSourceCodeReturnsEmptyStringForNonLocalAdapter(): void
@@ -278,13 +280,15 @@ class ErrorHandlerTest extends AppTestCase
         $file = PROJECT_ROOT . DS . 'shared' . DS . 'source-code.php';
         $this->createFile($file, "<?php\nA\nB\nC\nD\nE\nF\nG\n");
 
-        $code = $this->invokePrivateMethod('getSourceCode', [$file, 5, 'error-line']);
+        try {
+            $code = $this->invokePrivateMethod('getSourceCode', [$file, 5, 'error-line']);
 
-        $this->removeFile($file);
-
-        $this->assertStringContainsString('<ol start="1">', $code);
-        $this->assertStringContainsString('class="error-line"', $code);
-        $this->assertStringContainsString('<pre>C</pre>', $code);
+            $this->assertStringContainsString('<ol start="1">', $code);
+            $this->assertStringContainsString('class="error-line"', $code);
+            $this->assertStringContainsString('<pre>C</pre>', $code);
+        } finally {
+            $this->removeFile($file);
+        }
     }
 
     public function testFormatLineItemEscapesHtmlAndAppliesHighlightClass(): void
