@@ -4,9 +4,10 @@ namespace Quantum\Tests\Unit\Migration;
 
 use Quantum\Migration\Exceptions\MigrationException;
 use Quantum\Storage\Exceptions\FileSystemException;
+use Quantum\Migration\MigrationManager;
+use Quantum\Migration\MigrationTable;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Database\Database;
-use Quantum\Migration\MigrationManager;
 use Quantum\Loader\Setup;
 use Mockery;
 
@@ -46,6 +47,10 @@ class MigrationManagerTest extends AppTestCase
                 @unlink($file);
             }
         }
+
+        Database::execute('DROP TABLE IF EXISTS alpha_table');
+        Database::execute('DROP TABLE IF EXISTS beta_table');
+        Database::execute('DROP TABLE IF EXISTS ' . MigrationTable::TABLE);
 
         parent::tearDown();
     }
@@ -114,5 +119,82 @@ class MigrationManagerTest extends AppTestCase
         $this->expectExceptionMessage('Migration direction can only be [up] or [down]');
 
         $manager->applyMigrations('sideways');
+    }
+
+    public function testApplyMigrationsUpgradeRunsPendingMigrationsInAscendingOrder(): void
+    {
+        $this->createMigrationsTable();
+        $this->createValidMigrationFile('create_table_alpha_table_1001', 'alpha_table');
+        $this->createValidMigrationFile('create_table_beta_table_1002', 'beta_table');
+
+        $manager = new MigrationManager();
+        $migrated = $manager->applyMigrations(MigrationManager::UPGRADE);
+
+        $this->assertSame(2, $migrated);
+        $this->assertTrue($this->tableExists('alpha_table'));
+        $this->assertTrue($this->tableExists('beta_table'));
+
+        $entries = Database::query('SELECT migration FROM ' . MigrationTable::TABLE . ' ORDER BY migration ASC');
+        $this->assertCount(2, $entries);
+        $this->assertSame('create_table_alpha_table_1001', $entries[0]['migration']);
+        $this->assertSame('create_table_beta_table_1002', $entries[1]['migration']);
+    }
+
+    public function testApplyMigrationsDowngradeRespectsStepAndOrder(): void
+    {
+        $this->createMigrationsTable();
+        $this->createValidMigrationFile('create_table_alpha_table_2001', 'alpha_table');
+        $this->createValidMigrationFile('create_table_beta_table_2002', 'beta_table');
+
+        $manager = new MigrationManager();
+        $manager->applyMigrations(MigrationManager::UPGRADE);
+
+        $migrated = $manager->applyMigrations(MigrationManager::DOWNGRADE, 1);
+        $this->assertSame(1, $migrated);
+
+        $this->assertTrue($this->tableExists('alpha_table'));
+        $this->assertFalse($this->tableExists('beta_table'));
+
+        $entries = Database::query('SELECT migration FROM ' . MigrationTable::TABLE . ' ORDER BY migration ASC');
+        $this->assertCount(1, $entries);
+        $this->assertSame('create_table_alpha_table_2001', $entries[0]['migration']);
+    }
+
+    private function createValidMigrationFile(string $className, string $tableName): void
+    {
+        $content = "<?php\n"
+            . 'class ' . $className . " extends \\Quantum\\Migration\\QtMigration\n"
+            . "{\n"
+            . "    public function up(\\Quantum\\Database\\Factories\\TableFactory \$tableFactory): void\n"
+            . "    {\n"
+            . "        \\Quantum\\Database\\Database::execute('CREATE TABLE IF NOT EXISTS " . $tableName . " (id INTEGER PRIMARY KEY, name VARCHAR(255))');\n"
+            . "    }\n\n"
+            . "    public function down(\\Quantum\\Database\\Factories\\TableFactory \$tableFactory): void\n"
+            . "    {\n"
+            . "        \\Quantum\\Database\\Database::execute('DROP TABLE IF EXISTS " . $tableName . "');\n"
+            . "    }\n"
+            . "}\n";
+
+        file_put_contents($this->migrationDir . DS . $className . '.php', $content);
+    }
+
+    private function tableExists(string $table): bool
+    {
+        try {
+            Database::query('SELECT 1 FROM ' . $table . ' LIMIT 1');
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function createMigrationsTable(): void
+    {
+        Database::execute('CREATE TABLE IF NOT EXISTS ' . MigrationTable::TABLE . ' (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            migration VARCHAR(255),
+            applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )');
     }
 }
