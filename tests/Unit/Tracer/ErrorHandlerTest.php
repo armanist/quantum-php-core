@@ -9,6 +9,7 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
 use Quantum\Di\Di;
 use Quantum\Logger\Logger;
+use Symfony\Component\Console\Output\BufferedOutput;
 use ReflectionException;
 use ReflectionMethod;
 use ErrorException;
@@ -103,8 +104,12 @@ class ErrorHandlerTest extends AppTestCase
 
     public function testHandleExceptionCliWritesExceptionMessage(): void
     {
-        $this->expectNotToPerformAssertions();
+        $output = new BufferedOutput();
+        $this->errorHandler->setCliOutput($output);
+
         $this->errorHandler->handleException(new Exception('CLI failure'));
+
+        $this->assertStringContainsString('CLI failure', $output->fetch());
     }
 
     public function testHandleWebExceptionInDebugModeRendersTraceView(): void
