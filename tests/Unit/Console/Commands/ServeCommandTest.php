@@ -128,7 +128,6 @@ class ServeCommandTest extends AppTestCase
             protected function cleanupProcess($process): void
             {
                 $this->cleanupCalls++;
-                parent::cleanupProcess($process);
             }
 
             public function exposeStartServerOnAvailablePort(string $host, int $port): array
@@ -176,7 +175,6 @@ class ServeCommandTest extends AppTestCase
             protected function cleanupProcess($process): void
             {
                 $this->cleanupCalls++;
-                parent::cleanupProcess($process);
             }
 
             public function exposeStartServerOnAvailablePort(string $host, int $port): array

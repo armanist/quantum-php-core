@@ -89,7 +89,10 @@ class OpenApiCommandTest extends AppTestCase
 
         $this->assertStringContainsString('"openapi"', $routes);
         $this->assertStringContainsString('Blog', $routes);
-        $this->assertStringContainsString('resources\\openapi\\spec.json', $routes);
+        $this->assertTrue(
+            strpos($routes, 'resources/openapi/spec.json') !== false
+            || strpos($routes, 'resources\\openapi\\spec.json') !== false
+        );
     }
 
     public function testCopyResourcesSkipsExcludedFiles(): void
