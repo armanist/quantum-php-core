@@ -112,15 +112,19 @@ class ErrorHandler
     private function handleWebException(Throwable $throwable): void
     {
         $errorType = $this->getErrorType($throwable);
-        $statusCode = StatusCode::INTERNAL_SERVER_ERROR;
-        $errorPage = $this->webExceptionRenderer->render($throwable, $errorType);
 
         if (!is_debug_mode()) {
             $this->logError($throwable, $errorType);
         }
 
-        response()->html($errorPage, $statusCode);
-        response()->send();
+        try {
+            $errorPage = $this->webExceptionRenderer->render($throwable, $errorType);
+            response()->html($errorPage, StatusCode::INTERNAL_SERVER_ERROR);
+            response()->send();
+        } catch (Throwable $e) {
+            response()->html('Internal Server Error', StatusCode::INTERNAL_SERVER_ERROR);
+            response()->send();
+        }
     }
 
     private function logError(Throwable $e, string $errorType): void

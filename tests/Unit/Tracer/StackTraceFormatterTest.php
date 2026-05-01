@@ -8,10 +8,10 @@ use Quantum\Tracer\StackTraceFormatter;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
 use Quantum\Storage\FileSystem;
+use ReflectionProperty;
 use Quantum\Di\Di;
 use Exception;
 use Mockery;
-use ReflectionProperty;
 
 class StackTraceFormatterTest extends AppTestCase
 {
