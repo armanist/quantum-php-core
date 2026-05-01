@@ -34,7 +34,6 @@ class MainController
 
     /**
      * CSRF verification
-     * @var bool
      */
     public bool $csrfVerification = false;
 

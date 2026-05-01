@@ -26,7 +26,6 @@ use Quantum\Http\Request;
  */
 class AuthController extends BaseController
 {
-
     /**
      * Main layout
      */
@@ -59,12 +58,9 @@ class AuthController extends BaseController
 
     /**
      * Action - sign in
-     * @param Request $request
-     * @return Response
      */
     public function signin(Request $request): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
             try {
                 $code = auth()->signin($request->get('email'), $request->get('password'), !!$request->get('remember'));
@@ -83,13 +79,12 @@ class AuthController extends BaseController
                 'title' => t('common.signin') . ' | ' . config()->get('app.name'),
             ]);
 
-            return $response->html($this->view->render(self::VIEW_SIGNIN));
+            return response()->html($this->view->render(self::VIEW_SIGNIN));
         }
     }
 
     /**
      * Action - sign out
-     * @return Response
      */
     public function signout(): Response
     {
@@ -99,12 +94,9 @@ class AuthController extends BaseController
 
     /**
      * Action - sign up
-     * @param Request $request
-     * @return Response
      */
     public function signup(Request $request): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
             $userDto = UserDTO::fromRequest($request, Role::EDITOR, uuid_ordered());
 
@@ -118,14 +110,12 @@ class AuthController extends BaseController
                 'title' => t('common.signup') . ' | ' . config()->get('app.name'),
             ]);
 
-            return $response->html($this->view->render(self::VIEW_SIGNUP));
+            return response()->html($this->view->render(self::VIEW_SIGNUP));
         }
     }
 
     /**
      * Action - activate
-     * @param Request $request
-     * @return Response
      */
     public function activate(Request $request): Response
     {
@@ -135,12 +125,9 @@ class AuthController extends BaseController
 
     /**
      * Action - forget
-     * @param Request $request
-     * @return Response
      */
     public function forget(Request $request): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
             auth()->forget($request->get('email'));
             session()->setFlash('success', t('common.check_email'));
@@ -150,18 +137,15 @@ class AuthController extends BaseController
                 'title' => t('common.forget_password') . ' | ' . config()->get('app.name'),
             ]);
 
-            return $response->html($this->view->render(self::VIEW_FORGET));
+            return response()->html($this->view->render(self::VIEW_FORGET));
         }
     }
 
     /**
      * Action - reset
-     * @param Request $request
-     * @return Response
      */
     public function reset(Request $request): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
             auth()->reset($request->get('reset_token'), $request->get('password'));
             return redirect(base_url(true) . '/' . current_lang() . '/signin');
@@ -171,18 +155,15 @@ class AuthController extends BaseController
                 'reset_token' => $request->get('reset_token')
             ]);
 
-            return $response->html($this->view->render(self::VIEW_RESET));
+            return response()->html($this->view->render(self::VIEW_RESET));
         }
     }
 
     /**
      * Action - Verify OTP
-     * @param Request $request
-     * @return Response
      */
     public function verify(Request $request): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
             try {
                 auth()->verifyOtp((int)$request->get('otp'), $request->get('code'));
@@ -197,13 +178,12 @@ class AuthController extends BaseController
                 'code' => route_param('code')
             ]);
 
-            return $response->html($this->view->render(self::VIEW_VERIFY));
+            return response()->html($this->view->render(self::VIEW_VERIFY));
         }
     }
 
     /**
      * Action - Resend OTP
-     * @return Response
      */
     public function resend(): Response
     {

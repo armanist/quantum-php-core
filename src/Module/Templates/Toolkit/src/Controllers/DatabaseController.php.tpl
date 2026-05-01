@@ -25,9 +25,6 @@ use Quantum\Http\Request;
  */
 class DatabaseController extends BaseController
 {
-    /**
-     * @var DatabaseService
-     */
     private DatabaseService $databaseService;
 
     /**
@@ -40,9 +37,6 @@ class DatabaseController extends BaseController
         parent::__before();
     }
 
-    /**
-     * @return Response
-     */
     public function list(): Response
     {
         $tables = $this->databaseService->getTables();
@@ -56,7 +50,6 @@ class DatabaseController extends BaseController
     }
 
     /**
-     * @param Request $request
      * @throws DatabaseException
      */
     public function single(Request $request): Response
@@ -80,10 +73,6 @@ class DatabaseController extends BaseController
         return response()->html($this->view->render('pages/database/table'));
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function create(Request $request): Response
     {
         $tableName = $request->get('table');
@@ -95,10 +84,6 @@ class DatabaseController extends BaseController
         return redirect(get_referrer() ?? base_url());
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function update(Request $request): Response
     {
         $tableName = $request->get('table');
@@ -110,10 +95,6 @@ class DatabaseController extends BaseController
         return redirect(base_url(true) . '/database/view?table=' . $tableName);
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function delete(Request $request): Response
     {
         $tableName = $request->get('tableName');

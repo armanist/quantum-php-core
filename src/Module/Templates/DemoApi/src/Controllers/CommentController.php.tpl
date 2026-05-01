@@ -25,10 +25,6 @@ use Quantum\Http\Request;
  */
 class CommentController extends BaseController
 {
-
-    /**
-     * @var CommentService
-     */
     public CommentService $commentService;
 
     public function __before()
@@ -38,9 +34,6 @@ class CommentController extends BaseController
 
     /**
      * Action - create comment
-     * @param Request $request
-     * @param string|null $lang
-     * @param string $uuid
      */
     public function create(Request $request,  ?string $lang, string $uuid): Response
     {
@@ -57,8 +50,6 @@ class CommentController extends BaseController
 
     /**
      * Action - delete comment
-     * @param string|null $lang
-     * @param string $uuid
      */
     public function delete(?string $lang, string $uuid): Response
     {

@@ -28,13 +28,8 @@ class AccountController extends BaseController
 {
     /**
      * Auth service
-     * @var AuthService
      */
     public AuthService $authService;
-
-    /**
-     * Works before an action
-     */
 
     public function __before()
     {
@@ -43,7 +38,6 @@ class AccountController extends BaseController
 
     /**
      * Action - update user info
-     * @param Request $request
      */
     public function update(Request $request): Response
     {
@@ -72,7 +66,6 @@ class AccountController extends BaseController
 
     /**
      * Action - update password
-     * @param Request $request
      */
     public function updatePassword(Request $request): Response
     {

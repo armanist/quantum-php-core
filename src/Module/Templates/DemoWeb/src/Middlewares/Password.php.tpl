@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.9
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Middlewares;
@@ -27,12 +27,6 @@ use Closure;
  */
 class Password extends BaseMiddleware
 {
-
-
-    /**
-     * @param Request $request
-     * @param Closure $next
-     */
     public function apply(Request $request, Closure $next): Response
     {
         if ($request->isMethod('post')) {

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -26,11 +26,6 @@ use Closure;
  */
 class BasicAuth extends QtMiddleware
 {
-    /**
-     * @param Request $request
-     * @param Closure $next
-     * @return Response
-     */
     public function apply(Request $request, Closure $next): Response
     {
         $userCredentials = $request->getBasicAuthCredentials();
@@ -42,10 +37,6 @@ class BasicAuth extends QtMiddleware
         return $next($request);
     }
 
-    /**
-     * @param array $credentials
-     * @return bool
-     */
     private function isValidCredentials(array $credentials): bool
     {
         if (!config()->has('basic_auth')) {
@@ -58,9 +49,6 @@ class BasicAuth extends QtMiddleware
             && $credentials['password'] === $configCredentials['password'];
     }
 
-    /**
-     * @return Response
-     */
     private function unauthorizedResponse(): Response
     {
         $response = response();

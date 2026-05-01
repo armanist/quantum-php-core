@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -25,14 +25,10 @@ use Quantum\Http\Request;
  */
 abstract class BaseMiddleware extends QtMiddleware
 {
-    /**
-     * @var Validator
-     */
     protected Validator $validator;
 
     /**
      * Initialize Validator and define rules.
-     * @param Request $request
      */
     public function __construct(Request $request)
     {
@@ -41,9 +37,6 @@ abstract class BaseMiddleware extends QtMiddleware
         $this->defineValidationRules($request);
     }
 
-    /**
-     * @param Request $request
-     */
     protected function validateRequest(Request $request)
     {
         if (!$this->validator->isValid($request->all())) {
@@ -53,7 +46,6 @@ abstract class BaseMiddleware extends QtMiddleware
 
     /**
      * Define validation rules specific to middleware.
-     * @param Request $request
      */
     protected function defineValidationRules(Request $request)
     {
@@ -62,8 +54,6 @@ abstract class BaseMiddleware extends QtMiddleware
 
     /**
      * Handles error response logic.
-     * @param Request $request
-     * @param mixed $message
      */
     protected function respondWithError(Request $request, $message)
     {

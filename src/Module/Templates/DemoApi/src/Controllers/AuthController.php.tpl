@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.9
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Controllers;
@@ -27,11 +27,8 @@ use Quantum\Http\Request;
  */
 class AuthController extends BaseController
 {
-
     /**
      * Action - sign in
-     * @param Request $request
-     * @return Response
      */
     public function signin(Request $request): Response
     {
@@ -56,7 +53,6 @@ class AuthController extends BaseController
 
     /**
      * Action - me
-     * @return Response
      */
     public function me(): Response
     {
@@ -72,7 +68,6 @@ class AuthController extends BaseController
 
     /**
      * Action - sign out
-     * @return Response
      */
     public function signout(): Response
     {
@@ -90,8 +85,6 @@ class AuthController extends BaseController
 
     /**
      *  Action - sign up
-     * @param Request $request
-     * @return Response
      */
     public function signup(Request $request): Response
     {
@@ -107,8 +100,6 @@ class AuthController extends BaseController
 
     /**
      * Action - activate
-     * @param Request $request
-     * @return Response
      */
     public function activate(Request $request): Response
     {
@@ -122,8 +113,6 @@ class AuthController extends BaseController
 
     /**
      * Action - forget
-     * @param Request $request
-     * @return Response
      */
     public function forget(Request $request): Response
     {
@@ -137,8 +126,6 @@ class AuthController extends BaseController
 
     /**
      * Action - reset
-     * @param Request $request
-     * @return Response
      */
     public function reset(Request $request): Response
     {
@@ -151,8 +138,6 @@ class AuthController extends BaseController
 
     /**
      * Action - Verify OTP
-     * @param Request $request
-     * @return Response
      */
     public function verify(Request $request): Response
     {
@@ -172,7 +157,6 @@ class AuthController extends BaseController
 
     /**
      *  Action - Resend OTP
-     * @return Response
      */
     public function resend(): Response
     {

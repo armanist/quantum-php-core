@@ -28,14 +28,8 @@ use ReflectionException;
  */
 class LogsController extends BaseController
 {
-    /**
-     * @var LogsService
-     */
     public LogsService $logsService;
 
-    /**
-     * Works before an action
-     */
     public function __before()
     {
         $this->logsService = service(LogsService::class);
@@ -43,8 +37,6 @@ class LogsController extends BaseController
         parent::__before();
     }
 
-    /**
-     */
     public function list(): Response
     {
         $filteredLogFiles = $this->logsService->getLogFiles();
@@ -57,9 +49,6 @@ class LogsController extends BaseController
         return response()->html($this->view->render('pages/logs/index'));
     }
 
-    /**
-     * @param Request $request
-     */
     public function single(Request $request): Response
     {
         $logFile = $request->get('logFile');

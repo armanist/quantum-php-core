@@ -27,7 +27,6 @@ use Quantum\Http\Request;
  */
 class PostController extends BaseController
 {
-
     /**
      * Posts per page
      */
@@ -45,7 +44,6 @@ class PostController extends BaseController
 
     /**
      * Post service
-     * @var PostService
      */
     public PostService $postService;
 
@@ -57,8 +55,6 @@ class PostController extends BaseController
 
     /**
      * Action - get posts list
-     * @param Request $request
-     * @return Response
     */
     public function posts(Request $request): Response
     {
@@ -80,10 +76,6 @@ class PostController extends BaseController
 
     /**
      * Action - get single post
-     * @param Request $request
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
      */
     public function post(Request $request,  ?string $lang, string $postUuid): Response
     {

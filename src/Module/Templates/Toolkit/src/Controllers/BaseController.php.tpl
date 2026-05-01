@@ -39,14 +39,8 @@ class BaseController
      */
     protected const CURRENT_PAGE = 1;
 
-    /**
-     * @var View
-     */
     protected View $view;
 
-    /**
-     * Works before an action
-     */
     public function __before()
     {
         $this->view = ViewFactory::get();

@@ -32,7 +32,6 @@ class AccountController extends BaseController
 
     /**
      * Account service
-     * @var AuthService
      */
     public AuthService $authService;
 
@@ -44,7 +43,6 @@ class AccountController extends BaseController
 
     /**
      * Action - show user info
-     * @return Response
      */
     public function form(): Response
     {
@@ -57,8 +55,6 @@ class AccountController extends BaseController
 
     /**
      * Action - update user info
-     * @param Request $request
-     * @return Response
      */
     public function update(Request $request): Response
     {
@@ -77,8 +73,6 @@ class AccountController extends BaseController
 
     /**
      * Action - update password
-     * @param Request $request
-     * @return Response
      */
     public function updatePassword(Request $request): Response
     {

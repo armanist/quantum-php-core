@@ -33,7 +33,6 @@ abstract class BaseController
 
     /**
      * CSRF verification
-     * @var bool
      */
     public bool $csrfVerification = false;
 }

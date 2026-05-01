@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -27,11 +27,6 @@ use Closure;
  */
 class CreateTable extends BaseMiddleware
 {
-    /**
-     * @param Request $request
-     * @param Closure $next
-     * @return Response
-     */
     public function apply(Request $request, Closure $next): Response
     {
         if ($errorResponse = $this->validateRequest($request)) {

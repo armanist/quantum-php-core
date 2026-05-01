@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -28,14 +28,8 @@ use ReflectionException;
  */
 class EmailsController extends BaseController
 {
-    /**
-     * @var EmailService
-     */
     public EmailService $emailService;
 
-    /**
-     * Works before an action
-     */
     public function __before()
     {
         $this->emailService = service(EmailService::class);
@@ -43,9 +37,6 @@ class EmailsController extends BaseController
         parent::__before();
     }
 
-    /**
-     * @param Request $request
-     */
     public function list(Request $request): Response
     {
         $perPage = $request->get('per_page', self::ITEMS_PER_PAGE);
@@ -62,9 +53,6 @@ class EmailsController extends BaseController
         return response()->html($this->view->render('pages/email/index'));
     }
 
-    /**
-     * @param string $emailId
-     */
     public function single(string $emailId): Response
     {
         $email = $this->emailService->getEmail($emailId);
@@ -72,9 +60,6 @@ class EmailsController extends BaseController
         return response()->html(quoted_printable_decode($email->getParsedBody()));
     }
 
-    /**
-     * @param string $emailId
-     */
     public function delete(string $emailId): Response
     {
         $this->emailService->deleteEmail($emailId);

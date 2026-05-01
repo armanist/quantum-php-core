@@ -25,7 +25,6 @@ use Quantum\Http\Request;
  */
 class PostManagementController extends BaseController
 {
-
     /**
      * Main layout
      */
@@ -33,7 +32,6 @@ class PostManagementController extends BaseController
 
     /**
      * Post service
-     * @var PostService
      */
     public PostService $postService;
 
@@ -45,8 +43,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - get my posts
-     * @param Request $request
-     * @return Response
      */
     public function myPosts(Request $request): Response
     {
@@ -62,8 +58,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - display form for creating a post
-     * @param Request $request
-     * @return Response
      */
     public function createFrom(Request $request): Response
     {
@@ -79,8 +73,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - create post
-     * @param Request $request
-     * @return Response
      */
     public function create(Request $request): Response
     {
@@ -103,10 +95,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - display form for amend the post
-     * @param Request $request
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
      */
     public function amendForm(Request $request,  ?string $lang, string $postUuid): Response
     {
@@ -125,10 +113,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - amend post
-     * @param Request $request
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
      */
     public function amend(Request $request, ?string $lang, string $postUuid): Response
     {
@@ -157,9 +141,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - delete post
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
      */
     public function delete(?string $lang, string $postUuid): Response
     {
@@ -176,9 +157,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - delete image of the post
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
      */
     public function deleteImage(?string $lang, string $postUuid): Response
     {

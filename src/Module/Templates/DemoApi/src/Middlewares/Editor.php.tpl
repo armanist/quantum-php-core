@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.8
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Middlewares;
@@ -42,11 +42,6 @@ class Editor extends BaseMiddleware
      */
     private const ALLOWED_IMAGE_EXTENSIONS = ['jpeg', 'jpg', 'png'];
 
-    /**
-     * @param Request $request
-     * @param Closure $next
-     * @return Response
-     */
     public function apply(Request $request, Closure $next): Response
     {
         if (!in_array(auth()->user()->role, self::ROLES)) {

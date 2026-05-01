@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.8
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Controllers\OpenApi;
@@ -43,7 +43,6 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
      */
     abstract public function posts(Request $request);
 
@@ -79,8 +78,6 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param string|null $lang
-     * @param string $postId
      */
     abstract public function post(?string $lang, string $postId);
 
@@ -164,7 +161,6 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
      */
     abstract public function create(Request $request);
 
@@ -228,9 +224,6 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
-     * @param string|null $lang
-     * @param string $postId
      */
     abstract public function amend(Request $request,  ?string $lang, string $postId);
 
@@ -273,8 +266,6 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param string|null $lang
-     * @param string $postId
      */
     abstract public function delete(?string $lang, string $postId);
 
@@ -317,8 +308,6 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param string|null $lang
-     * @param string $postId
      */
     abstract public function deleteImage(?string $lang, string $postId);
 

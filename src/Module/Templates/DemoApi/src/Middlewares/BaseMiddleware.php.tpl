@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.8
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Middlewares;
@@ -27,15 +27,10 @@ use Closure;
  */
 abstract class BaseMiddleware extends QtMiddleware
 {
-
-    /**
-     * @var Validator
-     */
     protected $validator;
 
     /**
      * BaseMiddleware constructor.
-     * @param Request $request
      */
     public function __construct(Request $request)
     {
@@ -46,7 +41,6 @@ abstract class BaseMiddleware extends QtMiddleware
 
     /**
      * Define validation rules specific to middleware.
-     * @param Request $request
      */
     protected function defineValidationRules(Request $request)
     {
@@ -55,7 +49,6 @@ abstract class BaseMiddleware extends QtMiddleware
 
     /**
      * Validate the request and respond with error if invalid.
-     * @param Request $request
      * @return Response|null
      */
     protected function validateRequest(Request $request): ?Response
@@ -69,10 +62,6 @@ abstract class BaseMiddleware extends QtMiddleware
 
     /**
      * Handles error response logic.
-     * @param Request $request
-     * @param mixed $message
-     * @param int $status
-     * @return Response
      */
     protected function respondWithError(Request $request,
         $message,

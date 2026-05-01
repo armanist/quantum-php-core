@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -24,10 +24,6 @@ use Quantum\View\View;
  */
 abstract class BaseController
 {
-
-    /**
-    * @var View
-    */
     protected View $view;
 
     public function __before()

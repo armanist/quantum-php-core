@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.8
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Controllers\OpenApi;
@@ -63,7 +63,6 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
      */
     abstract public function signin(Request $request);
 
@@ -182,7 +181,6 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
      */
     abstract public function signup(Request $request);
 
@@ -218,7 +216,6 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
      */
     abstract public function activate(Request $request);
 
@@ -257,7 +254,6 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
      */
     abstract public function forget(Request $request);
 
@@ -309,7 +305,6 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
      */
     abstract public function reset(Request $request);
 
@@ -348,7 +343,6 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
      */
     abstract public function verify(Request $request);
 

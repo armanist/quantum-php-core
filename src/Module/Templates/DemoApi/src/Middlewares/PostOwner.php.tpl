@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Quantum PHP Framework
@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.9
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Middlewares;
@@ -26,12 +26,6 @@ use Closure;
  */
 class PostOwner extends BaseMiddleware
 {
-
-    /**
-     * @param Request $request
-     * @param Closure $next
-     * @return Response
-     */
     public function apply(Request $request, Closure $next): Response
     {
         $uuid = (string)route_param('uuid');

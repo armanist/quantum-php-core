@@ -32,7 +32,6 @@ class MainController
 
     /**
      * Works before an action
-     * @param ViewFactory $view
      */
     public function __before(ViewFactory $view)
     {
@@ -44,7 +43,6 @@ class MainController
 
     /**
      * Action - display home page
-     * @param ViewFactory $view
      */
     public function index(ViewFactory $view): Response
     {
