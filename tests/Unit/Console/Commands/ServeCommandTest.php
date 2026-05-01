@@ -293,11 +293,12 @@ class ServeCommandTest extends AppTestCase
             }
         };
 
-        $publicDir = getcwd() . DS . 'public';
+        $tempRoot = base_dir() . DS . 'var' . DS . 'tmp_serve_' . uniqid('', true);
+        $publicDir = $tempRoot . DS . 'public';
         $indexFile = $publicDir . DS . 'index.php';
-        if (!is_dir($publicDir)) {
-            mkdir($publicDir, 0777, true);
-        }
+        $originalCwd = getcwd();
+
+        mkdir($publicDir, 0777, true);
         file_put_contents($indexFile, "<?php echo 'ok';");
 
         $socket = stream_socket_server('tcp://127.0.0.1:0', $errno, $errstr);
@@ -305,19 +306,23 @@ class ServeCommandTest extends AppTestCase
         $port = (int) substr((string) $name, strrpos((string) $name, ':') + 1);
         fclose($socket);
 
-        $process = $command->exposeStartPhpServer('127.0.0.1', $port);
-        $this->assertIsResource($process);
-
         try {
+            $this->assertTrue(chdir($tempRoot));
+            $process = $command->exposeStartPhpServer('127.0.0.1', $port);
+            $this->assertIsResource($process);
             $command->exposeWaitUntilServerIsReady('127.0.0.1', $port, $process);
             $this->assertTrue(true);
         } finally {
-            if (is_resource($process)) {
+            if (isset($process) && is_resource($process)) {
                 proc_terminate($process);
             }
-            $command->exposeCleanupProcess($process);
+            if (isset($process)) {
+                $command->exposeCleanupProcess($process);
+            }
+            chdir($originalCwd);
             @unlink($indexFile);
             @rmdir($publicDir);
+            @rmdir($tempRoot);
         }
     }
 
