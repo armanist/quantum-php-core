@@ -31,18 +31,16 @@ class PostOwner extends BaseMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @param Closure $next
      * @return Response
      */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         $uuid = (string)route_param('uuid');
 
         $request->set('uuid', $uuid);
 
-        if ($errorResponse = $this->validateRequest($request, $response)) {
+        if ($errorResponse = $this->validateRequest($request)) {
             return $errorResponse;
         }
 
@@ -67,9 +65,9 @@ class PostOwner extends BaseMiddleware
     /**
      * @inheritDoc
      */
-    protected function respondWithError(Request $request, Response $response, $message = null): Response
+    protected function respondWithError(Request $request, $message = null): Response
     {
-        return $response->html(partial('errors/404'),  StatusCode::NOT_FOUND);
+        return response()->html(partial('errors/404'),  StatusCode::NOT_FOUND);
     }
 
     /**

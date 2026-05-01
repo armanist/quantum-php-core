@@ -29,14 +29,12 @@ class Update extends BaseMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @param Closure $next
      */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
-            if ($errorResponse = $this->validateRequest($request, $response)) {
+            if ($errorResponse = $this->validateRequest($request)) {
                 return $errorResponse;
             }
         }
@@ -62,9 +60,7 @@ class Update extends BaseMiddleware
     /**
      * @inheritDoc
      */
-    protected function respondWithError(
-        Request $request,
-        Response $response,
+    protected function respondWithError(Request $request,
         $message
     ): Response
     {

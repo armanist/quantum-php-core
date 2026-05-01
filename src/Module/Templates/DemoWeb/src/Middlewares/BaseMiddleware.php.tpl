@@ -44,13 +44,12 @@ abstract class BaseMiddleware extends QtMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @return Response|null
      */
-    protected function validateRequest(Request $request, Response $response): ?Response
+    protected function validateRequest(Request $request): ?Response
     {
         if (!$this->validator->isValid($request->all())) {
-            return $this->respondWithError($request, $response, $this->validator->getErrors());
+            return $this->respondWithError($request, $this->validator->getErrors());
         }
 
         return null;
@@ -68,13 +67,12 @@ abstract class BaseMiddleware extends QtMiddleware
     /**
      * Handles error response logic.
      * @param Request $request
-     * @param Response $response
      * @param mixed $message
      * @return Response
      */
-    protected function respondWithError(Request $request, Response $response, $message): Response
+    protected function respondWithError(Request $request, $message): Response
     {
         // default no-op: subclasses override if needed
-        return $response;
+        return response();
     }
 }

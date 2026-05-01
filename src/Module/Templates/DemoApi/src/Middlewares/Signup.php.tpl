@@ -30,14 +30,12 @@ class Signup extends BaseMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @param Closure $next
      * @return Response
      */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
-        if ($errorResponse = $this->validateRequest($request, $response)) {
+        if ($errorResponse = $this->validateRequest($request)) {
             return $errorResponse;
         }
 

@@ -30,18 +30,16 @@ class Verify extends BaseMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @param Closure $next
      * @return Response
      */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         $code = (string) route_param('code');
 
         $request->set('code', $code);
 
-        if ($errorResponse = $this->validateRequest($request, $response)) {
+        if ($errorResponse = $this->validateRequest($request)) {
             return $errorResponse;
         }
 
@@ -67,10 +65,10 @@ class Verify extends BaseMiddleware
     /**
      * @inheritDoc
      */
-    protected function respondWithError(Request $request, Response $response, $message): Response
+    protected function respondWithError(Request $request, $message): Response
     {
         if ($request->isMethod('get') && isset($message['code'])) {
-            return $response->html(partial('errors/404'), StatusCode::NOT_FOUND);
+            return response()->html(partial('errors/404'), StatusCode::NOT_FOUND);
         }
 
         session()->setFlash('error', $message);

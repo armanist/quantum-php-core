@@ -30,15 +30,13 @@ class Forget extends BaseMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @param Closure $next
      * @return Response
      */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
-            if ($errorResponse = $this->validateRequest($request, $response)) {
+            if ($errorResponse = $this->validateRequest($request)) {
                 return $errorResponse;
             }
         }
@@ -64,9 +62,7 @@ class Forget extends BaseMiddleware
     /**
      * @inheritDoc
      */
-    protected function respondWithError(
-        Request $request,
-        Response $response,
+    protected function respondWithError(Request $request,
         $message
     ): Response
     {

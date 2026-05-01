@@ -43,19 +43,17 @@ class Editor extends BaseMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @param Closure $next
      * @return Response
      */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         if (!in_array(auth()->user()->role, self::ROLES)) {
             return redirect(base_url(true) . '/' . current_lang());
         }
 
         if ($request->isMethod('post') || $request->isMethod('put')) {
-            if ($errorResponse = $this->validateRequest($request, $response)) {
+            if ($errorResponse = $this->validateRequest($request)) {
                 return $errorResponse;
             }
         }
@@ -94,7 +92,7 @@ class Editor extends BaseMiddleware
     /**
      * @inheritDoc
      */
-    protected function respondWithError(Request $request, Response $response, $message): Response
+    protected function respondWithError(Request $request, $message): Response
     {
         $data = $request->all();
 

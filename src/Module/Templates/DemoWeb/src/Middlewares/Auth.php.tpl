@@ -28,7 +28,6 @@ class Auth extends QtMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @param Closure $next
      * @return Response
      */

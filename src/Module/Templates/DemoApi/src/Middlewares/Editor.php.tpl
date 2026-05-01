@@ -44,24 +44,20 @@ class Editor extends BaseMiddleware
 
     /**
      * @param Request $request
-     * @param Response $response
      * @param Closure $next
      * @return Response
      */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         if (!in_array(auth()->user()->role, self::ROLES)) {
-            return $this->respondWithError(
-                $request,
-                $response,
+            return $this->respondWithError($request,
                 t('validation.unauthorizedRequest'),
                 StatusCode::UNAUTHORIZED
             );
         }
 
         if ($request->isMethod('post') || $request->isMethod('put')) {
-            if ($errorResponse = $this->validateRequest($request, $response)) {
+            if ($errorResponse = $this->validateRequest($request)) {
                 return $errorResponse;
             }
         }
