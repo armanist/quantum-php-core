@@ -144,19 +144,21 @@ class OpenApiCommandTest extends AppTestCase
         mkdir($specDir, 0777, true);
         file_put_contents($annotationDir . DS . 'SpecController.php', "<?php\n/**\n * @OA\\Info(title=\"Spec\", version=\"1.0.0\")\n */\nclass SpecController {}\n");
 
-        $method = new ReflectionMethod($command, 'generateOpenapiSpecification');
-        $method->setAccessible(true);
-        $method->invoke($command, $moduleName);
+        try {
+            $method = new ReflectionMethod($command, 'generateOpenapiSpecification');
+            $method->setAccessible(true);
+            $method->invoke($command, $moduleName);
 
-        $this->assertFileExists($specPath);
-        $this->assertNotSame('', trim((string) file_get_contents($specPath)));
-
-        @unlink($annotationDir . DS . 'SpecController.php');
-        @rmdir($annotationDir);
-        @unlink($specPath);
-        @rmdir($specDir);
-        @rmdir(modules_dir() . DS . $moduleName . DS . 'Controllers');
-        @rmdir(modules_dir() . DS . $moduleName . DS . 'resources');
-        @rmdir(modules_dir() . DS . $moduleName);
+            $this->assertFileExists($specPath);
+            $this->assertNotSame('', trim((string) file_get_contents($specPath)));
+        } finally {
+            @unlink($annotationDir . DS . 'SpecController.php');
+            @rmdir($annotationDir);
+            @unlink($specPath);
+            @rmdir($specDir);
+            @rmdir(modules_dir() . DS . $moduleName . DS . 'Controllers');
+            @rmdir(modules_dir() . DS . $moduleName . DS . 'resources');
+            @rmdir(modules_dir() . DS . $moduleName);
+        }
     }
 }
