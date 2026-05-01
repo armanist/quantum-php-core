@@ -2,8 +2,8 @@
 
 namespace Quantum\Tests\Unit\Tracer;
 
-use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\WebExceptionRenderer;
+use Quantum\Tests\Unit\AppTestCase;
 use Exception;
 
 class WebExceptionRendererTest extends AppTestCase

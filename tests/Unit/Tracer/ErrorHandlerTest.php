@@ -2,13 +2,12 @@
 
 namespace Quantum\Tests\Unit\Tracer;
 
+use Symfony\Component\Console\Output\BufferedOutput;
+use Quantum\Tracer\WebExceptionRenderer;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
-use Quantum\Tracer\WebExceptionRenderer;
 use Quantum\Logger\Logger;
-use Symfony\Component\Console\Output\BufferedOutput;
 use ReflectionException;
-use ReflectionMethod;
 use ErrorException;
 use ParseError;
 use Exception;
@@ -125,7 +124,7 @@ class ErrorHandlerTest extends AppTestCase
         $exception = new Exception('Web debug failure');
 
         ob_start();
-        $this->invokePrivateMethod('handleWebException', [$exception]);
+        $this->invokePrivateMethod($this->errorHandler, 'handleWebException', [$exception]);
         ob_get_clean();
 
         $content = response()->getContent();
@@ -149,7 +148,7 @@ class ErrorHandlerTest extends AppTestCase
         $exception = new ErrorException('Web production warning', 0, E_WARNING, __FILE__, __LINE__);
 
         ob_start();
-        $this->invokePrivateMethod('handleWebException', [$exception]);
+        $this->invokePrivateMethod($this->errorHandler, 'handleWebException', [$exception]);
         ob_get_clean();
 
         $content = response()->getContent();
@@ -172,7 +171,7 @@ class ErrorHandlerTest extends AppTestCase
 
         ob_start();
         try {
-            $this->invokePrivateMethodOn($handler, 'handleWebException', [new Exception('boom')]);
+            $this->invokePrivateMethod($handler, 'handleWebException', [new Exception('boom')]);
         } finally {
             ob_get_clean();
         }
@@ -182,7 +181,7 @@ class ErrorHandlerTest extends AppTestCase
     {
         $this->setPrivateProperty($this->errorHandler, 'logger', null);
 
-        $this->invokePrivateMethod('logError', [new Exception('No logger'), 'error']);
+        $this->invokePrivateMethod($this->errorHandler, 'logError', [new Exception('No logger'), 'error']);
 
         $this->assertTrue(true);
     }
@@ -196,7 +195,7 @@ class ErrorHandlerTest extends AppTestCase
 
         $this->setPrivateProperty($this->errorHandler, 'logger', $logger);
 
-        $this->invokePrivateMethod('logError', [new Exception('Unknown level message'), 'not_existing_level']);
+        $this->invokePrivateMethod($this->errorHandler, 'logError', [new Exception('Unknown level message'), 'not_existing_level']);
 
         $this->assertTrue(true);
     }
@@ -206,7 +205,7 @@ class ErrorHandlerTest extends AppTestCase
      */
     public function testGetErrorTypeMappings(\Throwable $throwable, string $expected): void
     {
-        $type = $this->invokePrivateMethod('getErrorType', [$throwable]);
+        $type = $this->invokePrivateMethod($this->errorHandler, 'getErrorType', [$throwable]);
 
         $this->assertSame($expected, $type);
     }
@@ -225,27 +224,4 @@ class ErrorHandlerTest extends AppTestCase
         ];
     }
 
-    /**
-     * @param array<int, mixed> $args
-     * @return mixed
-     */
-    private function invokePrivateMethod(string $method, array $args = [])
-    {
-        $reflectionMethod = new ReflectionMethod($this->errorHandler, $method);
-        $reflectionMethod->setAccessible(true);
-
-        return $reflectionMethod->invokeArgs($this->errorHandler, $args);
-    }
-
-    /**
-     * @param array<int, mixed> $args
-     * @return mixed
-     */
-    private function invokePrivateMethodOn(object $object, string $method, array $args = [])
-    {
-        $reflectionMethod = new ReflectionMethod($object, $method);
-        $reflectionMethod->setAccessible(true);
-
-        return $reflectionMethod->invokeArgs($object, $args);
-    }
 }

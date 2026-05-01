@@ -15,6 +15,7 @@ use Quantum\Config\Config;
 use Quantum\Router\Route;
 use Quantum\Http\Response;
 use ReflectionClass;
+use ReflectionMethod;
 use Quantum\App\App;
 use Quantum\Di\Di;
 use ReflectionProperty;
@@ -90,6 +91,14 @@ abstract class AppTestCase extends TestCase
         $property = $reflection->getProperty($property);
         $property->setAccessible(true);
         return $property->getValue($object);
+    }
+
+    protected function invokePrivateMethod(object $object, string $method, array $args = [])
+    {
+        $reflectionMethod = new ReflectionMethod($object, $method);
+        $reflectionMethod->setAccessible(true);
+
+        return $reflectionMethod->invokeArgs($object, $args);
     }
 
     protected function createFile(string $filePath, string $content)

@@ -2,14 +2,16 @@
 
 namespace Quantum\Tests\Unit\Tracer;
 
-use Quantum\Storage\Factories\FileSystemFactory;
 use Quantum\Storage\Contracts\FilesystemAdapterInterface;
-use Quantum\Storage\FileSystem;
+use Quantum\Storage\Factories\FileSystemFactory;
+use Quantum\Tracer\StackTraceFormatter;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
-use Quantum\Tracer\StackTraceFormatter;
+use Quantum\Storage\FileSystem;
 use Quantum\Di\Di;
 use Exception;
+use Mockery;
+use ReflectionProperty;
 
 class StackTraceFormatterTest extends AppTestCase
 {
@@ -29,17 +31,9 @@ class StackTraceFormatterTest extends AppTestCase
 
         try {
             $throwable = new Exception('trace');
-            $throwableProperty = new \ReflectionProperty(Exception::class, 'file');
-            $throwableProperty->setAccessible(true);
-            $throwableProperty->setValue($throwable, $sourceFile);
-
-            $lineProperty = new \ReflectionProperty(Exception::class, 'line');
-            $lineProperty->setAccessible(true);
-            $lineProperty->setValue($throwable, 3);
-
-            $traceProperty = new \ReflectionProperty(Exception::class, 'trace');
-            $traceProperty->setAccessible(true);
-            $traceProperty->setValue($throwable, [
+            $this->setPrivateProperty($throwable, 'file', $sourceFile);
+            $this->setPrivateProperty($throwable, 'line', 3);
+            $this->setPrivateProperty($throwable, 'trace', [
                 ['class' => ErrorHandler::class, 'file' => $sourceFile, 'line' => 2],
                 ['class' => 'ExternalClass', 'file' => $sourceFile, 'line' => 4],
                 ['class' => 'NoFileClass'],
@@ -60,67 +54,10 @@ class StackTraceFormatterTest extends AppTestCase
 
     public function testGetSourceCodeReturnsEmptyStringForNonLocalAdapter(): void
     {
-        $adapter = new class () implements FilesystemAdapterInterface {
-            public function makeDirectory(string $dirname, ?string $parentId = null): bool
-            {
-                return false;
-            }
-            public function removeDirectory(string $dirname): bool
-            {
-                return false;
-            }
-            public function get(string $filename)
-            {
-                return false;
-            }
-            public function put(string $filename, $content, ?string $parentId = null)
-            {
-                return false;
-            }
-            public function append(string $filename, $content)
-            {
-                return false;
-            }
-            public function rename(string $oldName, string $newName): bool
-            {
-                return false;
-            }
-            public function copy(string $source, string $dest): bool
-            {
-                return false;
-            }
-            public function exists(string $filename): bool
-            {
-                return false;
-            }
-            public function size(string $filename)
-            {
-                return false;
-            }
-            public function lastModified(string $filename)
-            {
-                return false;
-            }
-            public function remove(string $filename): bool
-            {
-                return false;
-            }
-            public function isFile(string $filename): bool
-            {
-                return false;
-            }
-            public function isDirectory(string $dirname): bool
-            {
-                return false;
-            }
-            public function listDirectory(string $dirname)
-            {
-                return false;
-            }
-        };
+        $adapter = Mockery::mock(FilesystemAdapterInterface::class);
 
         $factory = Di::get(FileSystemFactory::class);
-        $instancesProperty = new \ReflectionProperty(FileSystemFactory::class, 'instances');
+        $instancesProperty = new ReflectionProperty(FileSystemFactory::class, 'instances');
         $instancesProperty->setAccessible(true);
         $originalInstances = $instancesProperty->getValue($factory);
 
