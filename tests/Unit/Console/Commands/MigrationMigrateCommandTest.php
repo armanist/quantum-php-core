@@ -3,6 +3,7 @@
 namespace Quantum\Tests\Unit\Console\Commands;
 
 use Quantum\Console\Commands\MigrationMigrateCommand;
+use Quantum\Migration\Enums\ExceptionMessages;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -47,5 +48,18 @@ class MigrationMigrateCommandTest extends AppTestCase
 
         $output = $tester->getDisplay();
         $this->assertStringContainsString('Operation was canceled!', $output);
+    }
+
+    public function testExecWithInvalidDirectionShowsMigrationMessage(): void
+    {
+        $tester = new CommandTester($this->command);
+        $tester->execute([
+            'direction' => 'invalid',
+        ]);
+
+        $this->assertStringContainsString(
+            ExceptionMessages::WRONG_MIGRATION_DIRECTION,
+            $tester->getDisplay()
+        );
     }
 }
