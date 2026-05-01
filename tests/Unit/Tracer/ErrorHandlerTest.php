@@ -156,7 +156,7 @@ class ErrorHandlerTest extends AppTestCase
         $this->assertStringContainsString('ERROR 500 VIEW', $content);
     }
 
-    public function testHandleWebExceptionFallsBackWhenRendererThrows(): void
+    public function testHandleWebExceptionPropagatesRendererFailure(): void
     {
         config()->set('app.debug', true);
 
@@ -167,11 +167,15 @@ class ErrorHandlerTest extends AppTestCase
 
         $handler = new ErrorHandler(null, null, $renderer);
 
-        ob_start();
-        $this->invokePrivateMethodOn($handler, 'handleWebException', [new Exception('boom')]);
-        ob_get_clean();
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('render failed');
 
-        $this->assertSame('Internal Server Error', response()->getContent());
+        ob_start();
+        try {
+            $this->invokePrivateMethodOn($handler, 'handleWebException', [new Exception('boom')]);
+        } finally {
+            ob_get_clean();
+        }
     }
 
     public function testLogErrorReturnsEarlyWhenLoggerIsNull(): void

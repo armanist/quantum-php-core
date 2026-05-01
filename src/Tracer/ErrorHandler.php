@@ -22,6 +22,7 @@ use Quantum\Renderer\Exceptions\RendererException;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
+use Quantum\Http\Enums\StatusCode;
 use Quantum\Logger\Logger;
 use ReflectionException;
 use ErrorException;
@@ -111,18 +112,14 @@ class ErrorHandler
     private function handleWebException(Throwable $throwable): void
     {
         $errorType = $this->getErrorType($throwable);
-
-        try {
-            $errorPage = $this->webExceptionRenderer->render($throwable, $errorType);
-        } catch (Throwable $e) {
-            $errorPage = 'Internal Server Error';
-        }
+        $statusCode = StatusCode::INTERNAL_SERVER_ERROR;
+        $errorPage = $this->webExceptionRenderer->render($throwable, $errorType);
 
         if (!is_debug_mode()) {
             $this->logError($throwable, $errorType);
         }
 
-        response()->html($errorPage);
+        response()->html($errorPage, $statusCode);
         response()->send();
     }
 
