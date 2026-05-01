@@ -76,7 +76,7 @@ class AuthController extends BaseController
                 'status' => self::STATUS_SUCCESS
             ]);
         } else {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_ERROR,
                 'message' => t('validation.unauthorizedRequest')
             ], StatusCode::UNAUTHORIZED);
@@ -148,7 +148,7 @@ class AuthController extends BaseController
                 'status' => self::STATUS_SUCCESS
             ]);
         } catch (AuthException $e) {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_ERROR,
                 'message' => $e->getMessage()
             ], StatusCode::UNAUTHORIZED);
@@ -166,7 +166,7 @@ class AuthController extends BaseController
                 'code' => auth()->resendOtp(route_param('code'))
             ]);
         } catch (AuthException $e) {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_ERROR,
                 'message' => $e->getMessage()
             ], StatusCode::UNAUTHORIZED);

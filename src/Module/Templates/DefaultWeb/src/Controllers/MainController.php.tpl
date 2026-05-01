@@ -50,6 +50,6 @@ class MainController
             'title' => config()->get('app.name'),
         ]);
 
-        return $response->html($view->render('index'));
+        return response()->html($view->render('index'));
     }
 }

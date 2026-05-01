@@ -35,7 +35,7 @@ class CommentController extends BaseController
     /**
      * Action - create comment
      */
-    public function create(Request $request,  ?string $lang, string $uuid): Response
+    public function create(Request $request, ?string $lang, string $uuid): Response
     {
         $commentDto = CommentDTO::fromRequest($request, $uuid, auth()->user()->uuid);
 

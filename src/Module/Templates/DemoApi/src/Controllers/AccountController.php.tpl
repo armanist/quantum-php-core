@@ -57,7 +57,7 @@ class AccountController extends BaseController
                 'message' => t('common.updated_successfully')
             ]);
         } catch (AuthException $e) {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_ERROR,
                 'message' => $e->getMessage()
             ]);
@@ -83,7 +83,7 @@ class AccountController extends BaseController
                 'message' => t('common.updated_successfully')
             ]);
         } catch (AuthException $e) {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_ERROR,
                 'message' => $e->getMessage()
             ]);

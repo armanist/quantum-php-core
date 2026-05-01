@@ -81,7 +81,7 @@ class PostManagementController extends BaseController
     /**
      * Action - amend post
      */
-    public function amend(Request $request,  ?string $lang, string $postUuid): Response
+    public function amend(Request $request, ?string $lang, string $postUuid): Response
     {
         $post = $this->postService->getPost($postUuid);
 

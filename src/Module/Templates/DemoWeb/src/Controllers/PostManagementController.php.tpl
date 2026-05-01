@@ -96,7 +96,7 @@ class PostManagementController extends BaseController
     /**
      * Action - display form for amend the post
      */
-    public function amendForm(Request $request,  ?string $lang, string $postUuid): Response
+    public function amendForm(Request $request, ?string $lang, string $postUuid): Response
     {
         $ref = $request->get('ref', 'posts');
 

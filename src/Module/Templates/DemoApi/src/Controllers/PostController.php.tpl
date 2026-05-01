@@ -96,7 +96,7 @@ class PostController extends BaseController
 
         $postData['comments'] = $commentsData;
 
-        return $response->json([
+        return response()->json([
             'status' => 'success',
             'data' => $postData,
         ]);

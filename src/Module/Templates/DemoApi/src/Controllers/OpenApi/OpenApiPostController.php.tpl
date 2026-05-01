@@ -225,7 +225,7 @@ abstract class OpenApiPostController extends OpenApiController
      *    )
      *  )
      */
-    abstract public function amend(Request $request,  ?string $lang, string $postId);
+    abstract public function amend(Request $request, ?string $lang, string $postId);
 
     /**
      * Delete post action
