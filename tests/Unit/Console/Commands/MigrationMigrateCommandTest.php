@@ -48,4 +48,14 @@ class MigrationMigrateCommandTest extends AppTestCase
         $output = $tester->getDisplay();
         $this->assertStringContainsString('Operation was canceled!', $output);
     }
+
+    public function testExecWithInvalidDirectionShowsMigrationMessage(): void
+    {
+        $tester = new CommandTester($this->command);
+        $tester->execute([
+            'direction' => 'invalid',
+        ]);
+
+        $this->assertNotSame('', trim($tester->getDisplay()));
+    }
 }

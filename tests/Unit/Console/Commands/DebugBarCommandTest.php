@@ -4,8 +4,9 @@ namespace Quantum\Tests\Unit\Console\Commands;
 
 use Symfony\Component\Console\Tester\CommandTester;
 use Quantum\Console\Commands\DebugBarCommand;
-use Quantum\Storage\FileSystem;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\Storage\FileSystem;
+use ReflectionMethod;
 
 class DebugBarCommandTest extends AppTestCase
 {
@@ -49,5 +50,35 @@ class DebugBarCommandTest extends AppTestCase
         @unlink($assetsPath . DS . 'debugbar.css');
         @rmdir($assetsPath);
         @rmdir(assets_dir() . DS . 'DebugBar');
+    }
+
+    public function testCopyResourcesRecursivelyCopiesFiles(): void
+    {
+        $sourceDir = base_dir() . DS . 'var' . DS . 'tmp_debugbar_src_' . uniqid();
+        $targetDir = base_dir() . DS . 'var' . DS . 'tmp_debugbar_dst_' . uniqid();
+        $nestedSourceDir = $sourceDir . DS . 'nested';
+
+        mkdir($nestedSourceDir, 0777, true);
+        mkdir($targetDir, 0777, true);
+        file_put_contents($sourceDir . DS . 'root.css', 'root');
+        file_put_contents($nestedSourceDir . DS . 'nested.js', 'nested');
+
+        $this->setPrivateProperty($this->command, 'publicDebugBarFolderPath', $targetDir);
+
+        $method = new ReflectionMethod($this->command, 'copyResources');
+        $method->setAccessible(true);
+        $method->invoke($this->command, $sourceDir, $targetDir);
+
+        $this->assertFileExists($targetDir . DS . 'root.css');
+        $this->assertFileExists($targetDir . DS . 'nested' . DS . 'nested.js');
+
+        @unlink($targetDir . DS . 'nested' . DS . 'nested.js');
+        @unlink($targetDir . DS . 'root.css');
+        @rmdir($targetDir . DS . 'nested');
+        @rmdir($targetDir);
+        @unlink($nestedSourceDir . DS . 'nested.js');
+        @unlink($sourceDir . DS . 'root.css');
+        @rmdir($nestedSourceDir);
+        @rmdir($sourceDir);
     }
 }

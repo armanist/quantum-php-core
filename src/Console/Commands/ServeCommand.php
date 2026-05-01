@@ -180,11 +180,7 @@ class ServeCommand extends QtCommand
             'public',
         ];
 
-        $descriptors = [
-            0 => STDIN,
-            1 => STDOUT,
-            2 => STDERR,
-        ];
+        $descriptors = $this->serverProcessDescriptors();
 
         $process = proc_open($cmd, $descriptors, $pipes);
 
@@ -193,6 +189,19 @@ class ServeCommand extends QtCommand
         }
 
         return $process;
+    }
+
+    /**
+     * Descriptors used to start the PHP built-in server process.
+     * @return array<int, resource|array<int, string>|mixed>
+     */
+    protected function serverProcessDescriptors(): array
+    {
+        return [
+            0 => STDIN,
+            1 => STDOUT,
+            2 => STDERR,
+        ];
     }
 
     /**

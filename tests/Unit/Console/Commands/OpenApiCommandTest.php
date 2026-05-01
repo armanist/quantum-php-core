@@ -6,6 +6,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Quantum\Console\Commands\OpenApiCommand;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Storage\FileSystem;
+use ReflectionMethod;
 
 class OpenApiCommandTest extends AppTestCase
 {
@@ -77,5 +78,82 @@ class OpenApiCommandTest extends AppTestCase
                 @rmdir($openApiAssets);
             }
         }
+    }
+
+    public function testOpenapiRoutesContainsModuleSpecPath(): void
+    {
+        $method = new ReflectionMethod($this->command, 'openapiRoutes');
+        $method->setAccessible(true);
+
+        $routes = $method->invoke($this->command, 'Blog');
+
+        $this->assertStringContainsString('"openapi"', $routes);
+        $this->assertStringContainsString('Blog', $routes);
+        $this->assertStringContainsString('resources\\openapi\\spec.json', $routes);
+    }
+
+    public function testCopyResourcesSkipsExcludedFiles(): void
+    {
+        $sourceDir = base_dir() . DS . 'var' . DS . 'tmp_openapi_src_' . uniqid();
+        $targetDir = base_dir() . DS . 'var' . DS . 'tmp_openapi_dst_' . uniqid();
+
+        mkdir($sourceDir, 0777, true);
+        mkdir($targetDir, 0777, true);
+
+        file_put_contents($sourceDir . DS . 'swagger-ui.css', 'body{}');
+        file_put_contents($sourceDir . DS . 'index.html', '<html></html>');
+
+        $this->setPrivateProperty($this->command, 'vendorOpenApiFolderPath', $sourceDir);
+        $this->setPrivateProperty($this->command, 'publicOpenApiFolderPath', $targetDir);
+
+        $method = new ReflectionMethod($this->command, 'copyResources');
+        $method->setAccessible(true);
+        $method->invoke($this->command);
+
+        $this->assertFileExists($targetDir . DS . 'swagger-ui.css');
+        $this->assertFileDoesNotExist($targetDir . DS . 'index.html');
+
+        @unlink($targetDir . DS . 'swagger-ui.css');
+        @rmdir($targetDir);
+        @unlink($sourceDir . DS . 'swagger-ui.css');
+        @unlink($sourceDir . DS . 'index.html');
+        @rmdir($sourceDir);
+    }
+
+    public function testGenerateOpenapiSpecificationCreatesSpecFile(): void
+    {
+        $command = new class () extends OpenApiCommand {
+            public function info(string $message): void
+            {
+            }
+
+            public function error(string $message): void
+            {
+            }
+        };
+
+        $moduleName = 'OpenApiSpec' . uniqid();
+        $annotationDir = modules_dir() . DS . $moduleName . DS . 'Controllers' . DS . 'OpenApi';
+        $specDir = modules_dir() . DS . $moduleName . DS . 'resources' . DS . 'openapi';
+        $specPath = $specDir . DS . 'spec.json';
+
+        mkdir($annotationDir, 0777, true);
+        mkdir($specDir, 0777, true);
+        file_put_contents($annotationDir . DS . 'SpecController.php', "<?php\n/**\n * @OA\\Info(title=\"Spec\", version=\"1.0.0\")\n */\nclass SpecController {}\n");
+
+        $method = new ReflectionMethod($command, 'generateOpenapiSpecification');
+        $method->setAccessible(true);
+        $method->invoke($command, $moduleName);
+
+        $this->assertFileExists($specPath);
+        $this->assertNotSame('', trim((string) file_get_contents($specPath)));
+
+        @unlink($annotationDir . DS . 'SpecController.php');
+        @rmdir($annotationDir);
+        @unlink($specPath);
+        @rmdir($specDir);
+        @rmdir(modules_dir() . DS . $moduleName . DS . 'Controllers');
+        @rmdir(modules_dir() . DS . $moduleName . DS . 'resources');
+        @rmdir(modules_dir() . DS . $moduleName);
     }
 }
