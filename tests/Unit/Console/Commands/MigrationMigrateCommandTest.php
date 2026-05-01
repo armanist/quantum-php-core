@@ -3,6 +3,7 @@
 namespace Quantum\Tests\Unit\Console\Commands;
 
 use Quantum\Console\Commands\MigrationMigrateCommand;
+use Quantum\Migration\Enums\ExceptionMessages;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -56,6 +57,9 @@ class MigrationMigrateCommandTest extends AppTestCase
             'direction' => 'invalid',
         ]);
 
-        $this->assertNotSame('', trim($tester->getDisplay()));
+        $this->assertStringContainsString(
+            ExceptionMessages::WRONG_MIGRATION_DIRECTION,
+            $tester->getDisplay()
+        );
     }
 }
