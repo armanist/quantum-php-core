@@ -27,7 +27,7 @@ class Signout extends BaseMiddleware
     public function apply(Request $request, Closure $next): Response
     {
         if (!$request->hasHeader('refresh_token')) {
-            $this->respondWithError($request,
+            return $this->respondWithError($request,
                 [t('validation.nonExistingRecord', 'token')]
             );
         }

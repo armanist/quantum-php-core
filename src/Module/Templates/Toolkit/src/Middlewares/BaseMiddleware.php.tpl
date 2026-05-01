@@ -40,7 +40,7 @@ abstract class BaseMiddleware extends QtMiddleware
     protected function validateRequest(Request $request)
     {
         if (!$this->validator->isValid($request->all())) {
-            $this->respondWithError($request, $this->validator->getErrors());
+            return $this->respondWithError($request, $this->validator->getErrors());
         }
     }
 
