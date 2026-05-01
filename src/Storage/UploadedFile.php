@@ -119,6 +119,11 @@ class UploadedFile extends SplFileInfo
     protected bool $mimeTypesLoaded = false;
 
     /**
+     * Whether mime types were explicitly set by caller
+     */
+    protected bool $mimeTypesOverridden = false;
+
+    /**
      * @param array<string, mixed> $meta
      */
     public function __construct(array $meta)
@@ -136,6 +141,8 @@ class UploadedFile extends SplFileInfo
     public function setAllowedMimeTypes(array $allowedMimeTypes, bool $merge = true): UploadedFile
     {
         $this->setAllowedMimeTypesMap($allowedMimeTypes, $merge);
+        $this->mimeTypesOverridden = true;
+        $this->mimeTypesLoaded = true;
         return $this;
     }
 
@@ -402,7 +409,7 @@ class UploadedFile extends SplFileInfo
      */
     private function ensureAllowedMimeTypesLoaded(): void
     {
-        if ($this->mimeTypesLoaded) {
+        if ($this->mimeTypesLoaded || $this->mimeTypesOverridden) {
             return;
         }
 
@@ -419,7 +426,7 @@ class UploadedFile extends SplFileInfo
         $mimeType = strtolower($mimeType);
 
         return isset($this->allowedMimeTypes[$mimeType]) &&
-            in_array($extension, (array) $this->allowedMimeTypes[$mimeType], true);
+            in_array($extension, $this->allowedMimeTypes[$mimeType], true);
     }
 
     /**
