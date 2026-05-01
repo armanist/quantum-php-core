@@ -44,7 +44,7 @@ class UploadedFile extends SplFileInfo
     /**
      * Local File System
      */
-    protected LocalFilesystemAdapterInterface $localFileSystem;
+    protected ?LocalFilesystemAdapterInterface $localFileSystem = null;
 
     /**
      * Remove File System
@@ -114,26 +114,17 @@ class UploadedFile extends SplFileInfo
     protected int $errorCode;
 
     /**
+     * Whether mime types were loaded from config
+     */
+    protected bool $mimeTypesLoaded = false;
+
+    /**
      * @param array<string, mixed> $meta
-     * @throws ConfigException|DiException|BaseException|ReflectionException
      */
     public function __construct(array $meta)
     {
-        $adapter = fs()->getAdapter();
-
-        if (!$adapter instanceof LocalFilesystemAdapterInterface) {
-            throw FileSystemException::notInstanceOf(
-                get_class($adapter),
-                LocalFilesystemAdapterInterface::class
-            );
-        }
-
-        $this->localFileSystem = $adapter;
-
         $this->originalName = $meta['name'];
         $this->errorCode = $meta['error'];
-
-        $this->loadAllowedMimeTypesFromConfig();
 
         parent::__construct($meta['tmp_name']);
     }
@@ -154,7 +145,7 @@ class UploadedFile extends SplFileInfo
     public function getName(): string
     {
         if (!$this->name) {
-            $this->name = $this->localFileSystem->fileName($this->originalName ?? '');
+            $this->name = $this->getLocalFileSystem()->fileName($this->originalName ?? '');
         }
 
         return $this->name;
@@ -192,7 +183,7 @@ class UploadedFile extends SplFileInfo
     public function getExtension(): string
     {
         if (!$this->extension) {
-            $this->extension = strtolower($this->localFileSystem->extension($this->originalName ?? ''));
+            $this->extension = strtolower($this->getLocalFileSystem()->extension($this->originalName ?? ''));
         }
 
         return $this->extension;
@@ -268,15 +259,18 @@ class UploadedFile extends SplFileInfo
      * @param string $dest
      * @param bool $overwrite
      * @return bool
-     * @throws FileUploadException|FileSystemException|ImageResizeException|BaseException
+     * @throws FileUploadException|FileSystemException|ImageResizeException|BaseException|ReflectionException
      */
     public function save(string $dest, bool $overwrite = false): bool
     {
+        $this->ensureAllowedMimeTypesLoaded();
+        $localFileSystem = $this->getLocalFileSystem();
+
         if ($this->errorCode !== UPLOAD_ERR_OK) {
             throw new FileUploadException($this->getErrorMessage());
         }
 
-        if (!$this->localFileSystem->isFile($this->getPathname())) {
+        if (!$localFileSystem->isFile($this->getPathname())) {
             throw FileUploadException::fileNotFound($this->getPathname());
         }
 
@@ -287,15 +281,15 @@ class UploadedFile extends SplFileInfo
         $filePath = $dest . DS . $this->getNameWithExtension();
 
         if (!$this->remoteFileSystem) {
-            if (!$this->localFileSystem->isDirectory($dest)) {
+            if (!$localFileSystem->isDirectory($dest)) {
                 throw FileSystemException::directoryNotExists($dest);
             }
 
-            if (!$this->localFileSystem->isWritable($dest)) {
+            if (!$localFileSystem->isWritable($dest)) {
                 throw FileSystemException::directoryNotWritable($dest);
             }
 
-            if ($overwrite === false && $this->localFileSystem->exists($filePath)) {
+            if ($overwrite === false && $localFileSystem->exists($filePath)) {
                 throw FileSystemException::fileAlreadyExists($filePath);
             }
         }
@@ -369,13 +363,51 @@ class UploadedFile extends SplFileInfo
      */
     protected function moveUploadedFile(string $filePath): bool
     {
+        $localFileSystem = $this->getLocalFileSystem();
+
         if ($this->remoteFileSystem) {
-            return (bool) $this->remoteFileSystem->put($filePath, $this->localFileSystem->get($this->getPathname()));
+            return (bool) $this->remoteFileSystem->put($filePath, $localFileSystem->get($this->getPathname()));
         } elseif ($this->isUploaded()) {
             return move_uploaded_file($this->getPathname(), $filePath);
         } else {
-            return $this->localFileSystem->copy($this->getPathname(), $filePath);
+            return $localFileSystem->copy($this->getPathname(), $filePath);
         }
+    }
+
+    /**
+     * @throws ConfigException|DiException|BaseException|ReflectionException
+     */
+    private function getLocalFileSystem(): LocalFilesystemAdapterInterface
+    {
+        if ($this->localFileSystem) {
+            return $this->localFileSystem;
+        }
+
+        $adapter = fs()->getAdapter();
+
+        if (!$adapter instanceof LocalFilesystemAdapterInterface) {
+            throw FileSystemException::notInstanceOf(
+                get_class($adapter),
+                LocalFilesystemAdapterInterface::class
+            );
+        }
+
+        $this->localFileSystem = $adapter;
+
+        return $this->localFileSystem;
+    }
+
+    /**
+     * @throws FileUploadException|LoaderException|ConfigException|DiException|ReflectionException
+     */
+    private function ensureAllowedMimeTypesLoaded(): void
+    {
+        if ($this->mimeTypesLoaded) {
+            return;
+        }
+
+        $this->loadAllowedMimeTypesFromConfig();
+        $this->mimeTypesLoaded = true;
     }
 
     /**
