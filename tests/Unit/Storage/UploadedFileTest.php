@@ -10,20 +10,6 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Storage\UploadedFile;
 use Mockery;
 
-class UploadedDouble extends UploadedFile
-{
-    public function isUploaded(): bool
-    {
-        return file_exists($this->getPathname());
-    }
-
-    protected function moveUploadedFile(string $filePath): bool
-    {
-        return copy($this->getPathname(), $filePath);
-    }
-
-}
-
 class UploadedFileTest extends AppTestCase
 {
     private array $fileMeta;
@@ -139,7 +125,7 @@ class UploadedFileTest extends AppTestCase
 
     public function testUploadedFileUploadAndSave(): void
     {
-        $uploadedFile = new UploadedDouble($this->fileMeta);
+        $uploadedFile = new UploadedFile($this->fileMeta);
 
         $this->assertInstanceOf(UploadedFile::class, $uploadedFile);
 
@@ -153,7 +139,7 @@ class UploadedFileTest extends AppTestCase
         $fileMeta = $this->fileMeta;
         $fileMeta['name'] = 'foo.php';
 
-        $uploadedFile = new UploadedDouble($fileMeta);
+        $uploadedFile = new UploadedFile($fileMeta);
 
         $this->expectException(FileUploadException::class);
         $this->expectExceptionMessage('The file type `php` is not allowed.');
@@ -167,7 +153,7 @@ class UploadedFileTest extends AppTestCase
         $fileMeta['name'] = 'foo.jpg';
         $fileMeta['tmp_name'] = base_dir() . DS . 'journal.log';
 
-        $uploadedFile = new UploadedDouble($fileMeta);
+        $uploadedFile = new UploadedFile($fileMeta);
 
         $this->expectException(FileUploadException::class);
         $this->expectExceptionMessage('The file type `jpg` is not allowed.');
@@ -181,7 +167,7 @@ class UploadedFileTest extends AppTestCase
         $fileMeta['name'] = 'foo.txt';
         $fileMeta['tmp_name'] = base_dir() . DS . 'journal.log';
 
-        $uploadedFile = new UploadedDouble($fileMeta);
+        $uploadedFile = new UploadedFile($fileMeta);
 
         $uploadedFile->setAllowedMimeTypes([
             $uploadedFile->getMimeType() => ['txt'],
@@ -193,7 +179,7 @@ class UploadedFileTest extends AppTestCase
 
     public function testUploadedFileSaveAndTryOverwrite(): void
     {
-        $uploadedFile = new UploadedDouble($this->fileMeta);
+        $uploadedFile = new UploadedFile($this->fileMeta);
 
         $uploadedFile->save(base_dir());
 
@@ -210,7 +196,7 @@ class UploadedFileTest extends AppTestCase
 
     public function testUploadedFileSaveAndOverwrite(): void
     {
-        $uploadedFile = new UploadedDouble($this->fileMeta);
+        $uploadedFile = new UploadedFile($this->fileMeta);
 
         $uploadedFile->save(base_dir());
 
@@ -221,7 +207,7 @@ class UploadedFileTest extends AppTestCase
 
     public function testUploadedFileModifyAndSave(): void
     {
-        $uploadedFile = new UploadedDouble($this->fileMeta);
+        $uploadedFile = new UploadedFile($this->fileMeta);
 
         $uploadedFile->modify('crop', [100, 100]);
 

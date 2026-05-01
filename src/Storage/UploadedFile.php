@@ -20,18 +20,18 @@ use Quantum\Storage\Contracts\LocalFilesystemAdapterInterface;
 use Quantum\Storage\Contracts\FilesystemAdapterInterface;
 use Quantum\Storage\Exceptions\FileSystemException;
 use Quantum\Storage\Exceptions\FileUploadException;
-use Quantum\Loader\Exceptions\LoaderException;
+use Quantum\Storage\Uploads\UploadConfigProvider;
 use Quantum\Config\Exceptions\ConfigException;
+use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Lang\Exceptions\LangException;
+use Quantum\Storage\Uploads\UploadStorage;
 use Quantum\App\Exceptions\BaseException;
+use Quantum\Storage\Uploads\UploadPolicy;
 use Quantum\Di\Exceptions\DiException;
 use Gumlet\ImageResizeException;
-use Quantum\Loader\Loader;
-use Quantum\Loader\Setup;
 use ReflectionException;
 use Gumlet\ImageResize;
 use RuntimeException;
-use Quantum\Di\Di;
 use SplFileInfo;
 use finfo;
 
@@ -123,6 +123,10 @@ class UploadedFile extends SplFileInfo
      */
     protected bool $mimeTypesOverridden = false;
 
+    private ?UploadPolicy $uploadPolicy = null;
+
+    private ?UploadStorage $uploadStorage = null;
+
     /**
      * @param array<string, mixed> $meta
      */
@@ -140,7 +144,8 @@ class UploadedFile extends SplFileInfo
      */
     public function setAllowedMimeTypes(array $allowedMimeTypes, bool $merge = true): UploadedFile
     {
-        $this->setAllowedMimeTypesMap($allowedMimeTypes, $merge);
+        $policy = $this->getUploadPolicy();
+        $merge ? $policy->merge($allowedMimeTypes) : $policy->replace($allowedMimeTypes);
         $this->mimeTypesOverridden = true;
         $this->mimeTypesLoaded = true;
         return $this;
@@ -281,7 +286,7 @@ class UploadedFile extends SplFileInfo
             throw FileUploadException::fileNotFound($this->getPathname());
         }
 
-        if (!$this->allowed($this->getExtension(), $this->getMimeType())) {
+        if (!$this->getUploadPolicy()->isAllowed($this->getExtension(), $this->getMimeType())) {
             throw FileUploadException::fileTypeNotAllowed($this->getExtension());
         }
 
@@ -301,7 +306,7 @@ class UploadedFile extends SplFileInfo
             }
         }
 
-        if (!$this->moveUploadedFile($filePath)) {
+        if (!$this->getUploadStorage()->store($this, $filePath, $this->remoteFileSystem)) {
             return false;
         }
 
@@ -366,22 +371,6 @@ class UploadedFile extends SplFileInfo
     }
 
     /**
-     * Moves an uploaded file to a new location
-     */
-    protected function moveUploadedFile(string $filePath): bool
-    {
-        $localFileSystem = $this->getLocalFileSystem();
-
-        if ($this->remoteFileSystem) {
-            return (bool) $this->remoteFileSystem->put($filePath, $localFileSystem->get($this->getPathname()));
-        } elseif ($this->isUploaded()) {
-            return move_uploaded_file($this->getPathname(), $filePath);
-        } else {
-            return $localFileSystem->copy($this->getPathname(), $filePath);
-        }
-    }
-
-    /**
      * @throws ConfigException|DiException|BaseException|ReflectionException
      */
     private function getLocalFileSystem(): LocalFilesystemAdapterInterface
@@ -413,62 +402,10 @@ class UploadedFile extends SplFileInfo
             return;
         }
 
-        $this->loadAllowedMimeTypesFromConfig();
+        $this->getUploadPolicy()->merge(
+            (new UploadConfigProvider())->getAllowedMimeTypesMap()
+        );
         $this->mimeTypesLoaded = true;
-    }
-
-    /**
-     * Validates upload against allowed mime types => extensions map
-     */
-    protected function allowed(string $extension, string $mimeType): bool
-    {
-        $extension = strtolower($extension);
-        $mimeType = strtolower($mimeType);
-
-        return isset($this->allowedMimeTypes[$mimeType]) &&
-            in_array($extension, $this->allowedMimeTypes[$mimeType], true);
-    }
-
-    /**
-     * Loads allowed mime types from config (shared/config/uploads.php) if present.
-     * @throws FileUploadException|LoaderException|ConfigException|DiException|ReflectionException
-     */
-    protected function loadAllowedMimeTypesFromConfig(): void
-    {
-        if (!config()->has('uploads')) {
-            if (!Di::isRegistered(Loader::class)) {
-                Di::register(Loader::class);
-            }
-
-            $loader = Di::get(Loader::class);
-            $setup = new Setup('config', 'uploads');
-            $loader->setup($setup);
-
-            if (!$loader->fileExists()) {
-                return;
-            }
-
-            config()->import($setup);
-        }
-
-        $allowedMimeTypesMap = config()->get('uploads.allowed_mime_types') ?? [];
-
-        if (!is_array($allowedMimeTypesMap)) {
-            throw FileUploadException::incorrectMimeTypesConfig('uploads');
-        }
-
-        if ($allowedMimeTypesMap !== []) {
-            $this->setAllowedMimeTypesMap($allowedMimeTypesMap);
-        }
-    }
-
-    /**
-     * Sets the allowed mime types => extensions map
-     * @param array<string, string> $allowedMimeTypes
-     */
-    protected function setAllowedMimeTypesMap(array $allowedMimeTypes, bool $merge = true): void
-    {
-        $this->allowedMimeTypes = $merge ? array_merge_recursive($this->allowedMimeTypes, $allowedMimeTypes) : $allowedMimeTypes;
     }
 
     /**
@@ -489,5 +426,26 @@ class UploadedFile extends SplFileInfo
         call_user_func_array($callable, array_values($this->params));
 
         $image->save($filePath);
+    }
+
+    private function getUploadPolicy(): UploadPolicy
+    {
+        if (!$this->uploadPolicy) {
+            $this->uploadPolicy = new UploadPolicy($this->allowedMimeTypes);
+        }
+
+        return $this->uploadPolicy;
+    }
+
+    /**
+     * @throws ConfigException|DiException|BaseException|ReflectionException
+     */
+    private function getUploadStorage(): UploadStorage
+    {
+        if (!$this->uploadStorage) {
+            $this->uploadStorage = new UploadStorage($this->getLocalFileSystem());
+        }
+
+        return $this->uploadStorage;
     }
 }
