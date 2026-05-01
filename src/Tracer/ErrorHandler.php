@@ -16,19 +16,16 @@ declare(strict_types=1);
 
 namespace Quantum\Tracer;
 
-use Quantum\Storage\Contracts\LocalFilesystemAdapterInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Quantum\Renderer\Exceptions\RendererException;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
-use Quantum\View\Factories\ViewFactory;
 use Quantum\Di\Exceptions\DiException;
+use Quantum\Http\Enums\StatusCode;
 use Quantum\Logger\Logger;
 use ReflectionException;
-use Psr\Log\LogLevel;
 use ErrorException;
-use ParseError;
 use Throwable;
 use Exception;
 
@@ -38,32 +35,20 @@ use Exception;
  */
 class ErrorHandler
 {
-    /**
-     * Number of lines to be returned
-     */
-    public const NUM_LINES = 10;
-
-    /**
-     * @var array<int, string>
-     */
-    public const ERROR_TYPES = [
-        E_ERROR => 'error',
-        E_WARNING => 'warning',
-        E_PARSE => 'error',
-        E_NOTICE => 'notice',
-        E_CORE_ERROR => 'error',
-        E_CORE_WARNING => 'warning',
-        E_COMPILE_ERROR => 'error',
-        E_COMPILE_WARNING => 'warning',
-        E_USER_ERROR => 'error',
-        E_USER_WARNING => 'warning',
-        E_USER_NOTICE => 'notice',
-        E_STRICT => 'notice',
-        E_RECOVERABLE_ERROR => 'error',
-    ];
-
     private ?Logger $logger = null;
     private ?OutputInterface $cliOutput = null;
+    private ExceptionSeverityResolver $severityResolver;
+    private WebExceptionRenderer $webExceptionRenderer;
+
+    public function __construct(
+        ?ExceptionSeverityResolver $severityResolver = null,
+        ?StackTraceFormatter $stackTraceFormatter = null,
+        ?WebExceptionRenderer $webExceptionRenderer = null
+    ) {
+        $this->severityResolver = $severityResolver ?? new ExceptionSeverityResolver();
+        $formatter = $stackTraceFormatter ?? new StackTraceFormatter();
+        $this->webExceptionRenderer = $webExceptionRenderer ?? new WebExceptionRenderer($formatter);
+    }
 
     private function __clone()
     {
@@ -110,30 +95,36 @@ class ErrorHandler
     private function handleCliException(Throwable $throwable): void
     {
         $output = $this->cliOutput ?? new ConsoleOutput();
-        $output->writeln('<error>' . $throwable->getMessage() . '</error>');
+
+        if (!is_debug_mode()) {
+            $output->writeln('<error>' . $throwable->getMessage() . '</error>');
+            return;
+        }
+
+        $output->writeln('<error>' . get_class($throwable) . ': ' . $throwable->getMessage() . '</error>');
+        $output->writeln('In ' . $throwable->getFile() . ':' . $throwable->getLine());
+        $output->writeln($throwable->getTraceAsString());
     }
 
     /**
-     * @throws ConfigException|RendererException|DiException|BaseException|ReflectionException|Exception
+     * @throws DiException|BaseException|ReflectionException|Exception
      */
     private function handleWebException(Throwable $throwable): void
     {
-        $view = ViewFactory::get();
         $errorType = $this->getErrorType($throwable);
 
-        if (is_debug_mode()) {
-            $errorPage = $view->renderPartial('errors' . DS . 'trace', [
-                'stackTrace' => $this->composeStackTrace($throwable),
-                'errorMessage' => $throwable->getMessage(),
-                'severity' => ucfirst($errorType),
-            ]);
-        } else {
-            $errorPage = $view->renderPartial('errors' . DS . '500');
+        if (!is_debug_mode()) {
             $this->logError($throwable, $errorType);
         }
 
-        response()->html($errorPage);
-        response()->send();
+        try {
+            $errorPage = $this->webExceptionRenderer->render($throwable, $errorType);
+            response()->html($errorPage, StatusCode::INTERNAL_SERVER_ERROR);
+            response()->send();
+        } catch (Throwable $e) {
+            response()->html('Internal Server Error', StatusCode::INTERNAL_SERVER_ERROR);
+            response()->send();
+        }
     }
 
     private function logError(Throwable $e, string $errorType): void
@@ -148,94 +139,10 @@ class ErrorHandler
     }
 
     /**
-     * Composes the stack trace
-     * @return array<int, array{file: string, code: string}>
-     * @throws ConfigException|RendererException|DiException|BaseException|ReflectionException
-     */
-    private function composeStackTrace(Throwable $e): array
-    {
-        $trace[] = [
-            'file' => $e->getFile(),
-            'code' => $this->getSourceCode($e->getFile(), $e->getLine(), 'error-line'),
-        ];
-
-        foreach ($e->getTrace() as $item) {
-            if (($item['class'] ?? null) === self::class) {
-                continue;
-            }
-
-            if (isset($item['file'])) {
-                $trace[] = [
-                    'file' => $item['file'],
-                    'code' => $this->getSourceCode($item['file'], $item['line'] ?? 1, 'switch-line'),
-                ];
-            }
-        }
-
-        return $trace;
-    }
-
-    /**
-     * Gets the source code where the error happens
-     * @throws ConfigException|RendererException|DiException|BaseException|ReflectionException
-     */
-    private function getSourceCode(string $filename, int $lineNumber, string $className): string
-    {
-        $lineNumber--;
-
-        $halfLines = intdiv(self::NUM_LINES, 2);
-        $start = max($lineNumber - $halfLines, 1);
-
-        $adapter = fs()->getAdapter();
-
-        if (!$adapter instanceof LocalFilesystemAdapterInterface) {
-            return '';
-        }
-
-        $lines = $adapter->getLines($filename, $start, self::NUM_LINES);
-
-        $code = '<ol start="' . key($lines) . '">';
-
-        foreach ($lines as $currentLineNumber => $line) {
-            $code .= $this->formatLineItem($currentLineNumber, $line, $lineNumber, $className);
-        }
-
-        return $code . '</ol>';
-    }
-
-    /**
-     * Formats the line item
-     */
-    private function formatLineItem(int $currentLineNumber, string $line, int $lineNumber, string $className): string
-    {
-        $highlightClass = $currentLineNumber === $lineNumber ? " class=\"{$className}\"" : '';
-
-        $encodedLine = htmlspecialchars($line, ENT_QUOTES);
-
-        return sprintf(
-            '<li%s><pre>%s</pre></li>',
-            $highlightClass,
-            $encodedLine
-        );
-    }
-
-    /**
      * Gets the error type based on the exception class
      */
     private function getErrorType(Throwable $e): string
     {
-        if ($e instanceof ErrorException) {
-            return self::ERROR_TYPES[$e->getSeverity()] ?? LogLevel::ERROR;
-        }
-
-        if ($e instanceof ParseError) {
-            return LogLevel::CRITICAL;
-        }
-
-        if ($e instanceof ReflectionException) {
-            return LogLevel::WARNING;
-        }
-
-        return LogLevel::ERROR;
+        return $this->severityResolver->resolve($e);
     }
 }
