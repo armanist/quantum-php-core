@@ -42,14 +42,13 @@ class PostManagementController extends BaseController
 
     /**
      * Action - get my posts
-     * @param Response $response
      * @return Response
      */
-    public function myPosts(Response $response): Response
+    public function myPosts(): Response
     {
         $myPosts = $this->postService->getMyPosts(auth()->user()->uuid);
-        
-        return $response->json([
+
+        return response()->json([
             'status' => 'success',
             'data' => $this->postService->transformData($myPosts->all())
         ]);
@@ -57,12 +56,12 @@ class PostManagementController extends BaseController
 
     /**
      * Action - create post
-     * @param Request $request 
-     * @param Response $response
+     * @param Request $request
      * @return Response
      */
-    public function create(Request $request, Response $response): Response
+    public function create(Request $request): Response
     {
+        $response = response();
         $imageName = '';
 
         if ($request->hasFile('image')) {
@@ -85,15 +84,15 @@ class PostManagementController extends BaseController
     }
 
     /**
-     * Action - amend post 
-     * @param Request $request 
-     * @param Response $response
+     * Action - amend post
+     * @param Request $request
      * @param string|null $lang
      * @param string $postUuid
      * @return Response
      */
-    public function amend(Request $request, Response $response, ?string $lang, string $postUuid): Response
+    public function amend(Request $request,  ?string $lang, string $postUuid): Response
     {
+        $response = response();
         $post = $this->postService->getPost($postUuid);
 
         $imageName = null;
@@ -123,13 +122,13 @@ class PostManagementController extends BaseController
 
     /**
      * Action - delete post
-     * @param Response $response
      * @param string|null $lang
      * @param string $postUuid
      * @return Response
      */
-    public function delete(Response $response, ?string $lang, string $postUuid): Response
+    public function delete(?string $lang, string $postUuid): Response
     {
+        $response = response();
         $post = $this->postService->getPost($postUuid);
 
         if ($post->image) {
@@ -146,13 +145,13 @@ class PostManagementController extends BaseController
 
     /**
      * Action - delete image of the post
-     * @param Response $response
-     * @param string|null $lang 
+     * @param string|null $lang
      * @param string $postUuid
      * @return Response
      */
-    public function deleteImage(Response $response, ?string $lang, string $postUuid): Response
+    public function deleteImage(?string $lang, string $postUuid): Response
     {
+        $response = response();
         $post = $this->postService->getPost($postUuid);
 
         if ($post->image) {

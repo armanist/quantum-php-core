@@ -37,14 +37,13 @@ class MainController
      * @var bool
      */
     public bool $csrfVerification = false;
-    
+
     /**
      * Action - success response
-     * @param Response $response
      */
-    public function index(Response $response): Response
+    public function index(): Response
     {
-        return $response->json([
+        return response()->json([
             'status' => 'success',
             'message' => '{{MODULE_NAME}} module.'
         ]);

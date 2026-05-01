@@ -45,9 +45,8 @@ class EmailsController extends BaseController
 
     /**
      * @param Request $request
-     * @param Response $response
      */
-    public function list(Request $request, Response $response): Response
+    public function list(Request $request): Response
     {
         $perPage = $request->get('per_page', self::ITEMS_PER_PAGE);
         $currentPage = $request->get('page', self::CURRENT_PAGE);
@@ -60,18 +59,17 @@ class EmailsController extends BaseController
             'pagination' => $data
         ]);
 
-        return $response->html($this->view->render('pages/email/index'));
+        return response()->html($this->view->render('pages/email/index'));
     }
 
     /**
-     * @param Response $response
      * @param string $emailId
      */
-    public function single(Response $response, string $emailId): Response
+    public function single(string $emailId): Response
     {
         $email = $this->emailService->getEmail($emailId);
 
-        return $response->html(quoted_printable_decode($email->getParsedBody()));
+        return response()->html(quoted_printable_decode($email->getParsedBody()));
     }
 
     /**

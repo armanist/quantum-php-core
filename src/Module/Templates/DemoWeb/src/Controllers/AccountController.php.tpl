@@ -44,16 +44,15 @@ class AccountController extends BaseController
 
     /**
      * Action - show user info
-     * @param Response $response
      * @return Response
      */
-    public function form(Response $response): Response
+    public function form(): Response
     {
         $this->view->setParams([
             'title' => t('common.account_settings') . ' | ' . config()->get('app.name'),
         ]);
 
-        return $response->html($this->view->render('account/form'));
+        return response()->html($this->view->render('account/form'));
     }
 
     /**
@@ -86,7 +85,7 @@ class AccountController extends BaseController
         $hasher = new Hasher();
 
         $newPassword = $request->get('new_password', null);
-        
+
         $this->authService->update('uuid', auth()->user()->uuid, [
             'password' => $hasher->hash($newPassword)
         ]);

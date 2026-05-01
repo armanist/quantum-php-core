@@ -45,14 +45,13 @@ class DashboardController extends BaseController
 
     /**
      * @param Request $request
-     * @param Response $response
      */
-    public function index(Request $request, Response $response): Response
+    public function index(Request $request): Response
     {
         $this->view->setParams([
             'title' => 'Dashboard',
         ]);
 
-        return $response->html($this->view->render('pages/dashboard/index'));
+        return response()->html($this->view->render('pages/dashboard/index'));
     }
 }

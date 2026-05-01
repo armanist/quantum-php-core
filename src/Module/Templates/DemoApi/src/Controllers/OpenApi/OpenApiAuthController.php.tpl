@@ -64,9 +64,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      */
-    abstract public function signin(Request $request, Response $response);
+    abstract public function signin(Request $request);
 
     /**
      * Gets the logged-in user data
@@ -94,9 +93,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      */
-    abstract public function me(Response $response);
+    abstract public function me();
 
     /**
      * Sign out action
@@ -134,9 +132,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      */
-    abstract public function signout(Response $response);
+    abstract public function signout();
 
     /**
      * Sign up action
@@ -186,9 +183,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      */
-    abstract public function signup(Request $request, Response $response);
+    abstract public function signup(Request $request);
 
     /**
      * Activate action
@@ -223,9 +219,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      */
-    abstract public function activate(Request $request, Response $response);
+    abstract public function activate(Request $request);
 
     /**
      * Forget action
@@ -263,9 +258,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      */
-    abstract public function forget(Request $request, Response $response);
+    abstract public function forget(Request $request);
 
     /**
      * Reset action
@@ -316,9 +310,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      */
-    abstract public function reset(Request $request, Response $response);
+    abstract public function reset(Request $request);
 
     /**
      * Verify action
@@ -356,9 +349,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      */
-    abstract public function verify(Request $request, Response $response);
+    abstract public function verify(Request $request);
 
     /**
      * Resend action
@@ -392,7 +384,6 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      */
-    abstract public function resend(Response $response);
+    abstract public function resend();
 }

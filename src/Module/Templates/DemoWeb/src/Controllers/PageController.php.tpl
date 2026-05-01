@@ -30,23 +30,21 @@ class PageController extends BaseController
     protected const LAYOUT = 'layouts/main';
 
     /**
-     * Action - display home page  
-     * @param Response $response
+     * Action - display home page
      */
-    public function home(Response $response): Response
+    public function home(): Response
     {
         $this->view->setParams([
             'title' => config()->get('app.name'),
         ]);
 
-        return $response->html($this->view->render('pages/index'));
+        return response()->html($this->view->render('pages/index'));
     }
 
     /**
-     * Action - display about page 
-     * @param Response $response
+     * Action - display about page
      */
-    public function about(Response $response): Response
+    public function about(): Response
     {
         $this->view->setParams([
             'title' => t('common.about') . ' | ' . config()->get('app.name'),
@@ -54,6 +52,6 @@ class PageController extends BaseController
 
         $commands = service(CommandService::class)->getAllCommands();
 
-        return $response->html($this->view->render('pages/about', ['commands' => $commands]));
+        return response()->html($this->view->render('pages/about', ['commands' => $commands]));
     }
 }

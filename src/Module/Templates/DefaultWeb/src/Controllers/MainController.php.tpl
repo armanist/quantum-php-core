@@ -41,18 +41,17 @@ class MainController
             new Asset(Asset::CSS, '{{MODULE_NAME}}/css/custom.css')
         ]);
     }
-    
+
     /**
      * Action - display home page
-     * @param Response $response
      * @param ViewFactory $view
      */
-    public function index(Response $response, ViewFactory $view): Response
-    {   
+    public function index(ViewFactory $view): Response
+    {
         $view->setParams([
             'title' => config()->get('app.name'),
         ]);
-        
+
         return $response->html($view->render('index'));
     }
 }

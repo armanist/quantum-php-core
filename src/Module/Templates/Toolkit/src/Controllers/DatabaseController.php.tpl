@@ -41,10 +41,9 @@ class DatabaseController extends BaseController
     }
 
     /**
-     * @param Response $response
      * @return Response
      */
-    public function list(Response $response): Response
+    public function list(): Response
     {
         $tables = $this->databaseService->getTables();
 
@@ -53,15 +52,14 @@ class DatabaseController extends BaseController
             'tables' => $tables,
         ]);
 
-        return $response->html($this->view->render('pages/database/index'));
+        return response()->html($this->view->render('pages/database/index'));
     }
 
     /**
      * @param Request $request
-     * @param Response $response
      * @throws DatabaseException
      */
-    public function single(Request $request, Response $response): Response
+    public function single(Request $request): Response
     {
         $tableName = $request->get('table');
         $perPage = $request->get('per_page', self::ITEMS_PER_PAGE);
@@ -79,7 +77,7 @@ class DatabaseController extends BaseController
             'pagination' => $tableData['pagination'],
         ]);
 
-        return $response->html($this->view->render('pages/database/table'));
+        return response()->html($this->view->render('pages/database/table'));
     }
 
     /**

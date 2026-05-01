@@ -60,11 +60,11 @@ class AuthController extends BaseController
     /**
      * Action - sign in
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function signin(Request $request, Response $response): Response
+    public function signin(Request $request): Response
     {
+        $response = response();
         if ($request->isMethod('post')) {
             try {
                 $code = auth()->signin($request->get('email'), $request->get('password'), !!$request->get('remember'));
@@ -100,11 +100,11 @@ class AuthController extends BaseController
     /**
      * Action - sign up
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function signup(Request $request, Response $response): Response
+    public function signup(Request $request): Response
     {
+        $response = response();
         if ($request->isMethod('post')) {
             $userDto = UserDTO::fromRequest($request, Role::EDITOR, uuid_ordered());
 
@@ -136,11 +136,11 @@ class AuthController extends BaseController
     /**
      * Action - forget
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function forget(Request $request, Response $response): Response
+    public function forget(Request $request): Response
     {
+        $response = response();
         if ($request->isMethod('post')) {
             auth()->forget($request->get('email'));
             session()->setFlash('success', t('common.check_email'));
@@ -157,11 +157,11 @@ class AuthController extends BaseController
     /**
      * Action - reset
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function reset(Request $request, Response $response): Response
+    public function reset(Request $request): Response
     {
+        $response = response();
         if ($request->isMethod('post')) {
             auth()->reset($request->get('reset_token'), $request->get('password'));
             return redirect(base_url(true) . '/' . current_lang() . '/signin');
@@ -178,11 +178,11 @@ class AuthController extends BaseController
     /**
      * Action - Verify OTP
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function verify(Request $request, Response $response): Response
+    public function verify(Request $request): Response
     {
+        $response = response();
         if ($request->isMethod('post')) {
             try {
                 auth()->verifyOtp((int)$request->get('otp'), $request->get('code'));

@@ -44,9 +44,8 @@ abstract class OpenApiPostController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      */
-    abstract public function posts(Request $request, Response $response);
+    abstract public function posts(Request $request);
 
     /**
      * Get post action
@@ -82,9 +81,8 @@ abstract class OpenApiPostController extends OpenApiController
      *  )
      * @param string|null $lang
      * @param string $postId
-     * @param Response $response
      */
-    abstract public function post(?string $lang, string $postId, Response $response);
+    abstract public function post(?string $lang, string $postId);
 
     /**
      * Get my posts action
@@ -112,9 +110,8 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      */
-    abstract public function myPosts(Response $response);
+    abstract public function myPosts();
 
     /**
      * Create post action
@@ -168,9 +165,8 @@ abstract class OpenApiPostController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      */
-    abstract public function create(Request $request, Response $response);
+    abstract public function create(Request $request);
 
     /**
      * Amend post action
@@ -233,11 +229,10 @@ abstract class OpenApiPostController extends OpenApiController
      *    )
      *  )
      * @param Request $request
-     * @param Response $response
      * @param string|null $lang
      * @param string $postId
      */
-    abstract public function amend(Request $request, Response $response, ?string $lang, string $postId);
+    abstract public function amend(Request $request,  ?string $lang, string $postId);
 
     /**
      * Delete post action
@@ -278,11 +273,10 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      * @param string|null $lang
      * @param string $postId
      */
-    abstract public function delete(Response $response, ?string $lang, string $postId);
+    abstract public function delete(?string $lang, string $postId);
 
     /**
      * Delete post image action
@@ -323,10 +317,9 @@ abstract class OpenApiPostController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      * @param string|null $lang
      * @param string $postId
      */
-    abstract public function deleteImage(Response $response, ?string $lang, string $postId);
+    abstract public function deleteImage(?string $lang, string $postId);
 
 }

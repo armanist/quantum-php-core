@@ -31,11 +31,11 @@ class AuthController extends BaseController
     /**
      * Action - sign in
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function signin(Request $request, Response $response): Response
+    public function signin(Request $request): Response
     {
+        $response = response();
         try {
             $code = auth()->signin($request->get('email'), $request->get('password'));
 
@@ -56,12 +56,11 @@ class AuthController extends BaseController
 
     /**
      * Action - me
-     * @param Response $response
      * @return Response
      */
-    public function me(Response $response): Response
+    public function me(): Response
     {
-        return $response->json([
+        return response()->json([
             'status' => self::STATUS_SUCCESS,
             'data' => [
                 'firstname' => auth()->user()->firstname,
@@ -73,13 +72,12 @@ class AuthController extends BaseController
 
     /**
      * Action - sign out
-     * @param Response $response
      * @return Response
      */
-    public function signout(Response $response): Response
+    public function signout(): Response
     {
         if (auth()->signout()) {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_SUCCESS
             ]);
         } else {
@@ -93,16 +91,15 @@ class AuthController extends BaseController
     /**
      *  Action - sign up
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function signup(Request $request, Response $response): Response
+    public function signup(Request $request): Response
     {
         $userDto = UserDTO::fromRequest($request, Role::EDITOR, uuid_ordered());
 
         auth()->signup($userDto->toArray());
 
-        return $response->json([
+        return response()->json([
             'status' => self::STATUS_SUCCESS,
             'message' => t('common.successfully_signed_up')
         ]);
@@ -111,14 +108,13 @@ class AuthController extends BaseController
     /**
      * Action - activate
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function activate(Request $request, Response $response): Response
+    public function activate(Request $request): Response
     {
         auth()->activate($request->get('activation_token'));
 
-        return $response->json([
+        return response()->json([
             'status' => self::STATUS_SUCCESS,
             'message' => t('common.account_activated')
         ]);
@@ -127,14 +123,13 @@ class AuthController extends BaseController
     /**
      * Action - forget
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function forget(Request $request, Response $response): Response
+    public function forget(Request $request): Response
     {
         auth()->forget($request->get('email'));
 
-        return $response->json([
+        return response()->json([
             'status' => self::STATUS_SUCCESS,
             'message' => t('common.check_email')
         ]);
@@ -143,14 +138,13 @@ class AuthController extends BaseController
     /**
      * Action - reset
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function reset(Request $request, Response $response): Response
+    public function reset(Request $request): Response
     {
         auth()->reset($request->get('reset_token'), $request->get('password'));
 
-        return $response->json([
+        return response()->json([
             'status' => self::STATUS_SUCCESS
         ]);
     }
@@ -158,15 +152,14 @@ class AuthController extends BaseController
     /**
      * Action - Verify OTP
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function verify(Request $request, Response $response): Response
+    public function verify(Request $request): Response
     {
         try {
             auth()->verifyOtp((int)$request->get('otp'), $request->get('code'));
 
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_SUCCESS
             ]);
         } catch (AuthException $e) {
@@ -179,13 +172,12 @@ class AuthController extends BaseController
 
     /**
      *  Action - Resend OTP
-     * @param Response $response
      * @return Response
      */
-    public function resend(Response $response): Response
+    public function resend(): Response
     {
         try {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_SUCCESS,
                 'code' => auth()->resendOtp(route_param('code'))
             ]);

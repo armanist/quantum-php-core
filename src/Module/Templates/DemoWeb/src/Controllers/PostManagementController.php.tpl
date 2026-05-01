@@ -25,12 +25,12 @@ use Quantum\Http\Request;
  */
 class PostManagementController extends BaseController
 {
-    
+
     /**
      * Main layout
      */
     protected const LAYOUT = 'layouts/main';
-    
+
     /**
      * Post service
      * @var PostService
@@ -46,10 +46,9 @@ class PostManagementController extends BaseController
     /**
      * Action - get my posts
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function myPosts(Request $request, Response $response): Response
+    public function myPosts(Request $request): Response
     {
         $myPosts = $this->postService->getMyPosts(auth()->user()->uuid);
 
@@ -58,16 +57,15 @@ class PostManagementController extends BaseController
             'posts' => $this->postService->transformData($myPosts->all())
         ]);
 
-        return $response->html($this->view->render('post/my-posts'));
+        return response()->html($this->view->render('post/my-posts'));
     }
 
     /**
      * Action - display form for creating a post
      * @param Request $request
-     * @param Response $response
      * @return Response
      */
-    public function createFrom(Request $request, Response $response): Response
+    public function createFrom(Request $request): Response
     {
         $ref = $request->get('ref', 'posts');
 
@@ -76,7 +74,7 @@ class PostManagementController extends BaseController
             'referer' => $ref
         ]);
 
-        return $response->html($this->view->render('post/form'));
+        return response()->html($this->view->render('post/form'));
     }
 
     /**
@@ -104,14 +102,13 @@ class PostManagementController extends BaseController
     }
 
     /**
-     * Action - display form for amend the post 
+     * Action - display form for amend the post
      * @param Request $request
-     * @param Response $response
      * @param string|null $lang
      * @param string $postUuid
      * @return Response
      */
-    public function amendForm(Request $request, Response $response, ?string $lang, string $postUuid): Response
+    public function amendForm(Request $request,  ?string $lang, string $postUuid): Response
     {
         $ref = $request->get('ref', 'posts');
 
@@ -123,11 +120,11 @@ class PostManagementController extends BaseController
             'referer' => nav_ref_decode($ref)
         ]);
 
-        return $response->html($this->view->render('post/form'));
+        return response()->html($this->view->render('post/form'));
     }
 
     /**
-     * Action - amend post 
+     * Action - amend post
      * @param Request $request
      * @param string|null $lang
      * @param string $postUuid
