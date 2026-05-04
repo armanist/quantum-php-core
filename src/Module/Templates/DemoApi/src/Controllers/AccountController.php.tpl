@@ -28,13 +28,8 @@ class AccountController extends BaseController
 {
     /**
      * Auth service
-     * @var AuthService
      */
     public AuthService $authService;
-    
-    /**
-     * Works before an action
-     */
 
     public function __before()
     {
@@ -43,10 +38,8 @@ class AccountController extends BaseController
 
     /**
      * Action - update user info
-     * @param Request $request
-     * @param Response $response
      */
-    public function update(Request $request, Response $response): Response
+    public function update(Request $request): Response
     {
         try {
             $firstname = $request->get('firstname');
@@ -59,12 +52,12 @@ class AccountController extends BaseController
 
             auth()->refreshUser(auth()->user()->uuid);
 
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_SUCCESS,
                 'message' => t('common.updated_successfully')
             ]);
         } catch (AuthException $e) {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_ERROR,
                 'message' => $e->getMessage()
             ]);
@@ -73,26 +66,24 @@ class AccountController extends BaseController
 
     /**
      * Action - update password
-     * @param Request $request
-     * @param Response $response
      */
-    public function updatePassword(Request $request, Response $response): Response
+    public function updatePassword(Request $request): Response
     {
         try {
             $hasher = new Hasher();
-    
+
             $newPassword = $request->get('new_password');
-    
+
             $this->authService->update('uuid', auth()->user()->uuid, [
                 'password' => $hasher->hash($newPassword)
             ]);
 
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_SUCCESS,
                 'message' => t('common.updated_successfully')
             ]);
         } catch (AuthException $e) {
-            return $response->json([
+            return response()->json([
                 'status' => self::STATUS_ERROR,
                 'message' => $e->getMessage()
             ]);

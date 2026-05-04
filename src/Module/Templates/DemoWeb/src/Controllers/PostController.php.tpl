@@ -27,7 +27,6 @@ use Quantum\Http\Request;
  */
 class PostController extends BaseController
 {
-
     /**
      * Posts per page
      */
@@ -37,15 +36,14 @@ class PostController extends BaseController
      * Current page
      */
     protected const CURRENT_PAGE = 1;
-    
+
     /**
      * Main layout
      */
     protected const LAYOUT = 'layouts/main';
-    
+
     /**
      * Post service
-     * @var PostService
      */
     public PostService $postService;
 
@@ -57,11 +55,8 @@ class PostController extends BaseController
 
     /**
      * Action - get posts list
-     * @param Request $request
-     * @param Response $response
-     * @return Response
     */
-    public function posts(Request $request, Response $response): Response
+    public function posts(Request $request): Response
     {
         $perPage = $request->get('per_page', (string) self::POSTS_PER_PAGE);
         $currentPage = $request->get('page', (string) self::CURRENT_PAGE);
@@ -76,25 +71,20 @@ class PostController extends BaseController
             'referer' => nav_ref_encode(request()->getQuery())
         ]);
 
-        return $response->html($this->view->render('post/post'));
+        return response()->html($this->view->render('post/post'));
     }
 
     /**
      * Action - get single post
-     * @param Request $request
-     * @param Response $response
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
      */
-    public function post(Request $request, Response $response, ?string $lang, string $postUuid): Response
+    public function post(Request $request, ?string $lang, string $postUuid): Response
     {
         $ref = $request->get('ref', 'posts');
-    
+
         $post = $this->postService->getPost($postUuid);
-        
+
         if ($post->isEmpty()) {
-            return $response->html(partial('errors/404'), StatusCode::NOT_FOUND);
+            return response()->html(partial('errors/404'), StatusCode::NOT_FOUND);
         }
 
         $commentService = service(CommentService::class);
@@ -110,6 +100,6 @@ class PostController extends BaseController
             'referer' => nav_ref_decode($ref),
         ]);
 
-        return $response->html($this->view->render('post/single'));
+        return response()->html($this->view->render('post/single'));
     }
 }

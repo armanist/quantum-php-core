@@ -25,10 +25,6 @@ use Quantum\Http\Request;
  */
 class CommentController extends BaseController
 {
-
-    /**
-     * @var CommentService
-     */
     public CommentService $commentService;
 
     public function __before()
@@ -38,18 +34,14 @@ class CommentController extends BaseController
 
     /**
      * Action - create comment
-     * @param Request $request
-     * @param Response $response
-     * @param string|null $lang
-     * @param string $uuid
      */
-    public function create(Request $request, Response $response, ?string $lang, string $uuid): Response
+    public function create(Request $request, ?string $lang, string $uuid): Response
     {
         $commentDto = CommentDTO::fromRequest($request, $uuid, auth()->user()->uuid);
 
         $comment = $this->commentService->addComment($commentDto);
 
-        return $response->json([
+        return response()->json([
             'status' => 'success',
             'message' => t('common.created_successfully'),
             'data' => $comment
@@ -58,15 +50,12 @@ class CommentController extends BaseController
 
     /**
      * Action - delete comment
-     * @param Response $response
-     * @param string|null $lang
-     * @param string $uuid
      */
-    public function delete(Response $response, ?string $lang, string $uuid): Response
+    public function delete(?string $lang, string $uuid): Response
     {
         $this->commentService->deleteComment($uuid);
 
-        return $response->json([
+        return response()->json([
             'status' => 'success',
             'message' => t('common.deleted_successfully'),
         ]);

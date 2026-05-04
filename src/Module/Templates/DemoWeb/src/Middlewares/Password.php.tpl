@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.9
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Middlewares;
@@ -27,18 +27,12 @@ use Closure;
  */
 class Password extends BaseMiddleware
 {
-
-
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param Closure $next
-     */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
-            $this->validateRequest($request, $response);
+            if ($errorResponse = $this->validateRequest($request)) {
+                return $errorResponse;
+            }
         }
 
         return $next($request);
@@ -70,7 +64,7 @@ class Password extends BaseMiddleware
     /**
      * @inheritDoc
      */
-    protected function respondWithError(Request $request, Response $response, $message)
+    protected function respondWithError(Request $request, $message)
     {
         session()->setFlash('error', $message);
         redirectWith(base_url(true) . '/' . current_lang() . '/account-settings#account_password', $request->all());

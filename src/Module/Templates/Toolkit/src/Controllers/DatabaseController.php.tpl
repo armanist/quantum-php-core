@@ -25,9 +25,6 @@ use Quantum\Http\Request;
  */
 class DatabaseController extends BaseController
 {
-    /**
-     * @var DatabaseService
-     */
     private DatabaseService $databaseService;
 
     /**
@@ -40,11 +37,7 @@ class DatabaseController extends BaseController
         parent::__before();
     }
 
-    /**
-     * @param Response $response
-     * @return Response
-     */
-    public function list(Response $response): Response
+    public function list(): Response
     {
         $tables = $this->databaseService->getTables();
 
@@ -53,15 +46,13 @@ class DatabaseController extends BaseController
             'tables' => $tables,
         ]);
 
-        return $response->html($this->view->render('pages/database/index'));
+        return response()->html($this->view->render('pages/database/index'));
     }
 
     /**
-     * @param Request $request
-     * @param Response $response
      * @throws DatabaseException
      */
-    public function single(Request $request, Response $response): Response
+    public function single(Request $request): Response
     {
         $tableName = $request->get('table');
         $perPage = $request->get('per_page', self::ITEMS_PER_PAGE);
@@ -79,13 +70,9 @@ class DatabaseController extends BaseController
             'pagination' => $tableData['pagination'],
         ]);
 
-        return $response->html($this->view->render('pages/database/table'));
+        return response()->html($this->view->render('pages/database/table'));
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function create(Request $request): Response
     {
         $tableName = $request->get('table');
@@ -97,10 +84,6 @@ class DatabaseController extends BaseController
         return redirect(get_referrer() ?? base_url());
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function update(Request $request): Response
     {
         $tableName = $request->get('table');
@@ -112,10 +95,6 @@ class DatabaseController extends BaseController
         return redirect(base_url(true) . '/database/view?table=' . $tableName);
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function delete(Request $request): Response
     {
         $tableName = $request->get('tableName');

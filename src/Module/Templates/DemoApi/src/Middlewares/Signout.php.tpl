@@ -9,9 +9,9 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.8
+ * @since 3.0.0
  */
- 
+
 namespace {{MODULE_NAMESPACE}}\Middlewares;
 
 use Quantum\Http\Response;
@@ -24,20 +24,10 @@ use Closure;
  */
 class Signout extends BaseMiddleware
 {
-
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param Closure $next
-     * @return Response
-     */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         if (!$request->hasHeader('refresh_token')) {
-            $this->respondWithError(
-                $request,
-                $response,
+            return $this->respondWithError($request,
                 [t('validation.nonExistingRecord', 'token')]
             );
         }

@@ -25,15 +25,13 @@ use Quantum\Http\Request;
  */
 class PostManagementController extends BaseController
 {
-    
     /**
      * Main layout
      */
     protected const LAYOUT = 'layouts/main';
-    
+
     /**
      * Post service
-     * @var PostService
      */
     public PostService $postService;
 
@@ -45,11 +43,8 @@ class PostManagementController extends BaseController
 
     /**
      * Action - get my posts
-     * @param Request $request
-     * @param Response $response
-     * @return Response
      */
-    public function myPosts(Request $request, Response $response): Response
+    public function myPosts(Request $request): Response
     {
         $myPosts = $this->postService->getMyPosts(auth()->user()->uuid);
 
@@ -58,16 +53,13 @@ class PostManagementController extends BaseController
             'posts' => $this->postService->transformData($myPosts->all())
         ]);
 
-        return $response->html($this->view->render('post/my-posts'));
+        return response()->html($this->view->render('post/my-posts'));
     }
 
     /**
      * Action - display form for creating a post
-     * @param Request $request
-     * @param Response $response
-     * @return Response
      */
-    public function createFrom(Request $request, Response $response): Response
+    public function createFrom(Request $request): Response
     {
         $ref = $request->get('ref', 'posts');
 
@@ -76,13 +68,11 @@ class PostManagementController extends BaseController
             'referer' => $ref
         ]);
 
-        return $response->html($this->view->render('post/form'));
+        return response()->html($this->view->render('post/form'));
     }
 
     /**
      * Action - create post
-     * @param Request $request
-     * @return Response
      */
     public function create(Request $request): Response
     {
@@ -104,14 +94,9 @@ class PostManagementController extends BaseController
     }
 
     /**
-     * Action - display form for amend the post 
-     * @param Request $request
-     * @param Response $response
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
+     * Action - display form for amend the post
      */
-    public function amendForm(Request $request, Response $response, ?string $lang, string $postUuid): Response
+    public function amendForm(Request $request, ?string $lang, string $postUuid): Response
     {
         $ref = $request->get('ref', 'posts');
 
@@ -123,15 +108,11 @@ class PostManagementController extends BaseController
             'referer' => nav_ref_decode($ref)
         ]);
 
-        return $response->html($this->view->render('post/form'));
+        return response()->html($this->view->render('post/form'));
     }
 
     /**
-     * Action - amend post 
-     * @param Request $request
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
+     * Action - amend post
      */
     public function amend(Request $request, ?string $lang, string $postUuid): Response
     {
@@ -160,9 +141,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - delete post
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
      */
     public function delete(?string $lang, string $postUuid): Response
     {
@@ -179,9 +157,6 @@ class PostManagementController extends BaseController
 
     /**
      * Action - delete image of the post
-     * @param string|null $lang
-     * @param string $postUuid
-     * @return Response
      */
     public function deleteImage(?string $lang, string $postUuid): Response
     {

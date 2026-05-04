@@ -26,28 +26,17 @@ use Closure;
  */
 class BasicAuth extends QtMiddleware
 {
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param Closure $next
-     * @return Response
-     */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         $userCredentials = $request->getBasicAuthCredentials();
 
         if (!$userCredentials || !$this->isValidCredentials($userCredentials)) {
-            return $this->unauthorizedResponse($response);
+            return $this->unauthorizedResponse();
         }
 
         return $next($request);
     }
 
-    /**
-     * @param array $credentials
-     * @return bool
-     */
     private function isValidCredentials(array $credentials): bool
     {
         if (!config()->has('basic_auth')) {
@@ -60,13 +49,10 @@ class BasicAuth extends QtMiddleware
             && $credentials['password'] === $configCredentials['password'];
     }
 
-    /**
-     * @param Response $response
-     * @return Response
-     */
-    private function unauthorizedResponse(Response $response): Response
+    private function unauthorizedResponse(): Response
     {
-        $response->setHeader('WWW-Authenticate', 'Basic realm="Quantum Toolkit"');
-        return $response->html(partial('errors' . DS . '401'), 401);
+        return response()
+            ->setHeader('WWW-Authenticate', 'Basic realm="Quantum Toolkit"')
+            ->html(partial('errors' . DS . '401'), 401);
     }
 }

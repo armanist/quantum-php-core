@@ -22,7 +22,7 @@ use Quantum\Http\Response;
  */
 abstract class OpenApiMainController extends OpenApiController
 {
-   
+
     /**
      * @OA\Get(
      *     path="/{{MODULE_NAME}}",
@@ -40,6 +40,6 @@ abstract class OpenApiMainController extends OpenApiController
      *     )
      * )
      */
-    abstract public function index(Response $response);
+    abstract public function index();
 
 }

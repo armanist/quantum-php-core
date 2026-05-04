@@ -14,8 +14,8 @@
 
 namespace Modules\Toolkit\Middlewares;
 
-use Quantum\Validation\Validator;
 use Quantum\Middleware\QtMiddleware;
+use Quantum\Validation\Validator;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 
@@ -25,14 +25,10 @@ use Quantum\Http\Request;
  */
 abstract class BaseMiddleware extends QtMiddleware
 {
-    /**
-     * @var Validator
-     */
     protected Validator $validator;
 
     /**
      * Initialize Validator and define rules.
-     * @param Request $request
      */
     public function __construct(Request $request)
     {
@@ -41,20 +37,17 @@ abstract class BaseMiddleware extends QtMiddleware
         $this->defineValidationRules($request);
     }
 
-    /**
-     * @param Request $request
-     * @param Response $response
-     */
-    protected function validateRequest(Request $request, Response $response)
+    protected function validateRequest(Request $request): ?Response
     {
         if (!$this->validator->isValid($request->all())) {
-            $this->respondWithError($request, $response, $this->validator->getErrors());
+            return $this->respondWithError($request, $this->validator->getErrors());
         }
+
+        return null;
     }
 
     /**
      * Define validation rules specific to middleware.
-     * @param Request $request
      */
     protected function defineValidationRules(Request $request)
     {
@@ -63,12 +56,6 @@ abstract class BaseMiddleware extends QtMiddleware
 
     /**
      * Handles error response logic.
-     * @param Request $request
-     * @param Response $response
-     * @param mixed $message
      */
-    protected function respondWithError(Request $request, Response $response, $message)
-    {
-        // default no-op: subclasses override if needed
-    }
+    abstract protected function respondWithError(Request $request, $message): Response;
 }

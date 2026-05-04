@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.8
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Controllers\OpenApi;
@@ -63,10 +63,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
-     * @param Response $response
      */
-    abstract public function signin(Request $request, Response $response);
+    abstract public function signin(Request $request);
 
     /**
      * Gets the logged-in user data
@@ -94,9 +92,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      */
-    abstract public function me(Response $response);
+    abstract public function me();
 
     /**
      * Sign out action
@@ -134,9 +131,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      */
-    abstract public function signout(Response $response);
+    abstract public function signout();
 
     /**
      * Sign up action
@@ -185,10 +181,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
-     * @param Response $response
      */
-    abstract public function signup(Request $request, Response $response);
+    abstract public function signup(Request $request);
 
     /**
      * Activate action
@@ -222,10 +216,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
-     * @param Response $response
      */
-    abstract public function activate(Request $request, Response $response);
+    abstract public function activate(Request $request);
 
     /**
      * Forget action
@@ -262,10 +254,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
-     * @param Response $response
      */
-    abstract public function forget(Request $request, Response $response);
+    abstract public function forget(Request $request);
 
     /**
      * Reset action
@@ -315,10 +305,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
-     * @param Response $response
      */
-    abstract public function reset(Request $request, Response $response);
+    abstract public function reset(Request $request);
 
     /**
      * Verify action
@@ -355,10 +343,8 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Request $request
-     * @param Response $response
      */
-    abstract public function verify(Request $request, Response $response);
+    abstract public function verify(Request $request);
 
     /**
      * Resend action
@@ -392,7 +378,6 @@ abstract class OpenApiAuthController extends OpenApiController
      *      description="Internal Server Error"
      *    )
      *  )
-     * @param Response $response
      */
-    abstract public function resend(Response $response);
+    abstract public function resend();
 }

@@ -9,7 +9,7 @@
  * @author Arman Ag. <arman.ag@softberg.org>
  * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
  * @link http://quantum.softberg.org/
- * @since 2.9.8
+ * @since 3.0.0
  */
 
 namespace {{MODULE_NAMESPACE}}\Middlewares;
@@ -26,19 +26,10 @@ use Closure;
  */
 class Forget extends BaseMiddleware
 {
-
-
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param Closure $next
-     * @return Response
-     */
     public function apply(Request $request, Closure $next): Response
     {
-        $response = response();
         if ($request->isMethod('post')) {
-            if ($errorResponse = $this->validateRequest($request, $response)) {
+            if ($errorResponse = $this->validateRequest($request)) {
                 return $errorResponse;
             }
         }

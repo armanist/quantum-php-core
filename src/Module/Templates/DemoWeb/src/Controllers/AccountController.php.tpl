@@ -32,7 +32,6 @@ class AccountController extends BaseController
 
     /**
      * Account service
-     * @var AuthService
      */
     public AuthService $authService;
 
@@ -44,22 +43,18 @@ class AccountController extends BaseController
 
     /**
      * Action - show user info
-     * @param Response $response
-     * @return Response
      */
-    public function form(Response $response): Response
+    public function form(): Response
     {
         $this->view->setParams([
             'title' => t('common.account_settings') . ' | ' . config()->get('app.name'),
         ]);
 
-        return $response->html($this->view->render('account/form'));
+        return response()->html($this->view->render('account/form'));
     }
 
     /**
      * Action - update user info
-     * @param Request $request
-     * @return Response
      */
     public function update(Request $request): Response
     {
@@ -78,15 +73,13 @@ class AccountController extends BaseController
 
     /**
      * Action - update password
-     * @param Request $request
-     * @return Response
      */
     public function updatePassword(Request $request): Response
     {
         $hasher = new Hasher();
 
         $newPassword = $request->get('new_password', null);
-        
+
         $this->authService->update('uuid', auth()->user()->uuid, [
             'password' => $hasher->hash($newPassword)
         ]);

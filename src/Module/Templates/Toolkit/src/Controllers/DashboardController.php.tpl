@@ -28,14 +28,8 @@ use ReflectionException;
  */
 class DashboardController extends BaseController
 {
-    /**
-     * @var DashboardService
-     */
     public DashboardService $dashboardService;
 
-    /**
-     * Works before an action
-     */
     public function __before()
     {
         $this->dashboardService = service(DashboardService::class);
@@ -43,16 +37,12 @@ class DashboardController extends BaseController
         parent::__before();
     }
 
-    /**
-     * @param Request $request
-     * @param Response $response
-     */
-    public function index(Request $request, Response $response): Response
+    public function index(Request $request): Response
     {
         $this->view->setParams([
             'title' => 'Dashboard',
         ]);
 
-        return $response->html($this->view->render('pages/dashboard/index'));
+        return response()->html($this->view->render('pages/dashboard/index'));
     }
 }
