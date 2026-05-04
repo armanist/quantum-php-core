@@ -30,7 +30,9 @@ class Password extends BaseMiddleware
     public function apply(Request $request, Closure $next): Response
     {
         if ($request->isMethod('post')) {
-            $this->validateRequest($request);
+            if ($errorResponse = $this->validateRequest($request)) {
+                return $errorResponse;
+            }
         }
 
         return $next($request);
