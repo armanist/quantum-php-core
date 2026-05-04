@@ -51,8 +51,8 @@ class BasicAuth extends QtMiddleware
 
     private function unauthorizedResponse(): Response
     {
-        $response = response();
-        $response->setHeader('WWW-Authenticate', 'Basic realm="Quantum Toolkit"');
-        return $response->html(partial('errors' . DS . '401'), 401);
+        return response()
+            ->setHeader('WWW-Authenticate', 'Basic realm="Quantum Toolkit"')
+            ->html(partial('errors' . DS . '401'), 401);
     }
 }

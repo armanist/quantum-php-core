@@ -14,8 +14,8 @@
 
 namespace Modules\Toolkit\Middlewares;
 
-use Quantum\Validation\Validator;
 use Quantum\Middleware\QtMiddleware;
+use Quantum\Validation\Validator;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 
@@ -37,11 +37,13 @@ abstract class BaseMiddleware extends QtMiddleware
         $this->defineValidationRules($request);
     }
 
-    protected function validateRequest(Request $request)
+    protected function validateRequest(Request $request): ?Response
     {
         if (!$this->validator->isValid($request->all())) {
             return $this->respondWithError($request, $this->validator->getErrors());
         }
+
+        return null;
     }
 
     /**
@@ -55,8 +57,5 @@ abstract class BaseMiddleware extends QtMiddleware
     /**
      * Handles error response logic.
      */
-    protected function respondWithError(Request $request, $message)
-    {
-        // default no-op: subclasses override if needed
-    }
+    abstract protected function respondWithError(Request $request, $message): Response;
 }
