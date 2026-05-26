@@ -86,6 +86,7 @@ Upgrade guide: https://github.com/softberg/quantum-php-docs/blob/master/v3.0/upg
 - Fixed OpenAPI installer route generation to return `Response` objects via `response()->...` helpers and avoid undefined response-variable usage (#520)
 - Standardized `defineValidationRules(Request $request): void` in Toolkit middleware templates
 - Fixed request uploaded-file parsing to preserve multiple top-level multipart file fields in both real and internal request flows (#526)
+- Fixed `ModuleLoader` to skip dependency registration for modules where `enabled` is `false`, aligning dependency loading with route loading behavior (#529)
 
 ### Added
 - `AppContext` class representing the runtime identity of a single application execution

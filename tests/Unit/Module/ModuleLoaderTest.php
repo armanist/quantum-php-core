@@ -2,6 +2,8 @@
 
 namespace Quantum\Tests\Unit\Module;
 
+use Quantum\Tests\_root\modules\Meme\Services\DisabledTokenService;
+use Quantum\Storage\Contracts\TokenServiceInterface;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Module\ModuleLoader;
 use Quantum\Di\Di;
@@ -55,6 +57,7 @@ class ModuleLoaderTest extends AppTestCase
 
         $this->assertArrayHasKey(\Quantum\Storage\Contracts\TokenServiceInterface::class, $deps);
         $this->assertSame(\Quantum\Tests\_root\shared\Services\TokenService::class, $deps[\Quantum\Storage\Contracts\TokenServiceInterface::class]);
+        $this->assertNotSame(DisabledTokenService::class, $deps[TokenServiceInterface::class]);
     }
 
     public function testGetModuleConfigs(): void

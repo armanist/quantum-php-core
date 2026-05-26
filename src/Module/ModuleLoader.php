@@ -118,6 +118,10 @@ class ModuleLoader
         $modulesDependencies = [];
 
         foreach ($this->moduleConfigs as $module => $options) {
+            if (!$this->isModuleEnabled($options)) {
+                continue;
+            }
+
             $modulesDependencies = array_merge($modulesDependencies, $this->getModuleDependencies($module));
         }
 
