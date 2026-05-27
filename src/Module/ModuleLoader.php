@@ -149,6 +149,19 @@ class ModuleLoader
     }
 
     /**
+     * @return array<string, array<string, mixed>>
+     * @throws ModuleException
+     */
+    public function getModuleConfigs(): array
+    {
+        if (empty($this->moduleConfigs)) {
+            $this->loadModuleConfig();
+        }
+
+        return $this->moduleConfigs;
+    }
+
+    /**
      * @throws ModuleException
      */
     private function loadModuleConfig(): void
@@ -160,19 +173,6 @@ class ModuleLoader
         }
 
         $this->moduleConfigs = $this->fs->require($configPath);
-    }
-
-    /**
-     * @return array<string, array<string, mixed>>
-     * @throws ModuleException
-     */
-    public function getModuleConfigs(): array
-    {
-        if (empty($this->moduleConfigs)) {
-            $this->loadModuleConfig();
-        }
-
-        return $this->moduleConfigs;
     }
 
     /**
