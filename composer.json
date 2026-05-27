@@ -89,9 +89,7 @@
     "prefer-stable": true,
     "config": {
         "audit": {
-            "ignore": [
-                "CVE-2025-45769"
-            ]
+            "block-insecure": false
         }
     }
 }
