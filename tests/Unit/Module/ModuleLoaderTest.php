@@ -2,6 +2,10 @@
 
 namespace Quantum\Tests\Unit\Module;
 
+use Quantum\Tests\_root\modules\Meme\Services\DisabledTokenService;
+use Quantum\Tests\_root\modules\Test\Transformers\PostTransformer;
+use Quantum\Transformer\Contracts\TransformerInterface;
+use Quantum\Storage\Contracts\TokenServiceInterface;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Module\ModuleLoader;
 use Quantum\Di\Di;
@@ -44,6 +48,27 @@ class ModuleLoaderTest extends AppTestCase
         $this->assertInstanceOf(Closure::class, $modulesRoutes['Test']);
     }
 
+    public function testLoadModulesRoutesSkipsDisabledModule(): void
+    {
+        $this->setPrivateProperty($this->moduleLoader, 'moduleConfigs', [
+            'Meme' => [
+                'prefix' => 'meme',
+                'enabled' => false,
+            ],
+            'Test' => [
+                'prefix' => 'test',
+                'enabled' => true,
+            ],
+        ]);
+
+        $modulesRoutes = $this->moduleLoader->loadModulesRoutes();
+
+        $this->assertIsArray($modulesRoutes);
+        $this->assertArrayHasKey('Test', $modulesRoutes);
+        $this->assertArrayNotHasKey('Meme', $modulesRoutes);
+        $this->assertInstanceOf(Closure::class, $modulesRoutes['Test']);
+    }
+
     public function testLoadModulesDependencies(): void
     {
         $deps = $this->moduleLoader->loadModulesDependencies();
@@ -55,6 +80,27 @@ class ModuleLoaderTest extends AppTestCase
 
         $this->assertArrayHasKey(\Quantum\Storage\Contracts\TokenServiceInterface::class, $deps);
         $this->assertSame(\Quantum\Tests\_root\shared\Services\TokenService::class, $deps[\Quantum\Storage\Contracts\TokenServiceInterface::class]);
+        $this->assertNotSame(DisabledTokenService::class, $deps[TokenServiceInterface::class]);
+    }
+
+    public function testLoadModulesDependenciesSkipsDisabledModule(): void
+    {
+        $this->setPrivateProperty($this->moduleLoader, 'moduleConfigs', [
+            'Meme' => [
+                'prefix' => 'meme',
+                'enabled' => false,
+            ],
+            'Test' => [
+                'prefix' => 'test',
+                'enabled' => true,
+            ],
+        ]);
+
+        $deps = $this->moduleLoader->loadModulesDependencies();
+
+        $this->assertArrayHasKey(TransformerInterface::class, $deps);
+        $this->assertSame(PostTransformer::class, $deps[TransformerInterface::class]);
+        $this->assertNotSame(DisabledTokenService::class, $deps[TokenServiceInterface::class]);
     }
 
     public function testGetModuleConfigs(): void
@@ -64,5 +110,24 @@ class ModuleLoaderTest extends AppTestCase
         $this->assertIsArray($configs);
         $this->assertArrayHasKey('Test', $configs);
         $this->assertArrayNotHasKey('Mame', $configs);
+    }
+
+    public function testGetModuleConfigsLoadsConfigWhenEmpty(): void
+    {
+        $this->setPrivateProperty($this->moduleLoader, 'moduleConfigs', []);
+
+        $configs = $this->moduleLoader->getModuleConfigs();
+
+        $this->assertIsArray($configs);
+        $this->assertArrayHasKey('Test', $configs);
+        $this->assertArrayHasKey('Meme', $configs);
+    }
+
+    public function testGetModuleDependenciesReturnsEmptyArrayWhenFileMissing(): void
+    {
+        $deps = $this->moduleLoader->getModuleDependencies('MissingModule');
+
+        $this->assertIsArray($deps);
+        $this->assertSame([], $deps);
     }
 }

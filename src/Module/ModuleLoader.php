@@ -118,6 +118,10 @@ class ModuleLoader
         $modulesDependencies = [];
 
         foreach ($this->moduleConfigs as $module => $options) {
+            if (!$this->isModuleEnabled($options)) {
+                continue;
+            }
+
             $modulesDependencies = array_merge($modulesDependencies, $this->getModuleDependencies($module));
         }
 
@@ -145,6 +149,19 @@ class ModuleLoader
     }
 
     /**
+     * @return array<string, array<string, mixed>>
+     * @throws ModuleException
+     */
+    public function getModuleConfigs(): array
+    {
+        if (empty($this->moduleConfigs)) {
+            $this->loadModuleConfig();
+        }
+
+        return $this->moduleConfigs;
+    }
+
+    /**
      * @throws ModuleException
      */
     private function loadModuleConfig(): void
@@ -156,19 +173,6 @@ class ModuleLoader
         }
 
         $this->moduleConfigs = $this->fs->require($configPath);
-    }
-
-    /**
-     * @return array<string, array<string, mixed>>
-     * @throws ModuleException
-     */
-    public function getModuleConfigs(): array
-    {
-        if (empty($this->moduleConfigs)) {
-            $this->loadModuleConfig();
-        }
-
-        return $this->moduleConfigs;
     }
 
     /**
