@@ -1,4 +1,4 @@
-## [3.0.0] - TBD
+## [3.0.0] - 2026-05-28
 
 Upgrade guide: https://github.com/softberg/quantum-php-docs/blob/master/v3.0/upgrade-guide.md
 
