@@ -16,8 +16,8 @@
     <a href="https://codecov.io/gh/quantum-php/framework" >
         <img src="https://codecov.io/gh/quantum-php/framework/branch/master/graph/badge.svg"/>
     </a>
-    <a href="https://scrutinizer-ci.com/g/quantum-php/framework">
-        <img src="https://scrutinizer-ci.com/g/quantum-php/framework/badges/quality-score.png?b=master"/>
+    <a href="https://scrutinizer-ci.com/g/softberg/quantum-php-core">
+        <img src="https://scrutinizer-ci.com/g/softberg/quantum-php-core/badges/quality-score.png?b=master"/>
     </a>
     <a href="https://github.com/quantum-php/framework/blob/master/LICENSE">
         <img src="https://img.shields.io/github/license/quantum-php/framework"/>
@@ -65,4 +65,3 @@ Please also review our [Code of Conduct](CODE_OF_CONDUCT.md).
 <h2>License</h2>
 
 Quantum PHP is licensed under the [MIT License](https://github.com/quantum-php/framework/blob/master/LICENSE). See the LICENSE file for more details.
-
