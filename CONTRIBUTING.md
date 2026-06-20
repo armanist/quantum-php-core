@@ -17,26 +17,26 @@ Thanks for your interest in contributing to Quantum PHP Framework 💡 Whether y
 
 Quantum consists of **two repositories** that serve different purposes:
 
-🧩 1. `quantum-php-core` **(The core framework)**
+🧩 1. `framework` **(The core framework)**
 
 If your goal is to contribute to the core framework (e.g., routing, DI, ORM, view engine, etc.):
 
 1. Fork the repository on GitHub and clone your fork locally:
 
 ```bash
-git clone https://github.com/your-username/quantum-php-core.git
-cd quantum-php-core
+git clone https://github.com/your-username/framework.git
+cd framework
 composer install
 vendor/bin/phpunit --stderr
 ```
 
-🚀 2. `quantum-php-project` **(Starter Project)**
+🚀 2. `project` **(Starter Project)**
 
 If you want to run Quantum project locally, see how modules work, or test the framework in action, use the starter project:
 
 ```bash
-git clone https://github.com/softberg/quantum-php-project.git
-cd quantum-php-project
+git clone https://github.com/quantum-php/project.git
+cd project
 composer install
 php qt serve
 ```
@@ -98,7 +98,7 @@ Notes:
 
 - If your change affects behavior, public APIs, or compatibility (especially breaking changes), update `CHANGELOG.md` in the same branch/PR.
 
-7. Open a Pull Request from your fork → `softberg/quantum-php-core`. Describe **what** you changed, **why**, and **how** to test it. Reference any related issues. Always work in a branch, never directly on `main` of your fork.
+7. Open a Pull Request from your fork → `quantum-php/framework`. Describe **what** you changed, **why**, and **how** to test it. Reference any related issues. Always work in a branch, never directly on `main` of your fork.
 
 ---
 
