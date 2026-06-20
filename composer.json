@@ -9,8 +9,8 @@
     "license": "MIT",
     "homepage": "https://quantumphp.io",
     "support": {
-        "issues": "https://github.com/softberg/quantum-core/issues",
-        "source": "https://github.com/softberg/quantum-core"
+        "issues": "https://github.com/quantum-php/framework/issues",
+        "source": "https://github.com/quantum-php/framework"
     },
     "authors": [
         {

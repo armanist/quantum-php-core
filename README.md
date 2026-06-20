@@ -10,17 +10,17 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/softberg/quantum-php-core/actions/workflows/php.yml" >   
-        <img src="https://github.com/softberg/quantum-php-core/actions/workflows/php.yml/badge.svg">
+    <a href="https://github.com/quantum-php/framework/actions/workflows/php.yml" >
+        <img src="https://github.com/quantum-php/framework/actions/workflows/php.yml/badge.svg">
     </a>
-    <a href="https://codecov.io/gh/softberg/quantum-php-core" >
-        <img src="https://codecov.io/gh/softberg/quantum-php-core/branch/master/graph/badge.svg"/>
+    <a href="https://codecov.io/gh/quantum-php/framework" >
+        <img src="https://codecov.io/gh/quantum-php/framework/branch/master/graph/badge.svg"/>
     </a>
     <a href="https://scrutinizer-ci.com/g/softberg/quantum-php-core">
         <img src="https://scrutinizer-ci.com/g/softberg/quantum-php-core/badges/quality-score.png?b=master"/>
     </a>
-    <a href="https://github.com/softberg/quantum-php-core/blob/master/LICENSE">
-        <img src="https://img.shields.io/github/license/softberg/quantum-php-core"/>
+    <a href="https://github.com/quantum-php/framework/blob/master/LICENSE">
+        <img src="https://img.shields.io/github/license/quantum-php/framework"/>
     </a>
     <a href="https://packagist.org/packages/quantum/framework">
         <img src="https://img.shields.io/packagist/v/quantum/framework"/>
@@ -48,7 +48,7 @@ php qt serve
 <h2>Quick Demo</h2>
 <img src="https://quantumphp.io/assets/img/qt_demo.gif"/>
 
-> **Note:** This repository contains the core code of the Quantum framework. If you want to start a new project visit the main [Quantum PHP Project repository](https://github.com/softberg/quantum-php-project).
+> **Note:** This repository contains the core code of the Quantum framework. If you want to start a new project visit the main [Quantum PHP Project repository](https://github.com/quantum-php/project).
 
 <h2>Give it a star if you like the project</h2>
 <img width="100" src="https://i.imgur.com/YaY5arh.gif">
@@ -64,5 +64,4 @@ Please also review our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 <h2>License</h2>
 
-Quantum PHP is licensed under the [MIT License](https://github.com/softberg/quantum-php-core/blob/master/LICENSE). See the LICENSE file for more details.
-
+Quantum PHP is licensed under the [MIT License](https://github.com/quantum-php/framework/blob/master/LICENSE). See the LICENSE file for more details.
