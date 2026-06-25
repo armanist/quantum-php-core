@@ -280,11 +280,10 @@ trait MailerTrait
     private function createFromTemplate(): string
     {
         ob_start();
-        /** @phpstan-ignore argument.type */
-        ob_implicit_flush(PHP_VERSION_ID >= 80000 ? false : 0);
+        ob_implicit_flush(false);
 
         if (is_array($this->message)) {
-            extract($this->message, EXTR_OVERWRITE);
+            extract($this->message);
         }
 
         require $this->templatePath . '.php';

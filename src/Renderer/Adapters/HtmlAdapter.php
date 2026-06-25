@@ -63,8 +63,7 @@ class HtmlAdapter implements TemplateRendererInterface
         }
 
         ob_start();
-        /** @phpstan-ignore argument.type */
-        ob_implicit_flush(PHP_VERSION_ID >= 80000 ? false : 0);
+        ob_implicit_flush(false);
 
         if ($params !== []) {
             extract($params);
