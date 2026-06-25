@@ -63,14 +63,11 @@ trait Reducer
      */
     public function orderBy(string $column, string $direction): DbalInterface
     {
-        switch (strtolower($direction)) {
-            case 'asc':
-                $this->getOrmModel()->order_by_asc($column);
-                break;
-            case 'desc':
-                $this->getOrmModel()->order_by_desc($column);
-                break;
-        }
+        match (strtolower($direction)) {
+            'asc' => $this->getOrmModel()->order_by_asc($column),
+            'desc' => $this->getOrmModel()->order_by_desc($column),
+            default => $this,
+        };
 
         return $this;
     }

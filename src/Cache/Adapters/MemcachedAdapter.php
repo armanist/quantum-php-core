@@ -62,7 +62,7 @@ class MemcachedAdapter implements CacheInterface
 
             try {
                 return unserialize($cacheItem);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->delete($key);
                 return $default;
             }

@@ -243,7 +243,7 @@ class IdiormDbal implements DbalInterface, RelationalInterface
         try {
             $this->getOrmModel()->raw_execute("DELETE FROM {$this->table}");
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }

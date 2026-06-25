@@ -383,7 +383,7 @@ class UploadedFile extends SplFileInfo
 
         if (!$adapter instanceof LocalFilesystemAdapterInterface) {
             throw FileSystemException::notInstanceOf(
-                get_class($adapter),
+                $adapter::class,
                 LocalFilesystemAdapterInterface::class
             );
         }

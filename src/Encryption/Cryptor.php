@@ -54,7 +54,7 @@ class Cryptor
     public function __call(string $method, ?array $arguments)
     {
         if (!method_exists($this->adapter, $method)) {
-            throw CryptorException::methodNotSupported($method, get_class($this->adapter));
+            throw CryptorException::methodNotSupported($method, $this->adapter::class);
         }
 
         return $this->adapter->$method(...$arguments);

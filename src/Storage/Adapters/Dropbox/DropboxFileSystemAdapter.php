@@ -40,7 +40,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
         try {
             $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_CREATE_FOLDER, $this->dropboxApp->path($dirname));
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -53,7 +53,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
         try {
             $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_DELETE_FILE, $this->dropboxApp->path($dirname));
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -61,11 +61,11 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
     /**
      * @inheritDoc
      */
-    public function get(string $filename)
+    public function get(string $filename): string|false
     {
         try {
             return (string) $this->dropboxApp->contentRequest(DropboxApp::ENDPOINT_DOWNLOAD_FILE, $this->dropboxApp->path($filename));
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -84,7 +84,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
 
             return $response->size;
 
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -111,7 +111,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
             ]);
 
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -128,7 +128,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
             ]);
 
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -149,7 +149,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
         try {
             $meta = (array) $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_FILE_METADATA, $this->dropboxApp->path($filename));
             return $meta['size'];
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -157,12 +157,12 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
     /**
      * @inheritDoc
      */
-    public function lastModified(string $filename)
+    public function lastModified(string $filename): int|false
     {
         try {
             $meta = (array) $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_FILE_METADATA, $this->dropboxApp->path($filename));
             return isset($meta['server_modified']) ? strtotime($meta['server_modified']) : false;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
 
@@ -176,7 +176,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
         try {
             $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_DELETE_FILE, $this->dropboxApp->path($filename));
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
 
@@ -190,7 +190,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
         try {
             $meta = (array) $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_FILE_METADATA, $this->dropboxApp->path($filename));
             return $meta['.tag'] == 'file';
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
 
@@ -204,7 +204,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
         try {
             $meta = (array) $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_FILE_METADATA, $this->dropboxApp->path($dirname));
             return $meta['.tag'] == 'folder';
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -217,7 +217,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
         try {
             $response = (array) $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_LIST_FOLDER, $this->dropboxApp->path($dirname));
             return $response['entries'];
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }

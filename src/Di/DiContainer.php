@@ -112,7 +112,7 @@ class DiContainer
         }
 
         if (!$this->registry->isRegistered($abstract)) {
-            $this->registry->register(get_class($instance), $abstract);
+            $this->registry->register($instance::class, $abstract);
         }
 
         $this->container[$abstract] = $instance;

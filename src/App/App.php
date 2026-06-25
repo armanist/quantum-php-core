@@ -70,7 +70,7 @@ class App
     public function __call(string $method, ?array $arguments)
     {
         if (!method_exists($this->adapter, $method)) {
-            throw AppException::methodNotSupported($method, get_class($this->adapter));
+            throw AppException::methodNotSupported($method, $this->adapter::class);
         }
 
         return $this->adapter->$method(...$arguments);

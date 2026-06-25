@@ -54,7 +54,7 @@ class CronTask implements CronTaskInterface
 
         try {
             $this->cronExpression = new CronExpression($expression);
-        } catch (Exception $e) {
+        } catch (Exception) {
             throw CronException::invalidExpression($expression);
         }
     }

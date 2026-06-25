@@ -60,7 +60,7 @@ class Cache
     public function __call(string $method, ?array $arguments)
     {
         if (!method_exists($this->adapter, $method)) {
-            throw CacheException::methodNotSupported($method, get_class($this->adapter));
+            throw CacheException::methodNotSupported($method, $this->adapter::class);
         }
 
         return $this->adapter->$method(...$arguments);

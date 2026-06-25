@@ -131,7 +131,7 @@ trait Criteria
         ];
 
         if (is_array($value)) {
-            return array_map(fn ($v) => is_string($v) ? strtr($v, $escapeMap) : $v, $value);
+            return array_map(fn ($v): mixed => is_string($v) ? strtr($v, $escapeMap) : $v, $value);
         }
 
         return is_string($value) ? strtr($value, $escapeMap) : $value;

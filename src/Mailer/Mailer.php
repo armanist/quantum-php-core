@@ -57,7 +57,7 @@ class Mailer
     public function __call(string $method, ?array $arguments)
     {
         if (!method_exists($this->adapter, $method)) {
-            throw MailerException::methodNotSupported($method, get_class($this->adapter));
+            throw MailerException::methodNotSupported($method, $this->adapter::class);
         }
 
         return $this->adapter->$method(...$arguments);

@@ -56,7 +56,7 @@ class Session
     public function __call(string $method, ?array $arguments)
     {
         if (!method_exists($this->adapter, $method)) {
-            throw SessionException::methodNotSupported($method, get_class($this->adapter));
+            throw SessionException::methodNotSupported($method, $this->adapter::class);
         }
 
         return $this->adapter->$method(...$arguments);

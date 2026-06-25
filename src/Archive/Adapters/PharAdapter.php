@@ -62,7 +62,7 @@ class PharAdapter implements ArchiveInterface
         try {
             $this->archive = null;
             return Phar::unlinkArchive($this->archiveName);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -111,7 +111,7 @@ class PharAdapter implements ArchiveInterface
                 ? $this->archive->addFile($filePath, $entryName)
                 : $this->archive->addFile($filePath);
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -127,7 +127,7 @@ class PharAdapter implements ArchiveInterface
         try {
             $this->archive->addFromString($entryName, $content);
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -144,7 +144,7 @@ class PharAdapter implements ArchiveInterface
             foreach ($fileNames as $fileName => $filePath) {
                 $this->archive->addFile($filePath, $fileName);
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
 
@@ -173,7 +173,7 @@ class PharAdapter implements ArchiveInterface
         try {
             $this->archive->extractTo($pathToExtract, $files);
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -189,7 +189,7 @@ class PharAdapter implements ArchiveInterface
         try {
             $this->archive->delete($filename);
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -208,7 +208,7 @@ class PharAdapter implements ArchiveInterface
             }
 
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -237,7 +237,7 @@ class PharAdapter implements ArchiveInterface
         if ($this->archive === null) {
             try {
                 $this->archive = new Phar($this->archiveName);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 throw ArchiveException::cantOpen($this->archiveName);
             }
         }

@@ -94,7 +94,7 @@ class ResendAdapter implements MailerInterface
                 ->start();
 
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }

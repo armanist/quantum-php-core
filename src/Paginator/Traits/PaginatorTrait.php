@@ -227,7 +227,7 @@ trait PaginatorTrait
             $url = $this->baseUrl . $routeUrl;
         }
 
-        $delimiter = strpos($url ?? '', '?') !== false ? '&' : '?';
+        $delimiter = str_contains($url ?? '', '?') ? '&' : '?';
 
         return $url . $delimiter;
     }

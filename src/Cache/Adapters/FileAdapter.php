@@ -26,6 +26,7 @@ use Quantum\Cache\Traits\CacheTrait;
 use Quantum\Storage\FileSystem;
 use InvalidArgumentException;
 use ReflectionException;
+use Exception;
 
 /**
  * Class FileAdapter
@@ -71,7 +72,7 @@ class FileAdapter implements CacheInterface
 
             try {
                 return unserialize($cacheItem);
-            } catch (\Exception $e) {
+            } catch (Exception) {
                 $this->delete($key);
                 return $default;
             }

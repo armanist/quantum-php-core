@@ -30,7 +30,7 @@ trait Lists
         $value = trim(strtolower($value));
         $haystack = trim(strtolower($haystack));
 
-        return strpos($haystack, $value) !== false;
+        return str_contains($haystack, $value);
     }
 
     /**

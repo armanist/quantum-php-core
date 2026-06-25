@@ -35,7 +35,7 @@ if (!function_exists('cron_config')) {
                 if (!config()->has('cron')) {
                     config()->import(new Setup('config', 'cron'));
                 }
-            } catch (Throwable $exception) {
+            } catch (Throwable) {
                 // Ignore missing cron config file and rely on defaults
             }
 

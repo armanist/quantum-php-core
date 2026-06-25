@@ -47,7 +47,7 @@ class Renderer
     public function __call(string $method, ?array $arguments)
     {
         if (!method_exists($this->adapter, $method)) {
-            throw RendererException::methodNotSupported($method, get_class($this->adapter));
+            throw RendererException::methodNotSupported($method, $this->adapter::class);
         }
 
         return $this->adapter->$method(...$arguments);

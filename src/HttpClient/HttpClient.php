@@ -58,7 +58,7 @@ class HttpClient
     /**
      * @var MultiCurl|Curl
      */
-    private $client;
+    private Curl|MultiCurl|null $client = null;
 
     private string $method = 'GET';
 
@@ -308,7 +308,7 @@ class HttpClient
         }
 
         if (!method_exists($this->client, $method)) {
-            throw HttpClientException::methodNotSupported($method, get_class($this->client));
+            throw HttpClientException::methodNotSupported($method, $this->client::class);
         }
 
         $this->interceptCall($method, $arguments);

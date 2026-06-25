@@ -303,7 +303,7 @@ trait RelatedCriteria
                 continue;
             }
 
-            if ($column === $root || strpos($column, $root . '.') === 0) {
+            if ($column === $root || str_starts_with($column, $root . '.')) {
                 return true;
             }
         }

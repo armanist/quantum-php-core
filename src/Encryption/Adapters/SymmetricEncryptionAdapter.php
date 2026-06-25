@@ -96,21 +96,12 @@ class SymmetricEncryptionAdapter implements EncryptionInterface
 
     /**
      * Generates initialization vector
-     * @throws CryptorException
      */
     private function generateIV(): string
     {
         $length = openssl_cipher_iv_length(self::CIPHER_METHOD);
 
-        if ($length === false) {
-            throw CryptorException::invalidCipher();
-        }
-
         $bytes = openssl_random_pseudo_bytes($length);
-
-        if ($bytes === false) {
-            throw CryptorException::invalidCipher();
-        }
 
         return $bytes;
     }

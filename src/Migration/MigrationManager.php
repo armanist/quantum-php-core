@@ -119,16 +119,11 @@ class MigrationManager
             throw MigrationException::driverNotSupported($databaseDriver);
         }
 
-        switch ($direction) {
-            case self::UPGRADE:
-                $migrated = $this->upgrade();
-                break;
-            case self::DOWNGRADE:
-                $migrated = $this->downgrade($step);
-                break;
-            default:
-                throw MigrationException::wrongDirection();
-        }
+        $migrated = match ($direction) {
+            self::UPGRADE => $this->upgrade(),
+            self::DOWNGRADE => $this->downgrade($step),
+            default => throw MigrationException::wrongDirection(),
+        };
 
         return $migrated;
     }

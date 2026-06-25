@@ -155,11 +155,11 @@ trait RawInput
      */
     private function detectBlockType(string $block): string
     {
-        if (strpos($block, 'filename') !== false) {
+        if (str_contains($block, 'filename')) {
             return 'file';
         }
 
-        if (strpos($block, ContentType::OCTET_STREAM) !== false) {
+        if (str_contains($block, ContentType::OCTET_STREAM)) {
             return 'stream';
         }
 
@@ -294,9 +294,9 @@ trait RawInput
      * Parses array-like parameter names
      * @return array<string>|string
      */
-    private function arrayParam(string $parameter)
+    private function arrayParam(string $parameter): array|string
     {
-        if (strpos($parameter, '[') !== false && preg_match('/^([^[]*)\[([^]]*)\](.*)$/', $parameter, $match)) {
+        if (str_contains($parameter, '[') && preg_match('/^([^[]*)\[([^]]*)\](.*)$/', $parameter, $match)) {
             return [$match[1], $match[2]];
         }
 

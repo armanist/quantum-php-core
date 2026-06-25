@@ -88,7 +88,7 @@ class TableFactory
     {
         try {
             Database::query('SELECT 1 FROM ' . $name);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
 

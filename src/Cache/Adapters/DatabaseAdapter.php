@@ -61,7 +61,7 @@ class DatabaseAdapter implements CacheInterface
 
             try {
                 return unserialize($cacheItem->prop('value'));
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->delete($key);
                 return $default;
             }

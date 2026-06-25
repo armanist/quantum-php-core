@@ -187,7 +187,7 @@ class CronManager
         } catch (Throwable $e) {
             $this->stats['failed']++;
             $this->log('error', "Task \"{$task->getName()}\" failed: " . $e->getMessage(), [
-                'exception' => get_class($e),
+                'exception' => $e::class,
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ]);
@@ -233,7 +233,7 @@ class CronManager
         try {
             $logger = LoggerFactory::get(LoggerType::SINGLE);
             $logger->log($level, '[CRON] ' . $message, $context);
-        } catch (Throwable $exception) {
+        } catch (Throwable) {
             error_log(sprintf('[CRON] [%s] %s', strtoupper($level), $message));
         }
     }

@@ -231,7 +231,7 @@ trait Body
             $tag = $key;
             $attributes = null;
 
-            if (strpos($key, '@') !== false) {
+            if (str_contains($key, '@')) {
                 [$tag, $attributes] = explode('@', $key);
                 $attributes = json_decode($attributes);
             }

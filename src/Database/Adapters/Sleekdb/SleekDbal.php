@@ -192,7 +192,7 @@ class SleekDbal implements DbalInterface
     /**
      * @return mixed
      */
-    public function __get(string $key)
+    public function __get(string $key): mixed
     {
         return $this->data[$key] ?? null;
     }
@@ -295,7 +295,7 @@ class SleekDbal implements DbalInterface
         try {
             $this->getOrmModel()->deleteStore();
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }

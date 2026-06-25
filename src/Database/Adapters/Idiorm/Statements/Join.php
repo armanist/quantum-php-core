@@ -83,22 +83,14 @@ trait Join
     {
         $relation = $this->getValidatedRelation($relatedModel);
 
-        switch ($relation['type']) {
-            case Relation::HAS_ONE:
-            case Relation::HAS_MANY:
-                $this->applyHasRelation($relatedModel, $relation);
-                break;
-
-            case Relation::BELONGS_TO:
-                $this->applyBelongsTo($relatedModel, $relation);
-                break;
-
-            default:
-                throw ModelException::unsupportedRelationType($relation['type']);
-        }
+        match ($relation['type']) {
+            Relation::HAS_ONE, Relation::HAS_MANY => $this->applyHasRelation($relatedModel, $relation),
+            Relation::BELONGS_TO => $this->applyBelongsTo($relatedModel, $relation),
+            default => throw ModelException::unsupportedRelationType($relation['type']),
+        };
 
         if ($switch) {
-            $this->modelName = get_class($relatedModel);
+            $this->modelName = $relatedModel::class;
             $this->table = $relatedModel->table;
             $this->idColumn = $relatedModel->idColumn;
             $this->foreignKeys = $relatedModel->relations();
@@ -146,7 +138,7 @@ trait Join
     private function getValidatedRelation(DbModel $modelToJoin): array
     {
         $relations = $this->getForeignKeys();
-        $relatedModelName = get_class($modelToJoin);
+        $relatedModelName = $modelToJoin::class;
 
         if (!isset($relations[$relatedModelName])) {
             throw ModelException::wrongRelation($this->getModelName(), $relatedModelName);

@@ -196,7 +196,7 @@ class ModelCollection implements Countable, IteratorAggregate
     {
         if (!$model instanceof Model) {
             throw ModelException::notInstanceOf(
-                is_object($model) ? get_class($model) : gettype($model),
+                get_debug_type($model),
                 Model::class
             );
         }

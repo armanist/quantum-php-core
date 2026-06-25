@@ -86,7 +86,7 @@ trait Join
 
             $sleekModel = new self(
                 $modelToJoin->table,
-                get_class($modelToJoin),
+                $modelToJoin::class,
                 $modelToJoin->idColumn,
                 $modelToJoin->relations()
             );
@@ -135,19 +135,11 @@ trait Join
     {
         $relation = $this->getValidatedRelation($currentModel, $relatedModel);
 
-        switch ($relation['type']) {
-            case Relation::HAS_ONE:
-            case Relation::HAS_MANY:
-                $this->applyHasRelation($queryBuilder, $currentItem, $relation);
-                break;
-
-            case Relation::BELONGS_TO:
-                $this->applyBelongsTo($queryBuilder, $currentItem, $relation, $currentModel);
-                break;
-
-            default:
-                throw ModelException::unsupportedRelationType($relation['type']);
-        }
+        match ($relation['type']) {
+            Relation::HAS_ONE, Relation::HAS_MANY => $this->applyHasRelation($queryBuilder, $currentItem, $relation),
+            Relation::BELONGS_TO => $this->applyBelongsTo($queryBuilder, $currentItem, $relation, $currentModel),
+            default => throw ModelException::unsupportedRelationType($relation['type']),
+        };
     }
 
     /**
@@ -190,7 +182,7 @@ trait Join
     private function getValidatedRelation(SleekDbal $currentModel, DbModel $relatedModel): array
     {
         $relations = $currentModel->getForeignKeys();
-        $relatedModelName = get_class($relatedModel);
+        $relatedModelName = $relatedModel::class;
 
         if (!isset($relations[$relatedModelName])) {
             throw ModelException::wrongRelation($currentModel->getModelName(), $relatedModelName);

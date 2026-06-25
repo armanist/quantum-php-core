@@ -48,7 +48,7 @@ class LocalFileSystemAdapter implements LocalFilesystemAdapterInterface
     /**
      * @inheritDoc
      */
-    public function get(string $filename)
+    public function get(string $filename): string|false
     {
         return file_get_contents($filename);
     }
@@ -73,7 +73,7 @@ class LocalFileSystemAdapter implements LocalFilesystemAdapterInterface
     /**
      * @inheritDoc
      */
-    public function put(string $filename, $content, ?string $parentId = null)
+    public function put(string $filename, $content, ?string $parentId = null): int|false
     {
         return file_put_contents($filename, $content, LOCK_EX);
     }
@@ -81,7 +81,7 @@ class LocalFileSystemAdapter implements LocalFilesystemAdapterInterface
     /**
      * @inheritDoc
      */
-    public function append(string $filename, $content)
+    public function append(string $filename, $content): int|false
     {
         return file_put_contents($filename, $content, FILE_APPEND | LOCK_EX);
     }
@@ -113,7 +113,7 @@ class LocalFileSystemAdapter implements LocalFilesystemAdapterInterface
     /**
      * @inheritDoc
      */
-    public function size(string $filename)
+    public function size(string $filename): int|false
     {
         return filesize($filename);
     }
@@ -121,7 +121,7 @@ class LocalFileSystemAdapter implements LocalFilesystemAdapterInterface
     /**
      * @inheritDoc
      */
-    public function lastModified(string $filename)
+    public function lastModified(string $filename): int|false
     {
         return filemtime($filename);
     }
@@ -153,7 +153,7 @@ class LocalFileSystemAdapter implements LocalFilesystemAdapterInterface
     /**
      * @inheritDoc
      */
-    public function listDirectory(string $dirname)
+    public function listDirectory(string $dirname): array|false
     {
         $entries = [];
 
@@ -170,7 +170,7 @@ class LocalFileSystemAdapter implements LocalFilesystemAdapterInterface
 
             return $entries;
 
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return false;
         }
     }

@@ -54,7 +54,7 @@ trait HasTimestamps
      * Supports: datetime|unix
      * @return int|string
      */
-    protected function nowTimestampValue()
+    protected function nowTimestampValue(): int|string
     {
         if ($this->getTimestampType() === 'unix') {
             return time();

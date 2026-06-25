@@ -176,7 +176,7 @@ trait General
      */
     protected function starts($value, ?string $text = null): bool
     {
-        return strpos((string) $value, (string) $text) === 0;
+        return str_starts_with((string) $value, (string) $text);
     }
 
     /**

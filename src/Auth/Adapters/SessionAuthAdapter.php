@@ -66,7 +66,7 @@ class SessionAuthAdapter implements AuthenticatableInterface
      * @throws SessionException
      * @throws Exception
      */
-    public function signin(string $username, string $password, bool $remember = false)
+    public function signin(string $username, string $password, bool $remember = false): string|bool
     {
         $user = $this->getUser($username, $password);
 
@@ -174,7 +174,7 @@ class SessionAuthAdapter implements AuthenticatableInterface
      * @return User|false
      * @throws BaseException
      */
-    private function checkRememberToken()
+    private function checkRememberToken(): false|\Quantum\Auth\User
     {
         $user = $this->authService->get(
             $this->keyFields[AuthKeys::REMEMBER_TOKEN],

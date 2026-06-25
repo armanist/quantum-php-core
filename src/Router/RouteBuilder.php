@@ -338,7 +338,7 @@ final class RouteBuilder
                 throw RouteException::incompleteControllerRoute();
             }
 
-            if (strpos($handler, '\\') === false) {
+            if (!str_contains($handler, '\\')) {
                 if ($this->currentModule === null) {
                     throw RouteException::controllerWithoutModule();
                 }

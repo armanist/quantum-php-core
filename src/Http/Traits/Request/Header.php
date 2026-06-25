@@ -117,7 +117,7 @@ trait Header
         if (preg_match('/Basic\s(\S+)/', $authorization, $matches)) {
             $decoded = base64_decode($matches[1], true);
 
-            if ($decoded && strpos($decoded, ':') !== false) {
+            if ($decoded && str_contains($decoded, ':')) {
                 [$username, $password] = explode(':', $decoded, 2);
                 return ['username' => $username, 'password' => $password];
             }

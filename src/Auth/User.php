@@ -102,7 +102,7 @@ class User
      * Gets the user property
      * @return string|null
      */
-    public function __get(string $property)
+    public function __get(string $property): mixed
     {
         return $this->getFieldValue($property);
     }

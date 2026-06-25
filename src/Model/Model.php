@@ -104,7 +104,7 @@ abstract class Model
      * @param string $key
      * @return mixed
      */
-    public function __get(string $key)
+    public function __get(string $key): mixed
     {
         return $this->prop($key);
     }
@@ -113,7 +113,7 @@ abstract class Model
      * @param string $key
      * @param mixed $value
      */
-    public function __set(string $key, $value): void
+    public function __set(string $key, mixed $value): void
     {
         $this->prop($key, $value);
     }

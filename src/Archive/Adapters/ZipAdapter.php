@@ -60,7 +60,7 @@ class ZipAdapter implements ArchiveInterface
     {
         $this->ensureArchiveOpen();
 
-        if (strpos($filename, '.') === false) {
+        if (!str_contains($filename, '.')) {
             $filename = rtrim($filename, '/') . '/';
         }
 
@@ -129,7 +129,7 @@ class ZipAdapter implements ArchiveInterface
             foreach ($fileNames as $entryName => $filePath) {
                 $this->addFile($filePath, $entryName);
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
 

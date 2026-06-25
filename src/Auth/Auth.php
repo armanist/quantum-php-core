@@ -50,7 +50,7 @@ class Auth
     public function __call(string $method, ?array $arguments)
     {
         if (!method_exists($this->adapter, $method)) {
-            throw AuthException::methodNotSupported($method, get_class($this->adapter));
+            throw AuthException::methodNotSupported($method, $this->adapter::class);
         }
 
         return $this->adapter->$method(...$arguments);

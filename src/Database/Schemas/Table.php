@@ -226,20 +226,13 @@ class Table
     {
         $sql = '';
 
-        switch ($this->action) {
-            case self::CREATE:
-                $sql = $this->createTableSql();
-                break;
-            case self::ALTER:
-                $sql = $this->alterTableSql();
-                break;
-            case self::RENAME:
-                $sql = $this->renameTableSql();
-                break;
-            case self::DROP:
-                $sql = $this->dropTableSql();
-                break;
-        }
+        $sql = match ($this->action) {
+            self::CREATE => $this->createTableSql(),
+            self::ALTER => $this->alterTableSql(),
+            self::RENAME => $this->renameTableSql(),
+            self::DROP => $this->dropTableSql(),
+            default => $sql,
+        };
 
         return $sql;
     }

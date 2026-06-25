@@ -223,7 +223,7 @@ abstract class DbModel extends Model
         if (!method_exists($orm, $method)) {
             throw ModelException::methodNotSupported(
                 $method,
-                get_class($orm)
+                $orm::class
             );
         }
 

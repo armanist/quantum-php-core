@@ -101,7 +101,7 @@ class ErrorHandler
             return;
         }
 
-        $output->writeln('<error>' . get_class($throwable) . ': ' . $throwable->getMessage() . '</error>');
+        $output->writeln('<error>' . $throwable::class . ': ' . $throwable->getMessage() . '</error>');
         $output->writeln('In ' . $throwable->getFile() . ':' . $throwable->getLine());
         $output->writeln($throwable->getTraceAsString());
     }
@@ -121,7 +121,7 @@ class ErrorHandler
             $errorPage = $this->webExceptionRenderer->render($throwable, $errorType);
             response()->html($errorPage, StatusCode::INTERNAL_SERVER_ERROR);
             response()->send();
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             response()->html('Internal Server Error', StatusCode::INTERNAL_SERVER_ERROR);
             response()->send();
         }

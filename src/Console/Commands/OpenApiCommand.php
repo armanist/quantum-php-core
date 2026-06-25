@@ -31,7 +31,7 @@ use OpenApi\Generator;
 use Quantum\Di\Di;
 
 /**
- * Class OpenApiUiAssetsCommand
+ * Class OpenApiCommand
  * @package Quantum\Console
  */
 class OpenApiCommand extends CliCommand
