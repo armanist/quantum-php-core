@@ -4,14 +4,8 @@ declare(strict_types=1);
 
 /**
  * Quantum PHP Framework
- *
- * An open source software development framework for PHP
- *
- * @package Quantum
- * @author Arman Ag. <arman@quantumphp.io>
- * @copyright Copyright (c) 2018 Softberg LLC (https://softberg.org)
- * @link https://quantumphp.io/
- * @since 3.0.0
+ * An open-source software development framework for PHP
+ * @link https://quantumphp.io
  */
 
 namespace Quantum\Storage;
@@ -22,7 +16,6 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class FileSystem
- * @package Quantum\Storage
  * @method bool makeDirectory(string $dirname, ?string $parentId = null)
  * @method bool removeDirectory(string $dirname)
  * @method string|false get(string $filename)
