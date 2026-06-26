@@ -16,6 +16,10 @@
         {
             "name": "Arman Ag",
             "email": "arman@quantumphp.io"
+        },
+        {
+            "name": "Contributors",
+            "homepage": "https://github.com/quantum-php/framework/contributors"
         }
     ],
     "require": {
