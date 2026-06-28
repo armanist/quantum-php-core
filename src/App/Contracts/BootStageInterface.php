@@ -14,6 +14,7 @@ use Quantum\App\AppContext;
 
 /**
  * Interface BootStageInterface
+ * @package Quantum\App
  */
 interface BootStageInterface
 {

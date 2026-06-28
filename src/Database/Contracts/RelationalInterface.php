@@ -12,6 +12,7 @@ namespace Quantum\Database\Contracts;
 
 /**
  * Database Abstract Layer interface
+ * @package Quantum\Database
  */
 interface RelationalInterface
 {

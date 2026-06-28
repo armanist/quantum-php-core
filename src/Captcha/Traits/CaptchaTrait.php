@@ -21,6 +21,7 @@ use Exception;
 
 /**
  * Trait CaptchaTrait
+ * @package Quantum\Captcha
  */
 trait CaptchaTrait
 {

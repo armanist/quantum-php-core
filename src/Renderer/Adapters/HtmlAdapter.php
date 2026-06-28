@@ -21,6 +21,7 @@ use ReflectionException;
 
 /**
  * Class HtmlAdapter
+ * @package Quantum\Renderer
  */
 class HtmlAdapter implements TemplateRendererInterface
 {

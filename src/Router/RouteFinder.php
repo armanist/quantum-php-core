@@ -15,6 +15,7 @@ use Quantum\Http\Request;
 /**
  * Class RouteFinder
  * @internal Resolves an incoming request to a matched route.
+ * @package Quantum\Router
  */
 final class RouteFinder
 {

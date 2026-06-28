@@ -15,6 +15,7 @@ use Quantum\Jwt\Enums\ExceptionMessages;
 
 /**
  * Class JwtException
+ * @package Quantum\JwtToken
  */
 class JwtException extends BaseException
 {

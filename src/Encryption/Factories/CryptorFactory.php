@@ -21,6 +21,7 @@ use Quantum\Di\Di;
 
 /**
  * Class Cryptor
+ * @package Quantum\Encryption
  */
 class CryptorFactory
 {

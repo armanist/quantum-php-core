@@ -19,6 +19,7 @@ use ReflectionException;
 
 /**
  * Trait Internal
+ * @package Quantum\Http\Request
  */
 trait Internal
 {

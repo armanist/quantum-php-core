@@ -19,6 +19,7 @@ use Quantum\Http\Request;
 
 /**
  * Class AppContext
+ * @package Quantum\App
  */
 class AppContext
 {

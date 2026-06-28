@@ -21,6 +21,7 @@ use ReflectionException;
  * owned by AppContext. Preserves the existing static API
  * for full backward compatibility.
  *
+ * @package Quantum/Di
  * @method static void registerDependencies(array<string, mixed> $dependencies)
  * @method static void register(string $concrete, ?string $abstract = null)
  * @method static bool isRegistered(string $abstract)

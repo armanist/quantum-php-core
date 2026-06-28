@@ -21,6 +21,7 @@ use Throwable;
 
 /**
  * Class CronRunCommand
+ * @package Quantum\Console
  */
 class CronRunCommand extends CliCommand
 {

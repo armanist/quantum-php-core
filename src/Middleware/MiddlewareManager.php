@@ -21,6 +21,7 @@ use Closure;
 
 /**
  * Class MiddlewareManager
+ * @package Quantum\Middleware
  */
 class MiddlewareManager
 {

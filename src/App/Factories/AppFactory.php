@@ -21,6 +21,7 @@ use Quantum\App\App;
 
 /**
  * Class AppFactory
+ * @package Quantum\App
  */
 class AppFactory
 {

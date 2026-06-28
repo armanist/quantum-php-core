@@ -12,6 +12,7 @@ namespace Quantum\Cron\Contracts;
 
 /**
  * Interface CronTaskInterface
+ * @package Quantum\Cron
  */
 interface CronTaskInterface
 {

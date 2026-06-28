@@ -18,6 +18,7 @@ use ReflectionException;
 
 /**
  * Traits SessionTrait
+ * @package Quantum\Session
  */
 trait SessionTrait
 {

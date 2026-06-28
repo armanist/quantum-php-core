@@ -20,6 +20,7 @@ use ReflectionException;
 
 /**
  * Class Translator
+ * @package Quantum\Lang
  */
 class Translator
 {

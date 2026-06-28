@@ -12,6 +12,7 @@ namespace Quantum\App\Enums;
 
 /**
  * Class ExceptionMessages
+ * @package Quantum\App
  */
 class ExceptionMessages
 {

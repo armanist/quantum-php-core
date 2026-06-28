@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class ModelException
+ * @package Quantum\Model
  */
 class ModelException extends BaseException
 {

@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class LoggerException
+ * @package Quantum\Logger
  */
 class LoggerException extends BaseException
 {

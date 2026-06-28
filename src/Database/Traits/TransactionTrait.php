@@ -17,6 +17,7 @@ use Throwable;
 
 /**
  * Trait TransactionTrait
+ * @package Quantum\Database
  */
 trait TransactionTrait
 {

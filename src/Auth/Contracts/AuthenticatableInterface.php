@@ -14,6 +14,7 @@ use Quantum\Auth\User;
 
 /**
  * Interface AuthenticatableInterface
+ * @package Quantum\Auth
  */
 interface AuthenticatableInterface
 {

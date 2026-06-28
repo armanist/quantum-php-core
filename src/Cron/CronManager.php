@@ -22,6 +22,7 @@ use Throwable;
 
 /**
  * Class CronManager
+ * @package Quantum\Cron
  */
 class CronManager
 {

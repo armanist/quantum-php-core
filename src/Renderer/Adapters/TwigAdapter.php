@@ -27,6 +27,7 @@ use Twig\Environment;
 
 /**
  * Class TwigAdapter
+ * @package Quantum\Renderer
  */
 class TwigAdapter implements TemplateRendererInterface
 {

@@ -21,6 +21,7 @@ use Exception;
 
 /**
  * Class MemcachedAdapter
+ * @package Quantum\Cache
  */
 class MemcachedAdapter implements CacheInterface
 {

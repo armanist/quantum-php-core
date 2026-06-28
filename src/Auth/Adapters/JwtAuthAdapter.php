@@ -26,6 +26,7 @@ use Exception;
 
 /**
  * Class ApiAuth
+ * @package Quantum\Auth
  */
 class JwtAuthAdapter implements AuthenticatableInterface
 {

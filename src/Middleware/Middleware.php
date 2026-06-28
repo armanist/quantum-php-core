@@ -16,6 +16,7 @@ use Closure;
 
 /**
  * Class Middleware
+ * @package Quantum\Middleware
  */
 abstract class Middleware
 {

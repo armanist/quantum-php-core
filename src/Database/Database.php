@@ -24,6 +24,7 @@ use ReflectionException;
 
 /**
  * Class Database
+ * @package Quantum\Database
  */
 class Database
 {

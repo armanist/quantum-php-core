@@ -22,6 +22,7 @@ use Quantum\Di\Di;
 
 /**
  * Class Config
+ * @package Quantum\Config
  */
 class Config implements ConfigInterface
 {

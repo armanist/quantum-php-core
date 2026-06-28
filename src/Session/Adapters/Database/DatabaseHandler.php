@@ -15,6 +15,7 @@ use SessionHandlerInterface;
 
 /**
  * Class DatabaseHandler
+ * @package Quantum\Session
  */
 class DatabaseHandler implements SessionHandlerInterface
 {

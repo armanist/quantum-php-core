@@ -12,6 +12,7 @@ namespace Quantum\App\Contracts;
 
 /**
  * Interface AppInterface
+ * @package Quantum\App
  */
 interface AppInterface
 {

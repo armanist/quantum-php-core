@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Service
+ * @package Quantum\Service
  */
 abstract class Service
 {

@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Renderer
+ * @package Quantum\Renderer
  * @method string render(string $view, array<string, mixed> $params = [])
  */
 class Renderer

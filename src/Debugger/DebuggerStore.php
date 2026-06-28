@@ -14,6 +14,7 @@ use Quantum\Debugger\Contracts\DebuggerStoreInterface;
 
 /**
  * Class DebuggerStore
+ * @package Quantum\Debugger
  */
 class DebuggerStore implements DebuggerStoreInterface
 {

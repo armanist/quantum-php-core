@@ -15,6 +15,7 @@ use Exception;
 
 /**
  * Class AssetException
+ * @package Quantum\Asset
  */
 class AssetException extends Exception
 {

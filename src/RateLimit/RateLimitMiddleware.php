@@ -20,6 +20,7 @@ use Closure;
 
 /**
  * Class RateLimitMiddleware
+ * @package Quantum\RateLimit
  */
 class RateLimitMiddleware extends Middleware
 {

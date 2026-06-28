@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class RouteException
+ * @package Quantum\Exceptions
  */
 class RouteException extends BaseException
 {

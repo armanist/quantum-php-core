@@ -15,6 +15,7 @@ use Quantum\Debugger\Debugger;
 
 /**
  * Class MessageAdapter
+ * @package Quantum\Logger
  */
 class MessageAdapter implements ReportableInterface
 {

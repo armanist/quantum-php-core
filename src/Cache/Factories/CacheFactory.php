@@ -27,6 +27,7 @@ use Quantum\Di\Di;
 
 /**
  * Class CacheFactory
+ * @package Quantum\Cache
  */
 class CacheFactory
 {

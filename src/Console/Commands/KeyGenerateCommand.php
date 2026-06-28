@@ -16,6 +16,7 @@ use Exception;
 
 /**
  * Class KeyGenerateCommand
+ * @package Quantum\Console
  */
 class KeyGenerateCommand extends CliCommand
 {

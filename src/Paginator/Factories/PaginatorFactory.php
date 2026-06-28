@@ -19,6 +19,7 @@ use Quantum\Paginator\Paginator;
 
 /**
  * Class PaginatorFactory
+ * @package Quantum\Paginator
  */
 class PaginatorFactory
 {

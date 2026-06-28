@@ -19,6 +19,7 @@ use Curl\Curl;
 
 /**
  * HttpClient Class
+ * @package Quantum\HttpClient
  * @uses php-curl-class/php-curl-class
  * @method object addGet(string $url, array<string, mixed> $data = [])
  * @method object addPost(string $url, string $data = '', bool $follow_303_with_post = false)

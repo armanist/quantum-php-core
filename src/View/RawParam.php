@@ -12,6 +12,7 @@ namespace Quantum\View;
 
 /**
  * Class RawParam
+ * @package Quantum\View
  */
 class RawParam
 {

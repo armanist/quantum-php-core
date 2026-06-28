@@ -23,6 +23,7 @@ use ReflectionException;
 
 /**
  * class MailTrap
+ * @package Quantum\Mailer
  */
 class MailTrap
 {

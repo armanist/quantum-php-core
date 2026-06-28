@@ -15,6 +15,7 @@ use Quantum\Database\Enums\Key;
 
 /**
  * Trait TableTrait
+ * @package Quantum\Database
  */
 trait TableTrait
 {

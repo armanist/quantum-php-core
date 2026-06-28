@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Trait Transaction
+ * @package Quantum\Database
  */
 trait Transaction
 {

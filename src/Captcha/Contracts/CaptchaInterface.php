@@ -12,6 +12,7 @@ namespace Quantum\Captcha\Contracts;
 
 /**
  * Interface CaptchaInterface
+ * @package Quantum\Captcha
  */
 interface CaptchaInterface
 {

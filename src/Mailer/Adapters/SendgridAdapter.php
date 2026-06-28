@@ -17,6 +17,7 @@ use Exception;
 
 /**
  * class SendgridAdapter
+ * @package Quantum\Mailer
  */
 class SendgridAdapter implements MailerInterface
 {

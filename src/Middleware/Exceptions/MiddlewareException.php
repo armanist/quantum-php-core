@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class MiddlewareException
+ * @package Quantum\Exceptions
  */
 class MiddlewareException extends BaseException
 {

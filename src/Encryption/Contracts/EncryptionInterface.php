@@ -12,6 +12,7 @@ namespace Quantum\Encryption\Contracts;
 
 /**
  * Interface EncryptionInterface
+ * @package Quantum\Encryption
  */
 interface EncryptionInterface
 {

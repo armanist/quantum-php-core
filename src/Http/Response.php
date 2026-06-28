@@ -18,6 +18,7 @@ use Exception;
 
 /**
  * Class Response
+ * @package Quantum\Http
  */
 class Response
 {

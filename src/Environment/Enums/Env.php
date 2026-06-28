@@ -12,6 +12,7 @@ namespace Quantum\Environment\Enums;
 
 /**
  * Class Env
+ * @package Quantum\Environment
  * @codeCoverageIgnore
  */
 final class Env

@@ -15,6 +15,7 @@ use Exception;
 
 /**
  * Class GoogleDriveFileSystemAdapter
+ * @package Quantum\Storage
  */
 class GoogleDriveFileSystemAdapter implements FilesystemAdapterInterface
 {

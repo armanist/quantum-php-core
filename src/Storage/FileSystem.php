@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class FileSystem
+ * @package Quantum\Storage
  * @method bool makeDirectory(string $dirname, ?string $parentId = null)
  * @method bool removeDirectory(string $dirname)
  * @method string|false get(string $filename)

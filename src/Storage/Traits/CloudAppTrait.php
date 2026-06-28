@@ -16,6 +16,7 @@ use Exception;
 
 /**
  * Trait CloudAppTrait
+ * @package Quantum\Storage
  */
 trait CloudAppTrait
 {

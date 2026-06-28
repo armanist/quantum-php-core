@@ -15,6 +15,7 @@ use DateInterval;
 
 /**
  * Trait CacheTrait
+ * @package Quantum\Cache\Traits
  */
 trait CacheTrait
 {

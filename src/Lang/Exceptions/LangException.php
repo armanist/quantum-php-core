@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class LangException
+ * @package Quantum\Lang
  */
 class LangException extends BaseException
 {

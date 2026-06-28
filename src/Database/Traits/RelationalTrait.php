@@ -15,6 +15,7 @@ use ReflectionException;
 
 /**
  * Trait RelationalTrait
+ * @package Quantum\Database
  */
 trait RelationalTrait
 {

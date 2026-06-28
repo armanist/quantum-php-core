@@ -15,6 +15,7 @@ use InvalidArgumentException;
 
 /**
  * Class BootPipeline
+ * @package Quantum\App
  */
 class BootPipeline
 {

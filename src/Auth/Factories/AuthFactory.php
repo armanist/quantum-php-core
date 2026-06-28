@@ -31,6 +31,7 @@ use Quantum\Di\Di;
 
 /**
  * Class AuthFactory
+ * @package Quantum\Auth
  */
 class AuthFactory
 {

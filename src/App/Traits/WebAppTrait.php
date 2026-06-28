@@ -30,6 +30,7 @@ use Exception;
 
 /**
  * Trait WebAppTrait
+ * @package Quantum\App
  */
 trait WebAppTrait
 {

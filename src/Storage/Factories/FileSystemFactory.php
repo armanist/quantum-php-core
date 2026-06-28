@@ -33,6 +33,7 @@ use Quantum\Di\Di;
 
 /**
  * Class FileSystemFactory
+ * @package Quantum\Storage
  */
 class FileSystemFactory
 {

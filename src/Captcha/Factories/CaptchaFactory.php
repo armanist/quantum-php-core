@@ -26,6 +26,7 @@ use Quantum\Di\Di;
 
 /**
  * Class CaptchaFactory
+ * @package Quantum\Captcha
  */
 class CaptchaFactory
 {

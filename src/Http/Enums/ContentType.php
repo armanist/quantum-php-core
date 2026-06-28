@@ -12,6 +12,7 @@ namespace Quantum\Http\Enums;
 
 /**
  * Class ContentType
+ * @package Quantum\Http
  * @codeCoverageIgnore
  */
 final class ContentType

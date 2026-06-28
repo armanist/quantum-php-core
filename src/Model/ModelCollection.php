@@ -18,6 +18,7 @@ use Generator;
 
 /**
  * Class ModelCollection
+ * @package Quantum\Model
  * @template TKey of array-key
  * @template TValue of Model
  * @implements IteratorAggregate<TKey, TValue>

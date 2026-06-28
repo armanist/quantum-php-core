@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Paginator
+ * @package Quantum\Paginator
  * @method mixed data()
  * @method mixed firstItem()
  * @method mixed lastItem()

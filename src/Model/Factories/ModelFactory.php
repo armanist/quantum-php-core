@@ -20,6 +20,7 @@ use ReflectionException;
 
 /**
  * Class ModelFactory
+ * @package Quantum\Model
  */
 class ModelFactory
 {

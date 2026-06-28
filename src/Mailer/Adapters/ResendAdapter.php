@@ -17,6 +17,7 @@ use Exception;
 
 /**
  * class ResendAdapter
+ * @package Quantum\Mailer
  */
 class ResendAdapter implements MailerInterface
 {

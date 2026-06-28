@@ -22,6 +22,7 @@ use Exception;
 
 /**
  * Class DatabaseAdapter
+ * @package Quantum\Cache
  */
 class DatabaseAdapter implements CacheInterface
 {

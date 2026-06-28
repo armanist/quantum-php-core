@@ -15,6 +15,7 @@ use Quantum\App\App;
 
 /**
  * Class Loader
+ * @package Quantum\Loader
  */
 class Loader
 {

@@ -12,6 +12,7 @@ namespace Quantum\Validation\Traits;
 
 /**
  * Trait Length
+ * @package Quantum\Validation\Rules
  */
 trait Length
 {

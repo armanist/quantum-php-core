@@ -28,6 +28,7 @@ use Exception;
 
 /**
  * Class WebAuth
+ * @package Quantum\Auth
  */
 class SessionAuthAdapter implements AuthenticatableInterface
 {

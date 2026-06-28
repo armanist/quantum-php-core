@@ -15,6 +15,7 @@ use Quantum\Cron\Exceptions\CronException;
 /**
  * Class Schedule
  * Fluent API for creating cron schedules
+ * @package Quantum\Cron
  */
 class Schedule
 {

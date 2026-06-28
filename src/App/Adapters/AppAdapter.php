@@ -15,6 +15,7 @@ use Quantum\App\AppContext;
 
 /**
  * Class AppAdapter
+ * @package Quantum\App
  */
 abstract class AppAdapter implements AppInterface
 {

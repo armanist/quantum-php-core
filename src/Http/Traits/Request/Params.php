@@ -18,6 +18,7 @@ use ReflectionException;
 
 /**
  * Trait Params
+ * @package Quantum\Http\Request
  */
 trait Params
 {

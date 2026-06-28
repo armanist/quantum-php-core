@@ -19,6 +19,7 @@ use Quantum\Di\Di;
 
 /**
  * Class ServiceFactory
+ * @package Quantum\Service
  */
 class ServiceFactory
 {

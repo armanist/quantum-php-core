@@ -12,6 +12,7 @@ namespace Quantum\Paginator\Enums;
 
 /**
  * Class PaginatorType
+ * @package Quantum\Paginator
  * @codeCoverageIgnore
  */
 final class PaginatorType

@@ -19,6 +19,7 @@ use Quantum\Model\DbModel;
 
 /**
  * Trait SoftDeletes
+ * @package Quantum\Model
  */
 trait SoftDeletes
 {

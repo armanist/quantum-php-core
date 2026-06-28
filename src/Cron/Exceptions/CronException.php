@@ -14,6 +14,7 @@ use Quantum\Cron\Enums\ExceptionMessages;
 
 /**
  * Class CronException
+ * @package Quantum\Cron
  */
 class CronException extends \Exception
 {

@@ -12,6 +12,7 @@ namespace Quantum\Logger\Contracts;
 
 /**
  * Interface ReportableInterface
+ * @package Quantum\Logger
  */
 interface ReportableInterface
 {

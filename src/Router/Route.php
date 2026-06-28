@@ -17,6 +17,7 @@ use Closure;
 /**
  * Class Route
  * @internal Framework routing descriptor.
+ * @package Quantum\Router
  */
 final class Route
 {

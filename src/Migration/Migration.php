@@ -14,6 +14,7 @@ use Quantum\Database\Factories\TableFactory;
 
 /**
  * Class Migration
+ * @package Quantum\Migration
  */
 abstract class Migration
 {

@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class CsrfException
+ * @package Quantum\Csrf
  */
 class CsrfException extends BaseException
 {

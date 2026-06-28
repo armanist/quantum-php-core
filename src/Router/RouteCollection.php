@@ -13,6 +13,7 @@ namespace Quantum\Router;
 /**
  * Class RouteCollection
  * @internal Internal collection of Route descriptors.
+ * @package Quantum\Router
  */
 final class RouteCollection
 {

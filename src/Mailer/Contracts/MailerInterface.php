@@ -12,6 +12,7 @@ namespace Quantum\Mailer\Contracts;
 
 /**
  * Interface MailerInterface
+ * @package Quantum\Mailer
  */
 interface MailerInterface
 {

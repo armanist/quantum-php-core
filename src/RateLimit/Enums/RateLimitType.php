@@ -12,6 +12,7 @@ namespace Quantum\RateLimit\Enums;
 
 /**
  * Class RateLimitType
+ * @package Quantum\RateLimit
  * @codeCoverageIgnore
  */
 final class RateLimitType

@@ -16,6 +16,7 @@ use Quantum\Database\Enums\Type;
 
 /**
  * Class MigrationTable
+ * @package Quantum\Migration
  */
 class MigrationTable extends Migration
 {

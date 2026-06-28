@@ -16,6 +16,7 @@ use Quantum\Storage\UploadedFile;
 
 /**
  * Trait File
+ * @package Quantum\Http\Request
  */
 trait File
 {

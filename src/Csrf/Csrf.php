@@ -21,6 +21,7 @@ use ReflectionException;
 
 /**
  * Class Csrf
+ * @package Quantum\Csrf
  */
 class Csrf
 {

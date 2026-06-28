@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Captcha
+ * @package Quantum\Captcha
  * @method string getName()
  * @method string|null getType()
  * @method CaptchaInterface setType(string $type)

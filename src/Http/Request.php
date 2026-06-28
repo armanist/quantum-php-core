@@ -29,6 +29,7 @@ use Quantum\Csrf\Csrf;
 
 /**
  * Class Request
+ * @package Quantum\Http
  */
 class Request
 {

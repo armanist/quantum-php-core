@@ -16,6 +16,7 @@ use Psr\SimpleCache\CacheInterface;
 
 /**
  * Class Cache
+ * @package Quantum\Cache
  * @method mixed get($key, $default = null)
  * @method iterable<string, mixed> getMultiple($keys, $default = null)
  * @method has($key): bool

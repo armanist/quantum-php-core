@@ -17,6 +17,7 @@ use Exception;
 
 /**
  * class MandrillAdapter
+ * @package Quantum\Mailer
  */
 class MandrillAdapter implements MailerInterface
 {

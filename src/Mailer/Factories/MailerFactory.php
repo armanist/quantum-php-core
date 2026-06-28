@@ -29,6 +29,7 @@ use Quantum\Di\Di;
 
 /**
  * class MailerFactory
+ * @package Quantum\Mailer
  */
 class MailerFactory
 {

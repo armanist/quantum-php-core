@@ -12,6 +12,7 @@ namespace Quantum\Logger;
 
 /**
  * Class LoggerConfig
+ * @package Quantum\Logger
  */
 class LoggerConfig
 {

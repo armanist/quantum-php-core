@@ -18,6 +18,7 @@ use RecursiveArrayIterator;
 
 /**
  * Trait Modifier
+ * @package Quantum\Database
  */
 trait Reducer
 {

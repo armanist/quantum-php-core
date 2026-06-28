@@ -16,6 +16,7 @@ use ReflectionException;
 
 /**
  * Class AssetFactory
+ * @package Quantum\Asset
  */
 class AssetManager
 {

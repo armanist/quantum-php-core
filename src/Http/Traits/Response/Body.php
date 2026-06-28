@@ -19,6 +19,7 @@ use Exception;
 
 /**
  * Trait Body
+ * @package Quantum\Http\Response
  */
 trait Body
 {

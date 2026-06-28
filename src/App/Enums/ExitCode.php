@@ -12,6 +12,7 @@ namespace Quantum\App\Enums;
 
 /**
  * Class ExitCode
+ * @package Quantum\App
  * @codeCoverageIgnore
  */
 final class ExitCode

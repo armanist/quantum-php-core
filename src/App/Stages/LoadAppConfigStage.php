@@ -20,6 +20,7 @@ use ReflectionException;
 
 /**
  * Class LoadAppConfigStage
+ * @package Quantum\App
  */
 class LoadAppConfigStage implements BootStageInterface
 {

@@ -19,6 +19,7 @@ use ReflectionException;
 
 /**
  * Trait PaginatorTrait
+ * @package Quantum\Paginator
  */
 trait PaginatorTrait
 {

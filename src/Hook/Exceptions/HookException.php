@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class HookException
+ * @package Quantum\Exceptions
  */
 class HookException extends BaseException
 {

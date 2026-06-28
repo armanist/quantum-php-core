@@ -21,6 +21,7 @@ use Quantum\Di\Di;
 
 /**
  * Class ViewFactory
+ * @package Quantum\View
  * @mixin View
  */
 class ViewFactory

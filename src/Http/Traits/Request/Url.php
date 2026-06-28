@@ -12,6 +12,7 @@ namespace Quantum\Http\Traits\Request;
 
 /**
  * Trait Url
+ * @package Quantum\Http\Request
  */
 trait Url
 {

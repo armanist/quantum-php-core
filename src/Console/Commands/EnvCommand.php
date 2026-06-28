@@ -20,6 +20,7 @@ use Quantum\App\App;
 
 /**
  * Class EnvCommand
+ * @package Quantum\Console
  */
 class EnvCommand extends CliCommand
 {

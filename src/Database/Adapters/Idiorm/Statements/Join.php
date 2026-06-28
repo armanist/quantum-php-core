@@ -19,6 +19,7 @@ use Quantum\Model\DbModel;
 
 /**
  * Trait Join
+ * @package Quantum\Database
  */
 trait Join
 {

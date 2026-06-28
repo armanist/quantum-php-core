@@ -19,6 +19,7 @@ use ReflectionException;
 
 /**
  * Class DebugBarAssetsCommand
+ * @package Quantum\Console
  */
 class DebugBarCommand extends CliCommand
 {

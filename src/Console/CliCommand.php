@@ -21,6 +21,7 @@ use RuntimeException;
 
 /**
  * Class CliCommand
+ * @package Quantum\Console
  */
 abstract class CliCommand extends Command implements CommandInterface
 {

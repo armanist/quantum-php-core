@@ -16,6 +16,7 @@ use Quantum\Database\Contracts\DbalInterface;
 
 /**
  * Trait Model
+ * @package Quantum\Database
  */
 trait Model
 {

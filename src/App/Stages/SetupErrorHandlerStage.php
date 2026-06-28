@@ -22,6 +22,7 @@ use Quantum\Di\Di;
 
 /**
  * Class SetupErrorHandlerStage
+ * @package Quantum\App
  */
 class SetupErrorHandlerStage implements BootStageInterface
 {

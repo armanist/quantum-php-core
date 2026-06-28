@@ -17,6 +17,7 @@ use Exception;
 
 /**
  * class MailgunAdapter
+ * @package Quantum\Mailer
  */
 class MailgunAdapter implements MailerInterface
 {

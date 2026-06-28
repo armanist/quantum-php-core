@@ -12,6 +12,7 @@ namespace Quantum\Environment;
 
 /**
  * Class Server
+ * @package Quantum\Environment
  */
 class Server
 {

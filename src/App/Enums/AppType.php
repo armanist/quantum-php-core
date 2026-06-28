@@ -12,6 +12,7 @@ namespace Quantum\App\Enums;
 
 /**
  * Class AppType
+ * @package Quantum\App
  * @codeCoverageIgnore
  */
 final class AppType

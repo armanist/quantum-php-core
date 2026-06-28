@@ -21,6 +21,7 @@ use SleekDB\QueryBuilder;
 
 /**
  * Trait Result
+ * @package Quantum\Database
  */
 trait Result
 {

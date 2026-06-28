@@ -21,6 +21,7 @@ use Phar;
 
 /**
  * Class PharAdapter
+ * @package Quantum\Archive
  */
 class PharAdapter implements ArchiveInterface
 {

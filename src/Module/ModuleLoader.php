@@ -24,6 +24,7 @@ use Closure;
 
 /**
  * Class ModuleLoader
+ * @package Quantum\Module
  */
 class ModuleLoader
 {

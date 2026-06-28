@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Archive
+ * @package Quantum\Archive
  * @method void setName(string $archiveName)
  * @method bool offsetExists(string $filename)
  * @method bool addEmptyDir(string $directory)

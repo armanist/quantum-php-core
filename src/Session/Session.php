@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Session
+ * @package Quantum\Session
  * @method array<string, mixed> all()
  * @method bool has(string $key)
  * @method mixed|null get(string $key)

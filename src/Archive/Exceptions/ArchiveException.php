@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class CacheException
+ * @package Quantum\Archive
  */
 class ArchiveException extends BaseException
 {

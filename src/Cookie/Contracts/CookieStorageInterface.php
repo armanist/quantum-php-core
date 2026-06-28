@@ -12,6 +12,7 @@ namespace Quantum\Cookie\Contracts;
 
 /**
  * Interface CookieStorageInterface
+ * @package Quantum\Cookie
  */
 interface CookieStorageInterface
 {

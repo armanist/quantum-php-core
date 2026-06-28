@@ -18,6 +18,7 @@ use Quantum\Database\Database;
 
 /**
  * Class Table
+ * @package Quantum\Database
  *
  * @method self autoIncrement()
  * @method self primary()

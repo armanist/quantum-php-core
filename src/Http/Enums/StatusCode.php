@@ -12,6 +12,7 @@ namespace Quantum\Http\Enums;
 
 /**
  * Class StatusCode
+ * @package Quantum\Http
  * @codeCoverageIgnore
  */
 final class StatusCode

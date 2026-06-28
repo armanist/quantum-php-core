@@ -21,6 +21,7 @@ use ReflectionException;
 
 /**
  * Class Session
+ * @package Quantum\Session
  */
 class DatabaseSessionAdapter implements SessionStorageInterface
 {

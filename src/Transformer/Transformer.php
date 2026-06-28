@@ -14,6 +14,7 @@ use Quantum\Transformer\Contracts\TransformerInterface;
 
 /**
  * Class TransformerManager
+ * @package Quantum\Transformer
  */
 class Transformer
 {

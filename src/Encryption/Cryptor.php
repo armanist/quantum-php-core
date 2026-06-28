@@ -17,6 +17,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Cryptor
+ * @package Quantum\Encryption
  * @method string encrypt(string $plain)
  * @method string decrypt(string $encrypted)
  */

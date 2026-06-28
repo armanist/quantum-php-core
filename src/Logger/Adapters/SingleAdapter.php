@@ -21,6 +21,7 @@ use ReflectionException;
 
 /**
  * Class SingleAdapter
+ * @package Quantum\Logger
  */
 class SingleAdapter implements ReportableInterface
 {

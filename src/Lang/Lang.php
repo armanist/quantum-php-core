@@ -19,6 +19,7 @@ use ReflectionException;
 
 /**
  * Class Lang
+ * @package Quantum\Lang
  */
 class Lang
 {

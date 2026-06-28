@@ -27,6 +27,7 @@ use Closure;
 
 /**
  * Class Validator
+ * @package Quantum\Validation
  */
 class Validator
 {

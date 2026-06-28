@@ -20,6 +20,7 @@ use Redis;
 
 /**
  * Class RedisAdapter
+ * @package Quantum\Cache
  */
 class RedisAdapter implements CacheInterface
 {

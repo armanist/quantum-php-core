@@ -17,6 +17,7 @@ use Exception;
 
 /**
  * Class CronTask
+ * @package Quantum\Cron
  */
 class CronTask implements CronTaskInterface
 {

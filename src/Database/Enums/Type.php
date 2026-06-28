@@ -12,6 +12,7 @@ namespace Quantum\Database\Enums;
 
 /**
  * Class Type
+ * @package Quantum\Database
  * @codeCoverageIgnore
  */
 final class Type

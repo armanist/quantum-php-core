@@ -16,6 +16,7 @@ use Psr\Log\LogLevel;
 
 /**
  * Class Logger
+ * @package Quantum\Logger
  */
 class Logger implements LoggerInterface
 {

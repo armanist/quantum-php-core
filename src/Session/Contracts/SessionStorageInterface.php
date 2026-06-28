@@ -12,6 +12,7 @@ namespace Quantum\Session\Contracts;
 
 /**
  * Interface SessionStorageInterface
+ * @package Quantum\Session
  */
 interface SessionStorageInterface
 {

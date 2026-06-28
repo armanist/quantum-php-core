@@ -27,6 +27,7 @@ use Quantum\Di\Di;
 
 /**
  * Class LoggerFactory
+ * @package Quantum\Logger
  */
 class LoggerFactory
 {

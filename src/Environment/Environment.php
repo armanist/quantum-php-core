@@ -24,6 +24,7 @@ use Quantum\Di\Di;
 
 /**
  * Class Environment
+ * @package Quantum\Environment
  * @uses Dotenv
  */
 class Environment

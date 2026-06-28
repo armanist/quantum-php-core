@@ -23,6 +23,7 @@ use Quantum\Di\Di;
 
 /**
  * Class LoadModulesStage
+ * @package Quantum\App
  */
 class LoadModulesStage implements BootStageInterface
 {

@@ -17,6 +17,7 @@ use Exception;
 
 /**
  * Class ModuleGenerateCommand
+ * @package Quantum\Console\Commands
  */
 class ModuleGenerateCommand extends CliCommand
 {

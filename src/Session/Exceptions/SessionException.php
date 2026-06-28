@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class SessionException
+ * @package Quantum\Session
  */
 class SessionException extends BaseException
 {

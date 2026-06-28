@@ -28,6 +28,7 @@ use DateTime;
 
 /**
  * Trait AuthTrait
+ * @package Quantum\Auth
  */
 trait AuthTrait
 {

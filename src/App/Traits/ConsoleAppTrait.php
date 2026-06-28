@@ -18,6 +18,7 @@ use Exception;
 
 /**
  * Class ConsoleAppTrait
+ * @package Quantum\App
  */
 trait ConsoleAppTrait
 {

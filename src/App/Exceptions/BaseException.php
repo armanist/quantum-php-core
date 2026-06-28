@@ -15,6 +15,7 @@ use Exception;
 
 /**
  * Class BaseException
+ * @package Quantum\App
  */
 abstract class BaseException extends Exception
 {

@@ -12,6 +12,7 @@ namespace Quantum\Renderer\Contracts;
 
 /**
  * Interface TemplateRendererInterface
+ * @package Quantum\Renderer
  */
 interface TemplateRendererInterface
 {

@@ -16,6 +16,7 @@ use Quantum\Session\Traits\SessionTrait;
 
 /**
  * Class Session
+ * @package Quantum\Session
  */
 class NativeSessionAdapter implements SessionStorageInterface
 {

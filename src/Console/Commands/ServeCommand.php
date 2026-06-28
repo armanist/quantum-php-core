@@ -16,6 +16,7 @@ use Throwable;
 
 /**
  * Class ServeCommand
+ * @package Quantum\Console
  */
 class ServeCommand extends CliCommand
 {

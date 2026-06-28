@@ -14,6 +14,7 @@ use Quantum\Hasher\Exceptions\HasherException;
 
 /**
  * Hasher class
+ * @package Quantum\Hasher
  */
 class Hasher
 {

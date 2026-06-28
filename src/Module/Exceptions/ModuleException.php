@@ -14,6 +14,7 @@ use Quantum\Module\Enums\ExceptionMessages;
 
 /**
  * Class ModuleLoaderException
+ * @package Quantum\Module
  */
 class ModuleException extends \Exception
 {

@@ -15,6 +15,7 @@ use Throwable;
 
 /**
  * Class LocalFileSystemAdapter
+ * @package Quantum\Storage
  */
 class LocalFileSystemAdapter implements LocalFilesystemAdapterInterface
 {

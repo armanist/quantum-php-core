@@ -28,6 +28,7 @@ use SleekDB\Store;
 
 /**
  * Class SleekDbal
+ * @package Quantum\Database
  */
 class SleekDbal implements DbalInterface
 {

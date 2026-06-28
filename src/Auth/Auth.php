@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Auth
+ * @package Quantum\Auth
  * @method mixed signin(string $username, string $password, bool $remember = false)
  * @method bool signout()
  * @method bool check()

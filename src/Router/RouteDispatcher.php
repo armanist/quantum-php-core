@@ -22,6 +22,7 @@ use Closure;
 
 /**
  * Class RouteDispatcher
+ * @package Quantum\Router
  */
 final class RouteDispatcher
 {

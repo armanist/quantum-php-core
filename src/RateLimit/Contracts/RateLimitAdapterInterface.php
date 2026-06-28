@@ -12,6 +12,7 @@ namespace Quantum\RateLimit\Contracts;
 
 /**
  * Interface RateLimitAdapterInterface
+ * @package Quantum\RateLimit
  */
 interface RateLimitAdapterInterface
 {

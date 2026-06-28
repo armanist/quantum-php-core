@@ -25,6 +25,7 @@ use Exception;
 
 /**
  * ViewCache class
+ * @package Quantum\ResourceCache
  */
 class ViewCache
 {

@@ -31,6 +31,7 @@ use finfo;
 
 /**
  * Class File
+ * @package Quantum\Storage
  */
 class UploadedFile extends SplFileInfo
 {

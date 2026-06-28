@@ -22,6 +22,7 @@ use Quantum\Di\Di;
 
 /**
  * Class LangFactory
+ * @package Quantum\Lang
  */
 class LangFactory
 {

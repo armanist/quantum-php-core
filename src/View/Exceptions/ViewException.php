@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class ViewException
+ * @package Quantum\View
  */
 class ViewException extends BaseException
 {

@@ -12,6 +12,7 @@ namespace Quantum\Paginator\Contracts;
 
 /**
  * Paginator interface
+ * @package Quantum\Paginator
  */
 interface PaginatorInterface
 {

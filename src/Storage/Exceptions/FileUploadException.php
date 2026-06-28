@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class FileUploadException
+ * @package Quantum\Storage
  */
 class FileUploadException extends BaseException
 {

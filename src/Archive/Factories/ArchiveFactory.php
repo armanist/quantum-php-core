@@ -21,6 +21,7 @@ use Quantum\Di\Di;
 
 /**
  * Class ArchiveFactory
+ * @package Quantum\Archive
  */
 class ArchiveFactory
 {

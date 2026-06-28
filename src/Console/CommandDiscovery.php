@@ -15,6 +15,7 @@ use ReflectionClass;
 
 /**
  * Class CommandDiscovery
+ * @package Quantum\Console
  */
 class CommandDiscovery
 {

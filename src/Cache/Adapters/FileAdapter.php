@@ -24,6 +24,7 @@ use Exception;
 
 /**
  * Class FileAdapter
+ * @package Quantum\Cache
  */
 class FileAdapter implements CacheInterface
 {

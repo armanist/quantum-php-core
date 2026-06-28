@@ -12,6 +12,7 @@ namespace Quantum\Http\Traits\Request;
 
 /**
  * Trait Header
+ * @package Quantum\Http\Request
  */
 trait Header
 {

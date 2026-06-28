@@ -25,6 +25,7 @@ use Quantum\Di\Di;
 
 /**
  * Class RendererFactory
+ * @package Quantum\Renderer
  */
 class RendererFactory
 {

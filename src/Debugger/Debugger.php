@@ -23,6 +23,7 @@ use DebugBar\DebugBar;
 
 /**
  * Class Debugger
+ * @package Quantum\Debugger
  * @uses DebugBar
  */
 class Debugger

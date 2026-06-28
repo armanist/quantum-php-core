@@ -22,6 +22,7 @@ use DateTime;
 
 /**
  * Trait General
+ * @package Quantum\Validation
  */
 trait General
 {

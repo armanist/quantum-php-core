@@ -29,6 +29,7 @@ if (!defined('DS')) {
 
 /**
  * Class ConsoleAppAdapter
+ * @package Quantum\App
  */
 class ConsoleAppAdapter extends AppAdapter
 {

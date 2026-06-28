@@ -14,6 +14,7 @@ use Quantum\Database\Enums\Key;
 
 /**
  * Class Column
+ * @package Quantum\Database
  */
 class Column
 {

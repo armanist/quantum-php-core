@@ -12,6 +12,7 @@ namespace Quantum\Storage\Contracts;
 
 /**
  * Interface TokenServiceInterface
+ * @package Quantum\Storage
  */
 interface TokenServiceInterface
 {

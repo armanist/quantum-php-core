@@ -12,6 +12,7 @@ namespace Quantum\Auth\Enums;
 
 /**
  * Class AuthType
+ * @package Quantum\Auth
  * @codeCoverageIgnore
  */
 final class AuthType

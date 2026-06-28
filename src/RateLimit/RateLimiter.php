@@ -14,6 +14,7 @@ use Quantum\RateLimit\Contracts\RateLimitAdapterInterface;
 
 /**
  * Class RateLimiter
+ * @package Quantum\RateLimit
  */
 class RateLimiter
 {

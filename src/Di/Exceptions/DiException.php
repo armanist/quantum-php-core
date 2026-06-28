@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class DiException
+ * @package Quantum\Di
  */
 class DiException extends BaseException
 {

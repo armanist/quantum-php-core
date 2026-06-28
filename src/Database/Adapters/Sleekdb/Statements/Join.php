@@ -21,6 +21,7 @@ use RuntimeException;
 
 /**
  * Trait Join
+ * @package Quantum\Database
  */
 trait Join
 {

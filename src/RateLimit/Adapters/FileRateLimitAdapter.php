@@ -19,6 +19,7 @@ use ReflectionException;
 
 /**
  * Class FileRateLimitAdapter
+ * @package Quantum\RateLimit
  */
 class FileRateLimitAdapter implements RateLimitAdapterInterface
 {

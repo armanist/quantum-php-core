@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Mailer
+ * @package Quantum\Mailer
  * @method MailerInterface setFrom(string $email, ?string $name = null)
  * @method array<string, mixed> getFrom()
  * @method MailerInterface setAddress(string $email, ?string $name = null)

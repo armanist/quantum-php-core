@@ -20,6 +20,7 @@ use Quantum\Di\Di;
 
 /**
  * Class InitHttpStage
+ * @package Quantum\App
  */
 class InitHttpStage implements BootStageInterface
 {

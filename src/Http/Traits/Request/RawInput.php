@@ -20,6 +20,7 @@ use ReflectionException;
 
 /**
  * Class RawInput
+ * @package Quantum\Http
  */
 trait RawInput
 {

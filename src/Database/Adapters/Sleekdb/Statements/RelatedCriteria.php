@@ -15,6 +15,7 @@ use RuntimeException;
 
 /**
  * Trait RelatedCriteria
+ * @package Quantum\Database
  */
 trait RelatedCriteria
 {

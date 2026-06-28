@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class ConfigException
+ * @package Quantum\Config
  */
 class ConfigException extends BaseException
 {

@@ -26,6 +26,7 @@ use Quantum\Di\Di;
 
 /**
  * Class OpenApiCommand
+ * @package Quantum\Console
  */
 class OpenApiCommand extends CliCommand
 {

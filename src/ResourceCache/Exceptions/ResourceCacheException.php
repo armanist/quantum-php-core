@@ -14,6 +14,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class ResourceCacheException
+ * @package Quantum\ResourceCache
  * @codeCoverageIgnore
  */
 class ResourceCacheException extends BaseException

@@ -15,6 +15,7 @@ use Povils\Figlet\Figlet;
 
 /**
  * Class VersionCommand
+ * @package Quantum\Console
  */
 class VersionCommand extends CliCommand
 {

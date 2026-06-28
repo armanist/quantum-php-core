@@ -12,6 +12,7 @@ namespace Quantum\Debugger\Contracts;
 
 /**
  * Interface DebuggerStoreInterface
+ * @package Quantum\Debugger
  */
 interface DebuggerStoreInterface
 {

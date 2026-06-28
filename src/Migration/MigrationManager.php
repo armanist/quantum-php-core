@@ -25,6 +25,7 @@ use ReflectionException;
 
 /**
  * Class MigrationManager
+ * @package Quantum\Migration
  */
 class MigrationManager
 {

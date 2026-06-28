@@ -24,6 +24,7 @@ use Quantum\Di\Di;
 
 /**
  * Class RouteListCommand
+ * @package Quantum\Console
  */
 class RouteListCommand extends CliCommand
 {

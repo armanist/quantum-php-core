@@ -26,6 +26,7 @@ use Psr\Log\LogLevel;
 
 /**
  * Class View
+ * @package Quantum\View
  */
 class View
 {

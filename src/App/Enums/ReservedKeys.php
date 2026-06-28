@@ -12,6 +12,7 @@ namespace Quantum\App\Enums;
 
 /**
  * Class ReservedKeys
+ * @package Quantum\App
  */
 final class ReservedKeys
 {

@@ -12,6 +12,7 @@ namespace Quantum\Auth;
 
 /**
  * Class User
+ * @package Quantum\Auth
  */
 class User
 {

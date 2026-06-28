@@ -12,6 +12,7 @@ namespace Quantum\Database\Enums;
 
 /**
  * Class Relation
+ * @package Quantum\Database
  * @codeCoverageIgnore
  */
 final class Relation

@@ -25,6 +25,7 @@ use Quantum\Di\Di;
 
 /**
  * Class RateLimiterFactory
+ * @package Quantum\RateLimit
  */
 class RateLimiterFactory
 {

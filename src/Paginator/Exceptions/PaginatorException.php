@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class PaginatorException
+ * @package Quantum\Paginator
  */
 class PaginatorException extends BaseException
 {

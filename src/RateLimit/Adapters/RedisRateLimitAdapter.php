@@ -16,6 +16,7 @@ use Redis;
 
 /**
  * Class RedisRateLimitAdapter
+ * @package Quantum\RateLimit
  */
 class RedisRateLimitAdapter implements RateLimitAdapterInterface
 {

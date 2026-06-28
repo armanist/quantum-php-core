@@ -15,6 +15,7 @@ use Exception;
 
 /**
  * Class DropboxFileSystemAdapter
+ * @package Quantum\Storage
  */
 class DropboxFileSystemAdapter implements FilesystemAdapterInterface
 {

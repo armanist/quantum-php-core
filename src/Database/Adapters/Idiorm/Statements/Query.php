@@ -17,6 +17,7 @@ use PDOException;
 
 /**
  * Trait Query
+ * @package Quantum\Database
  */
 trait Query
 {

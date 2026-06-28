@@ -17,6 +17,7 @@ use ReflectionException;
 
 /**
  * Class ArrayPaginator
+ * @package Quantum\Paginator
  */
 class ArrayPaginator implements PaginatorInterface
 {

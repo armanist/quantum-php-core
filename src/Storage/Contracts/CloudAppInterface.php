@@ -14,6 +14,7 @@ use Quantum\HttpClient\HttpClient;
 
 /**
  * Interface CloudAppInterface
+ * @package Quantum\Storage
  */
 interface CloudAppInterface
 {

@@ -15,6 +15,7 @@ use Quantum\App\AppContext;
 
 /**
  * Class InitDebuggerStage
+ * @package Quantum\App
  */
 class InitDebuggerStage implements BootStageInterface
 {

@@ -15,6 +15,7 @@ use Quantum\Database\Contracts\DbalInterface;
 
 /**
  * Trait Criteria
+ * @package Quantum\Database
  */
 trait Criteria
 {

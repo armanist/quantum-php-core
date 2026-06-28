@@ -21,6 +21,7 @@ use Exception;
 
 /**
  * class SmtpAdapter
+ * @package Quantum\Mailer
  */
 class SmtpAdapter implements MailerInterface
 {

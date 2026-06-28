@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class HasherException
+ * @package Quantum\Hasher
  */
 class HasherException extends BaseException
 {

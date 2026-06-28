@@ -38,6 +38,7 @@ use ReflectionException;
 
 /**
  * Class WebAppAdapter
+ * @package Quantum\App
  */
 class WebAppAdapter extends AppAdapter
 {

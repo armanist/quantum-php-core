@@ -16,6 +16,7 @@ use Closure;
 /**
  * Class RouteBuilder
  * @internal Fluent DSL interpreter and route composition engine.
+ * @package Quantum\Router
  */
 final class RouteBuilder
 {

@@ -15,6 +15,7 @@ use Quantum\Storage\FileSystem;
 
 /**
  * Trait LoggerTrait
+ * @package Quantum\Logger
  */
 trait LoggerTrait
 {

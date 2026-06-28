@@ -12,6 +12,7 @@ namespace Quantum\Cron\Enums;
 
 /**
  * Enum ExceptionMessages
+ * @package Quantum\Cron
  * @codeCoverageIgnore
  */
 final class ExceptionMessages

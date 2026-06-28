@@ -14,6 +14,7 @@ use Quantum\Model\DbModel;
 
 /**
  * Database Abstract Layer interface
+ * @package Quantum\Database
  */
 interface DbalInterface
 {

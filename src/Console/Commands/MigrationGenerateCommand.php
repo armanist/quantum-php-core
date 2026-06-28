@@ -16,6 +16,7 @@ use Quantum\Console\CliCommand;
 
 /**
  * Class MigrationGenerateCommand
+ * @package Quantum\Console
  */
 class MigrationGenerateCommand extends CliCommand
 {

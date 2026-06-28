@@ -17,6 +17,7 @@ use Exception;
 
 /**
  * class SendinblueAdapter
+ * @package Quantum\Mailer
  */
 class SendinblueAdapter implements MailerInterface
 {

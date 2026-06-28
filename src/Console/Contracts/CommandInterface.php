@@ -12,6 +12,7 @@ namespace Quantum\Console\Contracts;
 
 /**
  * Interface CommandInterface
+ * @package Quantum\Console
  */
 interface CommandInterface
 {

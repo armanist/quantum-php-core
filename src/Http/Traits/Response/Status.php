@@ -15,6 +15,7 @@ use InvalidArgumentException;
 
 /**
  * Trait Status
+ * @package Quantum\Http\Response
  */
 trait Status
 {

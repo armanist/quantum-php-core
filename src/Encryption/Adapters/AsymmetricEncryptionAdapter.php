@@ -16,6 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class AsymmetricEncryptionAdapter
+ * @package Quantum\Encryption
  */
 class AsymmetricEncryptionAdapter implements EncryptionInterface
 {

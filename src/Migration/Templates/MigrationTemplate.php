@@ -12,6 +12,7 @@ namespace Quantum\Migration\Templates;
 
 /**
  * Class MigrationTable
+ * @package Quantum\Migration
  */
 class MigrationTemplate
 {

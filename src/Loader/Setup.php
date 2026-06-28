@@ -15,6 +15,7 @@ use ReflectionException;
 
 /**
  * Class Setup
+ * @package Quantum\Loader
  */
 class Setup
 {

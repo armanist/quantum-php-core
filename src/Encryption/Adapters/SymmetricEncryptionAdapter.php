@@ -18,6 +18,7 @@ use ReflectionException;
 
 /**
  * Class SymmetricEncryptionAdapter
+ * @package Quantum\Encryption
  */
 class SymmetricEncryptionAdapter implements EncryptionInterface
 {

@@ -16,6 +16,7 @@ use Quantum\HttpClient\HttpClient;
 
 /**
  * Class RecaptchaAdapter
+ * @package Quantum\Captcha
  */
 class RecaptchaAdapter implements CaptchaInterface
 {

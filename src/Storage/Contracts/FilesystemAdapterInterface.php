@@ -12,6 +12,7 @@ namespace Quantum\Storage\Contracts;
 
 /**
  * Interface FilesystemAdapterInterface
+ * @package Quantum\Storage
  */
 interface FilesystemAdapterInterface
 {

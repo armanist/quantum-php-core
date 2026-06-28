@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class Cookie
+ * @package Quantum\Cookie
  */
 class Cookie implements CookieStorageInterface
 {

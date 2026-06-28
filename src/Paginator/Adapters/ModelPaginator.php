@@ -22,6 +22,7 @@ use ReflectionException;
 
 /**
  * Class ModelPaginator
+ * @package Quantum\Paginator
  */
 class ModelPaginator implements PaginatorInterface
 {

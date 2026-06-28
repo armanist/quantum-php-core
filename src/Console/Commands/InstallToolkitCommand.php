@@ -23,6 +23,7 @@ use RuntimeException;
 
 /**
  * Class InstallToolkitCommand
+ * @package Quantum\Console
  */
 class InstallToolkitCommand extends CliCommand
 {

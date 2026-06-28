@@ -23,6 +23,7 @@ use Exception;
 
 /**
  * Class ModuleManager
+ * @package Quantum\Module
  */
 class ModuleManager
 {

@@ -12,6 +12,7 @@ namespace Quantum\Transformer\Contracts;
 
 /**
  * Interface TransformerInterface
+ * @package Quantum\Transformer
  */
 interface TransformerInterface
 {

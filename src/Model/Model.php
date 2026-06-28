@@ -14,6 +14,7 @@ use Quantum\Model\Exceptions\ModelException;
 
 /**
  * Class Model
+ * @package Quantum\Model
  */
 abstract class Model
 {

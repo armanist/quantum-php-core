@@ -12,6 +12,7 @@ namespace Quantum\Archive\Contracts;
 
 /**
  * Interface ArchiveInterface
+ * @package Quantum\Archive
  */
 interface ArchiveInterface
 {

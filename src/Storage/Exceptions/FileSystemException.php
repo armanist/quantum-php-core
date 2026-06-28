@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class FileSystemException
+ * @package Quantum\Storage
  */
 class FileSystemException extends BaseException
 {

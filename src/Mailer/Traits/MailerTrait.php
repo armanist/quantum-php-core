@@ -20,6 +20,7 @@ use Exception;
 
 /**
  * trait MailerTrait
+ * @package Quantum\Mailer
  */
 trait MailerTrait
 {

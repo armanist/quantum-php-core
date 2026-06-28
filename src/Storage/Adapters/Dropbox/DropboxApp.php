@@ -23,6 +23,7 @@ use Exception;
 
 /**
  * Class DropboxApp
+ * @package Quantum\Storage
  */
 class DropboxApp implements CloudAppInterface
 {

@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class DatabaseException
+ * @package Quantum\Database
  */
 class DatabaseException extends BaseException
 {

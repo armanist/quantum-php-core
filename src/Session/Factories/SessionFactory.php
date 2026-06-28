@@ -25,6 +25,7 @@ use Quantum\Di\Di;
 
 /**
  * Class SessionFactory
+ * @package Quantum\Session
  */
 class SessionFactory
 {

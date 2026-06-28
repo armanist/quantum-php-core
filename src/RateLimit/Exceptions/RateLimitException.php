@@ -15,6 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class RateLimitException
+ * @package Quantum\RateLimit
  */
 class RateLimitException extends BaseException
 {

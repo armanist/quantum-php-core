@@ -14,6 +14,7 @@ use Quantum\Loader\Setup;
 
 /**
  * Interface ConfigInterface
+ * @package Quantum\Config
  */
 interface ConfigInterface
 {

@@ -25,6 +25,7 @@ use Exception;
 
 /**
  * Class ErrorHandler
+ * @package Quantum\Tracer
  */
 class ErrorHandler
 {

@@ -15,6 +15,7 @@ use ORM;
 
 /**
  * Class IdiormPatch
+ * @package Quantum\Database
  */
 class IdiormPatch extends ORM
 {

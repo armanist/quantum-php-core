@@ -15,6 +15,7 @@ use Quantum\Router\Exceptions\RouteException;
 /**
  * Class PatternCompiler
  * @internal Compiles and matches route patterns against request URIs.
+ * @package Quantum\Router
  */
 class PatternCompiler
 {

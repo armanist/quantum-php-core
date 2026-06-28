@@ -20,6 +20,7 @@ use Quantum\Paginator\Paginator;
 
 /**
  * Class DbModel
+ * @package Quantum\Model
  *
  * @method string getTable()
  * @method string getModelName()

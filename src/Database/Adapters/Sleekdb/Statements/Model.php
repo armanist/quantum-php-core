@@ -22,6 +22,7 @@ use SleekDB\Exceptions\IOException;
 
 /**
  * Trait Model
+ * @package Quantum\Database
  */
 trait Model
 {

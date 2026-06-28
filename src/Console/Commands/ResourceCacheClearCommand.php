@@ -23,6 +23,7 @@ use Exception;
 
 /**
  * Class ResourceCacheClearCommand
+ * @package Quantum\Console
  */
 class ResourceCacheClearCommand extends CliCommand
 {
