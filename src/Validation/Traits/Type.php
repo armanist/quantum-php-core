@@ -12,7 +12,7 @@ namespace Quantum\Validation\Traits;
 
 /**
  * Trait Type
- * @package Quantum\Validation\Rules
+ * @package Quantum\Validation
  */
 trait Type
 {

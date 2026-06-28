@@ -19,7 +19,7 @@ use ReflectionException;
 
 /**
  * Class HookManager
- * @package Quantum\Hooks
+ * @package Quantum\Hook
  */
 class HookManager
 {

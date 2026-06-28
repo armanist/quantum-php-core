@@ -18,7 +18,7 @@ use ReflectionClass;
  *
  * Stores dependency bindings for the container.
  *
- * @package Quantum/Di
+ * @package Quantum\Di
  */
 class DiRegistry
 {

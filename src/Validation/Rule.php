@@ -12,7 +12,7 @@ namespace Quantum\Validation;
 
 /**
  * Rule class
- * @package Quantum
+ * @package Quantum\Validation
  * @category Libraries
  * @method static bool required()
  * @method static bool email()

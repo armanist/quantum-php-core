@@ -17,7 +17,7 @@ use Firebase\JWT\Key;
 
 /**
  * Class JwtToken
- * @package Quantum\JwtToken
+ * @package Quantum\Jwt
  * @uses JWT
  */
 class JwtToken extends JWT

@@ -24,7 +24,7 @@ use Closure;
  * Instance-based dependency injection container.
  * Holds all dependency registrations and resolved instances for a single application execution.
  *
- * @package Quantum/Di
+ * @package Quantum\Di
  */
 class DiContainer
 {

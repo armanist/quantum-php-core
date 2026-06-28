@@ -14,7 +14,7 @@ use Quantum\Http\Enums\ContentType;
 
 /**
  * Trait Header
- * @package Quantum\Http\Response
+ * @package Quantum\Http
  */
 trait Header
 {

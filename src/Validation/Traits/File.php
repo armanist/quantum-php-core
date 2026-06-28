@@ -15,7 +15,7 @@ use Quantum\Storage\UploadedFile;
 
 /**
  * Trait File
- * @package Quantum\Validation\Rules
+ * @package Quantum\Validation
  */
 trait File
 {

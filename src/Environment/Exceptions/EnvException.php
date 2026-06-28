@@ -15,7 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class EnvException
- * @package Quantum\Exceptions
+ * @package Quantum\Environment
  */
 class EnvException extends BaseException
 {

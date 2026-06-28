@@ -18,7 +18,7 @@ use Closure;
 
 /**
  * Trait Route
- * @package Quantum\Http\Request
+ * @package Quantum\Http
  */
 trait Route
 {

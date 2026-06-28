@@ -15,7 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class HasherException
- * @package Quantum\Hasher
+ * @package Quantum\HttpClient
  */
 class HttpClientException extends BaseException
 {

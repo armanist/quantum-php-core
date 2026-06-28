@@ -15,7 +15,7 @@ use InvalidArgumentException;
 
 /**
  * Trait Body
- * @package Quantum\Http\Request
+ * @package Quantum\Http
  */
 trait Body
 {

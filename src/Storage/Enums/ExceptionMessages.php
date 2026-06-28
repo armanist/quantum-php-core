@@ -14,7 +14,7 @@ use Quantum\App\Enums\ExceptionMessages as BaseExceptionMessages;
 
 /**
  * Class ExceptionMessages
- * @package Quantum\Session
+ * @package Quantum\Storage
  */
 final class ExceptionMessages extends BaseExceptionMessages
 {

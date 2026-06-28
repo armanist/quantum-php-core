@@ -15,7 +15,7 @@ use Quantum\App\Exceptions\BaseException;
 
 /**
  * Class AuthException
- * @package Quantum\Exceptions
+ * @package Quantum\Auth
  */
 class AuthException extends BaseException
 {

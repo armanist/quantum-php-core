@@ -17,7 +17,7 @@ use Exception;
 
 /**
  * Class TableFactory
- * @package Quantum\Factory
+ * @package Quantum\Database
  */
 class TableFactory
 {
