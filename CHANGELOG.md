@@ -1,4 +1,4 @@
-## [Unreleased]
+## [3.0.3] - 2026-06-28
 
 ### Changed
 - **BREAKING:** Raised the minimum supported PHP version from `7.4` to `8.0` (#532)
