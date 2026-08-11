@@ -13,8 +13,6 @@ namespace Quantum\HttpClient\Adapters;
 use Quantum\HttpClient\Contracts\MultiCurlAdapterInterface;
 use CurlMultiHandle;
 use CurlHandle;
-use Curl\MultiCurl;
-use Curl\Curl;
 
 /**
  * Class MultiCurlAdapter
@@ -22,8 +20,6 @@ use Curl\Curl;
  */
 class MultiCurlAdapter implements MultiCurlAdapterInterface
 {
-    private ?MultiCurl $client;
-
     private CurlMultiHandle $handle;
 
     /**
@@ -56,9 +52,8 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     private $errorCallback;
 
-    public function __construct(?MultiCurl $client = null)
+    public function __construct()
     {
-        $this->client = $client;
         $this->handle = curl_multi_init();
     }
 
@@ -69,54 +64,28 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
 
     public function complete(callable $callback): MultiCurlAdapterInterface
     {
-        if ($this->client === null) {
-            $this->completeCallback = $callback;
-            return $this;
-        }
-
-        $this->client->complete(function (Curl $instance) use ($callback): void {
-            $callback(new CurlAdapter($instance));
-        });
+        $this->completeCallback = $callback;
 
         return $this;
     }
 
     public function success(callable $callback): MultiCurlAdapterInterface
     {
-        if ($this->client === null) {
-            $this->successCallback = $callback;
-            return $this;
-        }
-
-        $this->client->success(function (Curl $instance) use ($callback): void {
-            $callback(new CurlAdapter($instance));
-        });
+        $this->successCallback = $callback;
 
         return $this;
     }
 
     public function error(callable $callback): MultiCurlAdapterInterface
     {
-        if ($this->client === null) {
-            $this->errorCallback = $callback;
-            return $this;
-        }
-
-        $this->client->error(function (Curl $instance) use ($callback): void {
-            $callback(new CurlAdapter($instance));
-        });
+        $this->errorCallback = $callback;
 
         return $this;
     }
 
     public function start(): void
     {
-        if ($this->client === null) {
-            $this->startNativeRequests();
-            return;
-        }
-
-        $this->client->start();
+        $this->startNativeRequests();
     }
 
     /**
@@ -125,15 +94,11 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function addGet(string $url, array $data = [])
     {
-        if ($this->client === null) {
-            $adapter = $this->queueRequest($this->buildUrl($url, $data));
-            $adapter->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
-            $adapter->setOpt(CURLOPT_HTTPGET, true);
+        $adapter = $this->queueRequest($this->buildUrl($url, $data));
+        $adapter->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
+        $adapter->setOpt(CURLOPT_HTTPGET, true);
 
-            return $adapter;
-        }
-
-        return $this->wrapCurlResult($this->client->addGet($url, $data));
+        return $adapter;
     }
 
     /**
@@ -142,20 +107,16 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function addPost(string $url, $data = '', bool $follow_303_with_post = false)
     {
-        if ($this->client === null) {
-            $adapter = $this->queueRequest($url);
+        $adapter = $this->queueRequest($url);
 
-            if ($follow_303_with_post) {
-                $adapter->setOpt(CURLOPT_CUSTOMREQUEST, 'POST');
-            }
-
-            $adapter->setOpt(CURLOPT_POST, true);
-            $adapter->setOpt(CURLOPT_POSTFIELDS, $adapter->buildPostData($data));
-
-            return $adapter;
+        if ($follow_303_with_post) {
+            $adapter->setOpt(CURLOPT_CUSTOMREQUEST, 'POST');
         }
 
-        return $this->wrapCurlResult($this->client->addPost($url, $data, $follow_303_with_post));
+        $adapter->setOpt(CURLOPT_POST, true);
+        $adapter->setOpt(CURLOPT_POSTFIELDS, $adapter->buildPostData($data));
+
+        return $adapter;
     }
 
     /**
@@ -163,13 +124,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function setHeader(string $key, $value): MultiCurlAdapterInterface
     {
-        if ($this->client === null) {
-            $this->applyHeader($key, $value);
-
-            return $this;
-        }
-
-        $this->client->setHeader($key, $value);
+        $this->applyHeader($key, $value);
 
         return $this;
     }
@@ -179,15 +134,9 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function setHeaders(array $headers): MultiCurlAdapterInterface
     {
-        if ($this->client === null) {
-            foreach ($headers as $key => $value) {
-                $this->applyHeader(trim((string) $key), trim((string) $value));
-            }
-
-            return $this;
+        foreach ($headers as $key => $value) {
+            $this->applyHeader(trim((string) $key), trim((string) $value));
         }
-
-        $this->client->setHeaders($headers);
 
         return $this;
     }
@@ -197,13 +146,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function setOpt(int $option, $value): MultiCurlAdapterInterface
     {
-        if ($this->client === null) {
-            $this->applyOption($option, $value);
-
-            return $this;
-        }
-
-        $this->client->setOpt($option, $value);
+        $this->applyOption($option, $value);
 
         return $this;
     }
@@ -213,23 +156,16 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function setOpts(array $options): MultiCurlAdapterInterface
     {
-        if ($this->client === null) {
-            foreach ($options as $option => $value) {
-                $this->applyOption($option, $value);
-            }
-
-            return $this;
+        foreach ($options as $option => $value) {
+            $this->applyOption($option, $value);
         }
-
-        $this->client->setOpts($options);
 
         return $this;
     }
 
     public function supportsMethod(string $method): bool
     {
-        return in_array($method, ['addGet', 'addPost', 'setHeader', 'setHeaders', 'setOpt', 'setOpts'], true)
-            || ($this->client !== null && method_exists($this->client, $method));
+        return in_array($method, ['addGet', 'addPost', 'setHeader', 'setHeaders', 'setOpt', 'setOpts'], true);
     }
 
     /**
@@ -250,20 +186,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
             return $this->$method(...$arguments);
         }
 
-        if ($this->client === null) {
-            return null;
-        }
-
-        return $this->client->$method(...$arguments);
-    }
-
-    /**
-     * @param mixed $result
-     * @return mixed
-     */
-    private function wrapCurlResult($result)
-    {
-        return $result instanceof Curl ? new CurlAdapter($result) : $result;
+        return null;
     }
 
     private function queueRequest(string $url): CurlAdapter
@@ -319,6 +242,8 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
         foreach ($this->queue as $adapter) {
             curl_multi_add_handle($this->handle, $adapter->getHandle());
         }
+
+        $running = 0;
 
         do {
             do {

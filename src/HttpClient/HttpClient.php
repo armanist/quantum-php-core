@@ -17,9 +17,7 @@ use Quantum\HttpClient\Exceptions\HttpClientException;
 use Quantum\HttpClient\Adapters\MultiCurlAdapter;
 use Quantum\HttpClient\Adapters\CurlAdapter;
 use Quantum\App\Exceptions\BaseException;
-use Curl\MultiCurl;
 use ErrorException;
-use Curl\Curl;
 
 /**
  * HttpClient Class
@@ -55,7 +53,7 @@ class HttpClient
     /**
      * @var HttpClientAdapterInterface|null
      */
-    private ?HttpClientAdapterInterface $client = null;
+    private ?HttpClientAdapterInterface $adapter = null;
 
     private string $method = 'GET';
 
@@ -83,12 +81,12 @@ class HttpClient
     /**
      * Creates request
      */
-    public function createRequest(string $url, ?Curl $client = null): HttpClient
+    public function createRequest(string $url): HttpClient
     {
-        $adapter = new CurlAdapter($client);
+        $adapter = new CurlAdapter();
         $adapter->setUrl($url);
 
-        $this->client = $adapter;
+        $this->adapter = $adapter;
 
         return $this;
     }
@@ -96,15 +94,15 @@ class HttpClient
     /**
      * Creates multi request
      */
-    public function createMultiRequest(?MultiCurl $client = null): HttpClient
+    public function createMultiRequest(): HttpClient
     {
-        $adapter = new MultiCurlAdapter($client);
+        $adapter = new MultiCurlAdapter();
 
         $adapter->complete(function (CurlAdapterInterface $instance): void {
             $this->handleResponse($instance);
         });
 
-        $this->client = $adapter;
+        $this->adapter = $adapter;
 
         return $this;
     }
@@ -112,14 +110,14 @@ class HttpClient
     /**
      * Creates async multi request
      */
-    public function createAsyncMultiRequest(callable $success, callable $error, ?MultiCurl $client = null): HttpClient
+    public function createAsyncMultiRequest(callable $success, callable $error): HttpClient
     {
-        $adapter = new MultiCurlAdapter($client);
+        $adapter = new MultiCurlAdapter();
 
         $adapter->success($success);
         $adapter->error($error);
 
-        $this->client = $adapter;
+        $this->adapter = $adapter;
 
         return $this;
     }
@@ -129,7 +127,7 @@ class HttpClient
      */
     public function getAdapter(): ?HttpClientAdapterInterface
     {
-        return $this->client;
+        return $this->adapter;
     }
 
     /**
@@ -175,12 +173,12 @@ class HttpClient
 
     /**
      * Checks if the request is multi cURL
-     * @phpstan-assert-if-true MultiCurlAdapterInterface $this->client
-     * @phpstan-assert-if-false CurlAdapterInterface|null $this->client
+     * @phpstan-assert-if-true MultiCurlAdapterInterface $this->adapter
+     * @phpstan-assert-if-false CurlAdapterInterface|null $this->adapter
      */
     public function isMultiRequest(): bool
     {
-        return $this->client instanceof MultiCurlAdapterInterface;
+        return $this->adapter instanceof MultiCurlAdapterInterface;
     }
 
     /**
@@ -190,12 +188,12 @@ class HttpClient
      */
     public function start(): HttpClient
     {
-        if (!$this->client) {
+        if (!$this->adapter) {
             throw HttpClientException::requestNotCreated();
         }
 
         if ($this->isMultiRequest()) {
-            $this->client->start();
+            $this->adapter->start();
         } else {
             $this->startSingleRequest();
         }
@@ -264,7 +262,7 @@ class HttpClient
     {
         $this->ensureSingleRequest();
 
-        return $this->response[$this->client->getId()][self::RESPONSE_BODY] ?? null;
+        return $this->response[$this->adapter->getId()][self::RESPONSE_BODY] ?? null;
     }
 
     /**
@@ -273,7 +271,7 @@ class HttpClient
      */
     public function getResponse(): array
     {
-        if ($this->client === null) {
+        if ($this->adapter === null) {
             return [];
         }
 
@@ -281,7 +279,7 @@ class HttpClient
             return $this->response;
         }
 
-        return $this->response[$this->client->getId()] ?? [];
+        return $this->response[$this->adapter->getId()] ?? [];
     }
 
     /**
@@ -290,7 +288,7 @@ class HttpClient
      */
     public function getErrors(): array
     {
-        if ($this->client === null) {
+        if ($this->adapter === null) {
             return [];
         }
 
@@ -298,7 +296,7 @@ class HttpClient
             return $this->errors;
         }
 
-        return $this->errors[$this->client->getId()] ?? [];
+        return $this->errors[$this->adapter->getId()] ?? [];
     }
 
     /**
@@ -310,7 +308,7 @@ class HttpClient
     {
         $this->ensureSingleRequest();
 
-        return $option !== null ? $this->client->getInfo($option) : $this->client->getInfo();
+        return $option !== null ? $this->adapter->getInfo($option) : $this->adapter->getInfo();
     }
 
     /**
@@ -321,7 +319,7 @@ class HttpClient
     {
         $this->ensureSingleRequest();
 
-        return $this->client->getUrl();
+        return $this->adapter->getUrl();
     }
 
     /**
@@ -333,15 +331,15 @@ class HttpClient
     {
         $this->ensureRequestCreated();
 
-        if (!$this->client->supportsMethod($method)) {
-            throw HttpClientException::methodNotSupported($method, $this->client::class);
+        if (!$this->adapter->supportsMethod($method)) {
+            throw HttpClientException::methodNotSupported($method, $this->adapter::class);
         }
 
         $this->interceptCall($method, $arguments);
 
         $this->ensureRequestCreated();
 
-        $this->client->callMethod($method, $arguments);
+        $this->adapter->callMethod($method, $arguments);
 
         return $this;
     }
@@ -353,14 +351,14 @@ class HttpClient
     {
         $this->ensureSingleRequest();
 
-        $this->client->setOpt(CURLOPT_CUSTOMREQUEST, $this->method);
+        $this->adapter->setOpt(CURLOPT_CUSTOMREQUEST, $this->method);
 
         if ($this->data) {
-            $this->client->setOpt(CURLOPT_POSTFIELDS, $this->client->buildPostData($this->data));
+            $this->adapter->setOpt(CURLOPT_POSTFIELDS, $this->adapter->buildPostData($this->data));
         }
 
-        $this->client->start();
-        $this->handleResponse($this->client);
+        $this->adapter->start();
+        $this->handleResponse($this->adapter);
     }
 
     /**
@@ -399,7 +397,7 @@ class HttpClient
 
     /**
      * @throws BaseException
-     * @phpstan-assert CurlAdapterInterface $this->client
+     * @phpstan-assert CurlAdapterInterface $this->adapter
      */
     private function ensureSingleRequest(): void
     {
@@ -412,11 +410,11 @@ class HttpClient
 
     /**
      * @throws HttpClientException
-     * @phpstan-assert HttpClientAdapterInterface $this->client
+     * @phpstan-assert HttpClientAdapterInterface $this->adapter
      */
     private function ensureRequestCreated(): void
     {
-        if ($this->client === null) {
+        if ($this->adapter === null) {
             throw HttpClientException::requestNotCreated();
         }
     }

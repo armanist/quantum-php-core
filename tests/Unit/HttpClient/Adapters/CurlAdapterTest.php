@@ -5,9 +5,7 @@ namespace Quantum\Tests\Unit\HttpClient\Adapters;
 use Quantum\HttpClient\Adapters\CurlAdapter;
 use Quantum\HttpClient\ResponseHeaders;
 use Quantum\Tests\Unit\AppTestCase;
-use Curl\CaseInsensitiveArray;
 use CurlHandle;
-use Curl\Curl;
 use Mockery;
 
 class CurlAdapterTest extends AppTestCase
@@ -224,78 +222,6 @@ class CurlAdapterTest extends AppTestCase
         $this->assertSame(0, $adapter->getErrorCode());
         $this->assertNull($adapter->getErrorMessage());
         $this->assertSame(file_get_contents($fixturePath), $adapter->getResponse());
-    }
-
-    public function testCurlAdapterKeepsInjectedVendorClientAsTransitionBridge(): void
-    {
-        $headers = new CaseInsensitiveArray(['Content-Type' => 'application/json']);
-        $response = (object) ['ok' => true];
-
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('setUrl')->once()->with('https://example.com');
-        $curl->shouldReceive('setHeader')->once()->with('Accept', 'application/json');
-        $curl->shouldReceive('setHeaders')->once()->with(['X-Test' => 'yes']);
-        $curl->shouldReceive('setOpt')->once()->with(CURLOPT_TIMEOUT, 10);
-        $curl->shouldReceive('buildPostData')->once()->with(['a' => 1])->andReturn('payload');
-        $curl->shouldReceive('exec')->once();
-        $curl->shouldReceive('getId')->once()->andReturn(7);
-        $curl->shouldReceive('isError')->once()->andReturn(false);
-        $curl->shouldReceive('getErrorCode')->once()->andReturn(0);
-        $curl->shouldReceive('getErrorMessage')->once()->andReturn(null);
-        $curl->shouldReceive('getResponseHeaders')->once()->andReturn($headers);
-        $curl->shouldReceive('getResponseCookies')->once()->andReturn(['sid' => 'abc']);
-        $curl->shouldReceive('getResponse')->once()->andReturn($response);
-        $curl->shouldReceive('getInfo')->with(CURLINFO_HTTP_CODE)->once()->andReturn(200);
-        $adapter = new CurlAdapter($curl);
-        $adapter
-            ->setUrl('https://example.com')
-            ->setHeader('Accept', 'application/json')
-            ->setHeaders(['X-Test' => 'yes'])
-            ->setOpt(CURLOPT_TIMEOUT, 10)
-            ->start();
-
-        $this->assertSame('payload', $adapter->buildPostData(['a' => 1]));
-        $this->assertSame(7, $adapter->getId());
-        $this->assertFalse($adapter->isError());
-        $this->assertSame(0, $adapter->getErrorCode());
-        $this->assertNull($adapter->getErrorMessage());
-        $this->assertSame($headers, $adapter->getResponseHeaders());
-        $this->assertSame(['sid' => 'abc'], $adapter->getResponseCookies());
-        $this->assertSame($response, $adapter->getResponse());
-        $this->assertSame(200, $adapter->getInfo(CURLINFO_HTTP_CODE));
-        $this->assertSame('https://example.com', $adapter->getUrl());
-    }
-
-    public function testCurlAdapterGetsUrlFromWrappedVendorClient(): void
-    {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('getUrl')->once()->andReturn('https://example.com/from-multi');
-
-        $adapter = new CurlAdapter($curl);
-
-        $this->assertSame('https://example.com/from-multi', $adapter->getUrl());
-    }
-
-    public function testCurlAdapterPassesZeroInfoOption(): void
-    {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('getInfo')->with(0)->once()->andReturn('zero');
-
-        $adapter = new CurlAdapter($curl);
-
-        $this->assertSame('zero', $adapter->getInfo(0));
-    }
-
-    public function testCurlAdapterSupportsAndCallsVendorMethods(): void
-    {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('setTimeout')->once()->with(15)->andReturnNull();
-
-        $adapter = new CurlAdapter($curl);
-
-        $this->assertTrue($adapter->supportsMethod('setTimeout'));
-        $this->assertFalse($adapter->supportsMethod('missingMethod'));
-        $this->assertNull($adapter->callMethod('setTimeout', [15]));
     }
 
     public function testCurlAdapterSupportsAndCallsNativeFacadeMethods(): void
