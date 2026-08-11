@@ -219,6 +219,28 @@ class HttpClientTest extends AppTestCase
         $this->assertArrayHasKey('body', $response[0]);
     }
 
+    public function testHttpClientNativeMultiRequestResponseFlow(): void
+    {
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+
+        $this->httpClient
+            ->createMultiRequest()
+            ->addGet($this->fileUrl($fixturePath))
+            ->addGet($this->fileUrl($fixturePath))
+            ->start();
+
+        $response = $this->httpClient->getResponse();
+
+        $this->assertCount(2, $response);
+        $this->assertSame([], $this->httpClient->getErrors());
+
+        foreach ($response as $item) {
+            $this->assertSame([], $item['headers']);
+            $this->assertSame([], $item['cookies']);
+            $this->assertSame(file_get_contents($fixturePath), $item['body']);
+        }
+    }
+
     public function testHttpClientMultiRequestAggregatesErrors(): void
     {
         $multi = Mockery::mock(MultiCurl::class);
@@ -283,6 +305,30 @@ class HttpClientTest extends AppTestCase
         $this->assertInstanceOf(CurlAdapter::class, $successWrapped);
 
         $this->assertInstanceOf(CurlAdapter::class, $errorWrapped);
+    }
+
+    public function testHttpClientNativeAsyncMultiRequestRegistersCallbacks(): void
+    {
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+        $successWrapped = null;
+        $errorWrapped = null;
+        $success = function (CurlAdapter $instance) use (&$successWrapped): void {
+            $successWrapped = $instance;
+        };
+        $error = function (CurlAdapter $instance) use (&$errorWrapped): void {
+            $errorWrapped = $instance;
+        };
+
+        $this->httpClient
+            ->createAsyncMultiRequest($success, $error)
+            ->addGet($this->fileUrl($fixturePath))
+            ->start();
+
+        $this->assertTrue($this->httpClient->isMultiRequest());
+        $this->assertInstanceOf(MultiCurlAdapter::class, $this->httpClient->getAdapter());
+        $this->assertInstanceOf(CurlAdapter::class, $successWrapped);
+        $this->assertNull($errorWrapped);
+        $this->assertSame(file_get_contents($fixturePath), $successWrapped->getResponse());
     }
 
     public function testHttpClientInfoAndUrl(): void

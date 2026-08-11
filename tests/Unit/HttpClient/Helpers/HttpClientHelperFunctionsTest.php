@@ -30,6 +30,17 @@ class HttpClientHelperFunctionsTest extends AppTestCase
         $this->assertNotSame($httpClient1, $httpClient2);
     }
 
+    public function testHttpMultiRequestHelperCreatesExecutableNativeMultiRequest(): void
+    {
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+
+        $httpClient = httpMultiRequest()
+            ->addGet($this->fileUrl($fixturePath))
+            ->start();
+
+        $this->assertSame(file_get_contents($fixturePath), reset($httpClient->getResponse())['body']);
+    }
+
     public function testHttpAsyncMultiRequestHelperCreatesAsyncMultiRequest(): void
     {
         $success = static function (): void {
@@ -45,5 +56,10 @@ class HttpClientHelperFunctionsTest extends AppTestCase
         $this->assertTrue($httpClient1->isMultiRequest());
         $this->assertInstanceOf(MultiCurlAdapter::class, $httpClient1->getAdapter());
         $this->assertNotSame($httpClient1, $httpClient2);
+    }
+
+    private function fileUrl(string $path): string
+    {
+        return 'file:///' . str_replace('\\', '/', $path);
     }
 }
