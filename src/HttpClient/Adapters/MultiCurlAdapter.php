@@ -262,7 +262,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
 
     private function completeNativeRequest(CurlHandle $handle): void
     {
-        foreach ($this->queue as $adapter) {
+        foreach ($this->queue as $id => $adapter) {
             if ($adapter->getHandle() !== $handle) {
                 continue;
             }
@@ -282,6 +282,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
             }
 
             curl_multi_remove_handle($this->handle, $handle);
+            unset($this->queue[$id]);
 
             return;
         }

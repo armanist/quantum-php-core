@@ -69,6 +69,26 @@ class MultiCurlAdapterTest extends AppTestCase
         $this->assertSame([], $errorRequests);
     }
 
+    public function testMultiCurlAdapterRemovesCompletedRequestsFromQueue(): void
+    {
+        $adapter = new MultiCurlAdapter();
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+        $completeRequests = [];
+
+        $adapter->complete(function (CurlAdapter $instance) use (&$completeRequests): void {
+            $completeRequests[] = $instance->getId();
+        });
+
+        $firstRequest = $adapter->addGet($this->fileUrl($fixturePath));
+        $adapter->start();
+
+        $secondRequest = $adapter->addGet($this->fileUrl($fixturePath));
+        $adapter->start();
+
+        $this->assertSame([$firstRequest->getId(), $secondRequest->getId()], $completeRequests);
+        $this->assertSame([], $adapter->getQueuedRequests());
+    }
+
     public function testMultiCurlAdapterAppliesNativeHeadersAndOptionsToFutureQueuedRequests(): void
     {
         $adapter = new MultiCurlAdapter();
