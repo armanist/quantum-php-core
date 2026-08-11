@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Quantum\HttpClient\Adapters;
 
 use Quantum\HttpClient\Contracts\CurlAdapterInterface;
-use Curl\CaseInsensitiveArray;
+use Quantum\HttpClient\ResponseHeaders;
 use JsonSerializable;
 use RuntimeException;
 use CurlHandle;
@@ -46,7 +46,7 @@ class CurlAdapter implements CurlAdapterInterface
      */
     private $response;
 
-    private CaseInsensitiveArray $responseHeaders;
+    private ResponseHeaders $responseHeaders;
 
     /**
      * @var array<string, mixed>
@@ -74,7 +74,7 @@ class CurlAdapter implements CurlAdapterInterface
         }
 
         $this->handle = $handle;
-        $this->responseHeaders = new CaseInsensitiveArray();
+        $this->responseHeaders = new ResponseHeaders();
         $this->applyOption(CURLOPT_RETURNTRANSFER, true);
         $this->applyOption(CURLOPT_HEADER, false);
         $this->applyOption(CURLOPT_HEADERFUNCTION, function ($handle, string $header): int {
@@ -356,7 +356,7 @@ class CurlAdapter implements CurlAdapterInterface
     {
         $this->rawResponseHeaders = '';
         $this->response = null;
-        $this->responseHeaders = new CaseInsensitiveArray();
+        $this->responseHeaders = new ResponseHeaders();
         $this->responseCookies = [];
         $this->error = false;
         $this->errorCode = 0;
@@ -370,7 +370,7 @@ class CurlAdapter implements CurlAdapterInterface
         }
     }
 
-    private function parseResponseHeaders(string $rawHeaders): CaseInsensitiveArray
+    private function parseResponseHeaders(string $rawHeaders): ResponseHeaders
     {
         $headerBlocks = explode("\r\n\r\n", trim($rawHeaders));
         $responseHeader = '';
@@ -382,7 +382,7 @@ class CurlAdapter implements CurlAdapterInterface
             }
         }
 
-        $headers = new CaseInsensitiveArray();
+        $headers = new ResponseHeaders();
         $rawLines = preg_split('/\r\n/', $responseHeader, -1, PREG_SPLIT_NO_EMPTY);
 
         if ($rawLines === false || $rawLines === []) {

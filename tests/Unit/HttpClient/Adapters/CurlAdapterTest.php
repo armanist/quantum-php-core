@@ -3,6 +3,7 @@
 namespace Quantum\Tests\Unit\HttpClient\Adapters;
 
 use Quantum\HttpClient\Adapters\CurlAdapter;
+use Quantum\HttpClient\ResponseHeaders;
 use Quantum\Tests\Unit\AppTestCase;
 use Curl\CaseInsensitiveArray;
 use Curl\Curl;
@@ -72,6 +73,7 @@ class CurlAdapterTest extends AppTestCase
             "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nContent-Type: application/json\r\nMalformed Header\r\nX-Test: one\r\nX-Test: two\r\n\r\n",
         ]);
 
+        $this->assertInstanceOf(ResponseHeaders::class, $headers);
         $this->assertSame('HTTP/1.1 200 OK', $headers['status-line']);
         $this->assertSame('application/json', $headers['content-type']);
         $this->assertSame('one,two', $headers['x-test']);
