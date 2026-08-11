@@ -231,6 +231,7 @@ class CurlAdapterTest extends AppTestCase
         $this->assertTrue($adapter->supportsMethod('setHeaders'));
         $this->assertFalse($adapter->supportsMethod('setTimeout'));
         $this->assertSame($adapter, $adapter->callMethod('setHeaders', [['Accept' => 'application/json']]));
+        $this->assertNull($adapter->callMethod('setTimeout', []));
     }
 
     private function fileUrl(string $path): string

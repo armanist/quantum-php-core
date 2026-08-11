@@ -139,6 +139,7 @@ class MultiCurlAdapterTest extends AppTestCase
         $this->assertTrue($adapter->supportsMethod('addGet'));
         $this->assertFalse($adapter->supportsMethod('missingMethod'));
         $this->assertInstanceOf(CurlAdapter::class, $adapter->callMethod('addGet', ['https://example.com', []]));
+        $this->assertNull($adapter->callMethod('missingMethod', []));
     }
 
     private function fileUrl(string $path): string
