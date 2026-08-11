@@ -254,8 +254,8 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
                 $this->completeNativeRequest($info['handle']);
             }
 
-            if ($running > 0) {
-                curl_multi_select($this->handle);
+            if ($running > 0 && curl_multi_select($this->handle) === -1) {
+                usleep(1000);
             }
         } while ($running > 0);
     }
