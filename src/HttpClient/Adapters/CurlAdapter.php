@@ -329,6 +329,11 @@ class CurlAdapter implements CurlAdapterInterface
         return $this->url ?? $this->client?->getUrl();
     }
 
+    public function getHandle(): CurlHandle
+    {
+        return $this->handle;
+    }
+
     public function supportsMethod(string $method): bool
     {
         return in_array($method, ['setHeader', 'setHeaders', 'setOpt', 'setOpts'], true)

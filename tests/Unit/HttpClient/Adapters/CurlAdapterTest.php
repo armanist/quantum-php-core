@@ -6,6 +6,7 @@ use Quantum\HttpClient\Adapters\CurlAdapter;
 use Quantum\HttpClient\ResponseHeaders;
 use Quantum\Tests\Unit\AppTestCase;
 use Curl\CaseInsensitiveArray;
+use CurlHandle;
 use Curl\Curl;
 use Mockery;
 
@@ -63,6 +64,13 @@ class CurlAdapterTest extends AppTestCase
         $adapter2 = new CurlAdapter();
 
         $this->assertNotSame($adapter1->getId(), $adapter2->getId());
+    }
+
+    public function testCurlAdapterExposesNativeHandle(): void
+    {
+        $adapter = new CurlAdapter();
+
+        $this->assertInstanceOf(CurlHandle::class, $adapter->getHandle());
     }
 
     public function testCurlAdapterParsesNativeResponseHeaders(): void

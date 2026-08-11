@@ -18,6 +18,24 @@ class MultiCurlAdapterTest extends AppTestCase
         parent::tearDown();
     }
 
+    public function testMultiCurlAdapterQueuesNativeRequests(): void
+    {
+        $adapter = new MultiCurlAdapter();
+
+        $getRequest = $adapter->addGet('https://example.com', ['a' => 1]);
+        $postRequest = $adapter->addPost('https://example.org', 'payload', true);
+
+        $this->assertInstanceOf(CurlAdapter::class, $getRequest);
+        $this->assertInstanceOf(CurlAdapter::class, $postRequest);
+        $this->assertNotSame($getRequest->getId(), $postRequest->getId());
+        $this->assertSame('https://example.com', $getRequest->getUrl());
+        $this->assertSame('https://example.org', $postRequest->getUrl());
+        $this->assertSame([
+            $getRequest->getId() => $getRequest,
+            $postRequest->getId() => $postRequest,
+        ], $adapter->getQueuedRequests());
+    }
+
     public function testMultiCurlAdapterDelegatesRequestMethods(): void
     {
         $getCurl = Mockery::mock(Curl::class);
