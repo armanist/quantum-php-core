@@ -22,13 +22,13 @@ class MultiCurlAdapterTest extends AppTestCase
     {
         $adapter = new MultiCurlAdapter();
 
-        $getRequest = $adapter->addGet('https://example.com', ['a' => 1]);
+        $getRequest = $adapter->addGet('https://example.com?existing=yes', ['a' => 1]);
         $postRequest = $adapter->addPost('https://example.org', 'payload', true);
 
         $this->assertInstanceOf(CurlAdapter::class, $getRequest);
         $this->assertInstanceOf(CurlAdapter::class, $postRequest);
         $this->assertNotSame($getRequest->getId(), $postRequest->getId());
-        $this->assertSame('https://example.com', $getRequest->getUrl());
+        $this->assertSame('https://example.com?existing=yes&a=1', $getRequest->getUrl());
         $this->assertSame('https://example.org', $postRequest->getUrl());
         $this->assertSame([
             $getRequest->getId() => $getRequest,

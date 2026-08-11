@@ -96,10 +96,9 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function addGet(string $url, array $data = [])
     {
         if ($this->client === null) {
-            $adapter = new CurlAdapter();
-            $adapter->setUrl($url);
-
-            $this->queue[$adapter->getId()] = $adapter;
+            $adapter = $this->queueRequest($this->buildUrl($url, $data));
+            $adapter->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
+            $adapter->setOpt(CURLOPT_HTTPGET, true);
 
             return $adapter;
         }
@@ -114,10 +113,14 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function addPost(string $url, $data = '', bool $follow_303_with_post = false)
     {
         if ($this->client === null) {
-            $adapter = new CurlAdapter();
-            $adapter->setUrl($url);
+            $adapter = $this->queueRequest($url);
 
-            $this->queue[$adapter->getId()] = $adapter;
+            if ($follow_303_with_post) {
+                $adapter->setOpt(CURLOPT_CUSTOMREQUEST, 'POST');
+            }
+
+            $adapter->setOpt(CURLOPT_POST, true);
+            $adapter->setOpt(CURLOPT_POSTFIELDS, $adapter->buildPostData($data));
 
             return $adapter;
         }
@@ -219,5 +222,27 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     private function wrapCurlResult($result)
     {
         return $result instanceof Curl ? new CurlAdapter($result) : $result;
+    }
+
+    private function queueRequest(string $url): CurlAdapter
+    {
+        $adapter = new CurlAdapter();
+        $adapter->setUrl($url);
+
+        $this->queue[$adapter->getId()] = $adapter;
+
+        return $adapter;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function buildUrl(string $url, array $data): string
+    {
+        if ($data === []) {
+            return $url;
+        }
+
+        return $url . (str_contains($url, '?') ? '&' : '?') . http_build_query($data);
     }
 }
