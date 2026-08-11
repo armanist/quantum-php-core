@@ -114,6 +114,9 @@ class HttpClient
     {
         $adapter = new MultiCurlAdapter();
 
+        $adapter->complete(function (CurlAdapterInterface $instance): void {
+            $this->handleResponse($instance);
+        });
         $adapter->success($success);
         $adapter->error($error);
 

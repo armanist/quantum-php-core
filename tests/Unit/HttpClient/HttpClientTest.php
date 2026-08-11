@@ -197,28 +197,40 @@ class HttpClientTest extends AppTestCase
     public function testHttpClientCreateAsyncMultiRequestRegistersCallbacks(): void
     {
         $fixturePath = PROJECT_ROOT . DS . 'app.conf';
-        $successWrapped = null;
-        $errorWrapped = null;
+        $missingFixturePath = PROJECT_ROOT . DS . 'missing-async.conf';
+        $successWrapped = [];
+        $errorWrapped = [];
         $success = function (CurlAdapter $instance) use (&$successWrapped): void {
-            $successWrapped = $instance;
+            $successWrapped[$instance->getId()] = $instance;
         };
         $error = function (CurlAdapter $instance) use (&$errorWrapped): void {
-            $errorWrapped = $instance;
+            $errorWrapped[$instance->getId()] = $instance;
         };
 
         $this->httpClient
             ->createAsyncMultiRequest($success, $error)
             ->addGet($this->fileUrl($fixturePath))
-            ->start();
+            ->addGet($this->fileUrl($missingFixturePath));
 
         $this->assertTrue($this->httpClient->isMultiRequest());
-
         $this->assertInstanceOf(MultiCurlAdapter::class, $this->httpClient->getAdapter());
 
-        $this->assertInstanceOf(CurlAdapter::class, $successWrapped);
+        $queuedRequests = array_values($this->httpClient->getAdapter()->getQueuedRequests());
+        [$successRequest, $errorRequest] = $queuedRequests;
 
-        $this->assertNull($errorWrapped);
-        $this->assertSame(file_get_contents($fixturePath), $successWrapped->getResponse());
+        $this->httpClient->start();
+
+        $this->assertSame([$successRequest->getId() => $successRequest], $successWrapped);
+        $this->assertSame([$errorRequest->getId() => $errorRequest], $errorWrapped);
+        $this->assertSame(file_get_contents($fixturePath), $successRequest->getResponse());
+
+        $response = $this->httpClient->getResponse();
+        $errors = $this->httpClient->getErrors();
+
+        $this->assertSame(file_get_contents($fixturePath), $response[$successRequest->getId()]['body']);
+        $this->assertSame('', $response[$errorRequest->getId()]['body']);
+        $this->assertArrayHasKey($errorRequest->getId(), $errors);
+        $this->assertNotSame(0, $errors[$errorRequest->getId()]['code']);
     }
 
     public function testHttpClientInfoAndUrl(): void
