@@ -32,6 +32,16 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     private array $queue = [];
 
     /**
+     * @var array<int|string, mixed>
+     */
+    private array $headers = [];
+
+    /**
+     * @var array<int, mixed>
+     */
+    private array $options = [];
+
+    /**
      * @var callable|null
      */
     private $completeCallback;
@@ -154,6 +164,8 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function setHeader(string $key, $value): MultiCurlAdapterInterface
     {
         if ($this->client === null) {
+            $this->applyHeader($key, $value);
+
             return $this;
         }
 
@@ -168,6 +180,10 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function setHeaders(array $headers): MultiCurlAdapterInterface
     {
         if ($this->client === null) {
+            foreach ($headers as $key => $value) {
+                $this->applyHeader(trim((string) $key), trim((string) $value));
+            }
+
             return $this;
         }
 
@@ -182,6 +198,8 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function setOpt(int $option, $value): MultiCurlAdapterInterface
     {
         if ($this->client === null) {
+            $this->applyOption($option, $value);
+
             return $this;
         }
 
@@ -196,6 +214,10 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function setOpts(array $options): MultiCurlAdapterInterface
     {
         if ($this->client === null) {
+            foreach ($options as $option => $value) {
+                $this->applyOption($option, $value);
+            }
+
             return $this;
         }
 
@@ -248,10 +270,36 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     {
         $adapter = new CurlAdapter();
         $adapter->setUrl($url);
+        $adapter->setHeaders($this->headers);
+        $adapter->setOpts($this->options);
 
         $this->queue[$adapter->getId()] = $adapter;
 
         return $adapter;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private function applyHeader(string $key, $value): void
+    {
+        $this->headers[$key] = $value;
+
+        foreach ($this->queue as $adapter) {
+            $adapter->setHeader($key, $value);
+        }
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private function applyOption(int $option, $value): void
+    {
+        $this->options[$option] = $value;
+
+        foreach ($this->queue as $adapter) {
+            $adapter->setOpt($option, $value);
+        }
     }
 
     /**

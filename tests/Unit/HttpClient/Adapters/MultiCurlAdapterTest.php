@@ -71,6 +71,49 @@ class MultiCurlAdapterTest extends AppTestCase
         $this->assertSame([], $errorRequests);
     }
 
+    public function testMultiCurlAdapterAppliesNativeHeadersAndOptionsToFutureQueuedRequests(): void
+    {
+        $adapter = new MultiCurlAdapter();
+
+        $adapter
+            ->setHeader('Accept', 'application/json')
+            ->setHeaders(['X-Test' => 'yes'])
+            ->setOpt(CURLOPT_TIMEOUT, 10)
+            ->setOpts([CURLOPT_CONNECTTIMEOUT => 5]);
+
+        $request = $adapter->addGet('https://example.com');
+
+        $this->assertSame([
+            'Accept' => 'application/json',
+            'X-Test' => 'yes',
+        ], $this->getPrivateProperty($request, 'headers'));
+        $this->assertSame([
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ], $this->getPrivateProperty($adapter, 'options'));
+    }
+
+    public function testMultiCurlAdapterAppliesNativeHeadersAndOptionsToExistingQueuedRequests(): void
+    {
+        $adapter = new MultiCurlAdapter();
+        $request = $adapter->addGet('https://example.com');
+
+        $adapter
+            ->setHeader('Accept', 'application/json')
+            ->setHeaders(['X-Test' => 'yes'])
+            ->setOpt(CURLOPT_TIMEOUT, 10)
+            ->setOpts([CURLOPT_CONNECTTIMEOUT => 5]);
+
+        $this->assertSame([
+            'Accept' => 'application/json',
+            'X-Test' => 'yes',
+        ], $this->getPrivateProperty($request, 'headers'));
+        $this->assertSame([
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ], $this->getPrivateProperty($adapter, 'options'));
+    }
+
     public function testMultiCurlAdapterDelegatesRequestMethods(): void
     {
         $getCurl = Mockery::mock(Curl::class);
