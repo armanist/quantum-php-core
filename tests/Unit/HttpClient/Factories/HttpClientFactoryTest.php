@@ -39,7 +39,9 @@ class HttpClientFactoryTest extends AppTestCase
             ->addGet($this->fileUrl($fixturePath))
             ->start();
 
-        $this->assertSame(file_get_contents($fixturePath), reset($httpClient->getResponse())['body']);
+        $response = $httpClient->getResponse();
+
+        $this->assertSame(file_get_contents($fixturePath), reset($response)['body']);
     }
 
     public function testHttpClientFactoryCreatesAsyncMultiRequest(): void
