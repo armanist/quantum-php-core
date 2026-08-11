@@ -129,6 +129,19 @@ class HttpClientTest extends AppTestCase
         $this->assertEquals('ok', $this->httpClient->getResponseBody());
     }
 
+    public function testHttpClientNativeSingleRequestResponseFlow(): void
+    {
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+
+        $this->httpClient
+            ->createRequest($this->fileUrl($fixturePath))
+            ->start();
+
+        $this->assertSame([], $this->httpClient->getErrors());
+        $this->assertSame(file_get_contents($fixturePath), $this->httpClient->getResponseBody());
+        $this->assertSame(file_get_contents($fixturePath), $this->httpClient->getResponse()['body']);
+    }
+
     public function testHttpClientPostRequestWithData(): void
     {
         $curl = Mockery::mock(Curl::class);
@@ -305,5 +318,10 @@ class HttpClientTest extends AppTestCase
         $this->httpClient->createRequest('https://example.com', $curl);
 
         $this->assertSame('zero', $this->httpClient->info(0));
+    }
+
+    private function fileUrl(string $path): string
+    {
+        return 'file:///' . str_replace('\\', '/', $path);
     }
 }

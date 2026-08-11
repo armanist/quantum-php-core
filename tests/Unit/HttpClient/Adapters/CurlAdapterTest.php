@@ -206,14 +206,16 @@ class CurlAdapterTest extends AppTestCase
     public function testCurlAdapterKeepsNativeErrorMessageNullOnSuccess(): void
     {
         $adapter = new CurlAdapter();
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
 
-        $this->setPrivateProperty($adapter, 'error', false);
-        $this->setPrivateProperty($adapter, 'errorCode', 0);
-        $this->setPrivateProperty($adapter, 'errorMessage', null);
+        $adapter
+            ->setUrl($this->fileUrl($fixturePath))
+            ->start();
 
         $this->assertFalse($adapter->isError());
         $this->assertSame(0, $adapter->getErrorCode());
         $this->assertNull($adapter->getErrorMessage());
+        $this->assertSame(file_get_contents($fixturePath), $adapter->getResponse());
     }
 
     public function testCurlAdapterKeepsInjectedVendorClientAsTransitionBridge(): void
@@ -295,5 +297,10 @@ class CurlAdapterTest extends AppTestCase
         $this->assertTrue($adapter->supportsMethod('setHeaders'));
         $this->assertFalse($adapter->supportsMethod('setTimeout'));
         $this->assertSame($adapter, $adapter->callMethod('setHeaders', [['Accept' => 'application/json']]));
+    }
+
+    private function fileUrl(string $path): string
+    {
+        return 'file:///' . str_replace('\\', '/', $path);
     }
 }
