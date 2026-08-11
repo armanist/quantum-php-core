@@ -247,6 +247,15 @@ class CurlAdapter implements CurlAdapterInterface
         $this->resetResponseState();
 
         $rawResponse = curl_exec($this->handle);
+
+        $this->finalizeResponse($rawResponse);
+    }
+
+    /**
+     * @param mixed $rawResponse
+     */
+    public function finalizeResponse($rawResponse): void
+    {
         $curlErrorCode = curl_errno($this->handle);
         $curlErrorMessage = curl_error($this->handle);
         $httpStatusCode = (int) $this->getInfo(CURLINFO_HTTP_CODE);

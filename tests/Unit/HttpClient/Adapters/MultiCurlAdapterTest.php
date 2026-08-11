@@ -36,6 +36,41 @@ class MultiCurlAdapterTest extends AppTestCase
         ], $adapter->getQueuedRequests());
     }
 
+    public function testMultiCurlAdapterExecutesNativeRequestsAndDispatchesCallbacks(): void
+    {
+        $adapter = new MultiCurlAdapter();
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+        $completeRequests = [];
+        $successRequests = [];
+        $errorRequests = [];
+
+        $firstRequest = $adapter->addGet($this->fileUrl($fixturePath));
+        $secondRequest = $adapter->addGet($this->fileUrl($fixturePath));
+
+        $adapter
+            ->complete(function (CurlAdapter $instance) use (&$completeRequests): void {
+                $completeRequests[$instance->getId()] = $instance;
+            })
+            ->success(function (CurlAdapter $instance) use (&$successRequests): void {
+                $successRequests[$instance->getId()] = $instance;
+            })
+            ->error(function (CurlAdapter $instance) use (&$errorRequests): void {
+                $errorRequests[$instance->getId()] = $instance;
+            })
+            ->start();
+
+        $this->assertSame(file_get_contents($fixturePath), $firstRequest->getResponse());
+        $this->assertSame(file_get_contents($fixturePath), $secondRequest->getResponse());
+        $this->assertFalse($firstRequest->isError());
+        $this->assertFalse($secondRequest->isError());
+        $this->assertSame([
+            $firstRequest->getId() => $firstRequest,
+            $secondRequest->getId() => $secondRequest,
+        ], $completeRequests);
+        $this->assertSame($completeRequests, $successRequests);
+        $this->assertSame([], $errorRequests);
+    }
+
     public function testMultiCurlAdapterDelegatesRequestMethods(): void
     {
         $getCurl = Mockery::mock(Curl::class);
@@ -123,5 +158,10 @@ class MultiCurlAdapterTest extends AppTestCase
         $this->assertTrue($adapter->supportsMethod('addGet'));
         $this->assertFalse($adapter->supportsMethod('missingMethod'));
         $this->assertEquals((object) ['id' => 1], $adapter->callMethod('addGet', ['https://example.com', []]));
+    }
+
+    private function fileUrl(string $path): string
+    {
+        return 'file:///' . str_replace('\\', '/', $path);
     }
 }

@@ -12,6 +12,7 @@ namespace Quantum\HttpClient\Adapters;
 
 use Quantum\HttpClient\Contracts\MultiCurlAdapterInterface;
 use CurlMultiHandle;
+use CurlHandle;
 use Curl\MultiCurl;
 use Curl\Curl;
 
@@ -30,6 +31,21 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     private array $queue = [];
 
+    /**
+     * @var callable|null
+     */
+    private $completeCallback;
+
+    /**
+     * @var callable|null
+     */
+    private $successCallback;
+
+    /**
+     * @var callable|null
+     */
+    private $errorCallback;
+
     public function __construct(?MultiCurl $client = null)
     {
         $this->client = $client;
@@ -44,6 +60,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function complete(callable $callback): MultiCurlAdapterInterface
     {
         if ($this->client === null) {
+            $this->completeCallback = $callback;
             return $this;
         }
 
@@ -57,6 +74,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function success(callable $callback): MultiCurlAdapterInterface
     {
         if ($this->client === null) {
+            $this->successCallback = $callback;
             return $this;
         }
 
@@ -70,6 +88,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function error(callable $callback): MultiCurlAdapterInterface
     {
         if ($this->client === null) {
+            $this->errorCallback = $callback;
             return $this;
         }
 
@@ -83,6 +102,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
     public function start(): void
     {
         if ($this->client === null) {
+            $this->startNativeRequests();
             return;
         }
 
@@ -244,5 +264,53 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
         }
 
         return $url . (str_contains($url, '?') ? '&' : '?') . http_build_query($data);
+    }
+
+    private function startNativeRequests(): void
+    {
+        foreach ($this->queue as $adapter) {
+            curl_multi_add_handle($this->handle, $adapter->getHandle());
+        }
+
+        do {
+            do {
+                $status = curl_multi_exec($this->handle, $running);
+            } while ($status === CURLM_CALL_MULTI_PERFORM);
+
+            while ($info = curl_multi_info_read($this->handle)) {
+                $this->completeNativeRequest($info['handle']);
+            }
+
+            if ($running > 0) {
+                curl_multi_select($this->handle);
+            }
+        } while ($running > 0);
+    }
+
+    private function completeNativeRequest(CurlHandle $handle): void
+    {
+        foreach ($this->queue as $adapter) {
+            if ($adapter->getHandle() !== $handle) {
+                continue;
+            }
+
+            $adapter->finalizeResponse(curl_multi_getcontent($handle));
+
+            if ($this->completeCallback !== null) {
+                ($this->completeCallback)($adapter);
+            }
+
+            if ($adapter->isError()) {
+                if ($this->errorCallback !== null) {
+                    ($this->errorCallback)($adapter);
+                }
+            } elseif ($this->successCallback !== null) {
+                ($this->successCallback)($adapter);
+            }
+
+            curl_multi_remove_handle($this->handle, $handle);
+
+            return;
+        }
     }
 }
