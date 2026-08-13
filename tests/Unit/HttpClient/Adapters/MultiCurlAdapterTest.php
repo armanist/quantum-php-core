@@ -5,8 +5,6 @@ namespace Quantum\Tests\Unit\HttpClient\Adapters;
 use Quantum\HttpClient\Adapters\MultiCurlAdapter;
 use Quantum\HttpClient\Adapters\CurlAdapter;
 use Quantum\Tests\Unit\AppTestCase;
-use Curl\MultiCurl;
-use Curl\Curl;
 use Mockery;
 
 class MultiCurlAdapterTest extends AppTestCase
@@ -18,92 +16,167 @@ class MultiCurlAdapterTest extends AppTestCase
         parent::tearDown();
     }
 
-    public function testMultiCurlAdapterDelegatesRequestMethods(): void
+    public function testMultiCurlAdapterQueuesNativeRequests(): void
     {
-        $getCurl = Mockery::mock(Curl::class);
-        $postCurl = Mockery::mock(Curl::class);
+        $adapter = new MultiCurlAdapter();
 
-        $multiCurl = Mockery::mock(MultiCurl::class);
-        $multiCurl->shouldReceive('setHeader')->once()->with('Accept', 'application/json');
-        $multiCurl->shouldReceive('setHeaders')->once()->with(['X-Test' => 'yes']);
-        $multiCurl->shouldReceive('setOpt')->once()->with(CURLOPT_TIMEOUT, 10);
-        $multiCurl->shouldReceive('setOpts')->once()->with([CURLOPT_CONNECTTIMEOUT => 5]);
-        $multiCurl->shouldReceive('addGet')->once()->with('https://example.com', ['a' => 1])->andReturn($getCurl);
-        $multiCurl->shouldReceive('addPost')->once()->with('https://example.com', 'payload', true)->andReturn($postCurl);
-        $multiCurl->shouldReceive('start')->once()->andReturnNull();
+        $getRequest = $adapter->addGet('https://example.com?existing=yes', ['a' => 1]);
+        $postRequest = $adapter->addPost('https://example.org', 'payload', true);
 
-        $adapter = new MultiCurlAdapter($multiCurl);
+        $this->assertInstanceOf(CurlAdapter::class, $getRequest);
+        $this->assertInstanceOf(CurlAdapter::class, $postRequest);
+        $this->assertNotSame($getRequest->getId(), $postRequest->getId());
+        $this->assertSame('https://example.com?existing=yes&a=1', $getRequest->getUrl());
+        $this->assertSame('https://example.org', $postRequest->getUrl());
+        $this->assertSame([
+            $getRequest->getId() => $getRequest,
+            $postRequest->getId() => $postRequest,
+        ], $adapter->getQueuedRequests());
+    }
 
-        $this->assertSame($adapter, $adapter->setHeader('Accept', 'application/json'));
-        $this->assertSame($adapter, $adapter->setHeaders(['X-Test' => 'yes']));
-        $this->assertSame($adapter, $adapter->setOpt(CURLOPT_TIMEOUT, 10));
-        $this->assertSame($adapter, $adapter->setOpts([CURLOPT_CONNECTTIMEOUT => 5]));
-        $this->assertInstanceOf(CurlAdapter::class, $adapter->addGet('https://example.com', ['a' => 1]));
-        $this->assertInstanceOf(CurlAdapter::class, $adapter->addPost('https://example.com', 'payload', true));
+    public function testMultiCurlAdapterExecutesNativeRequestsAndDispatchesCallbacks(): void
+    {
+        $adapter = new MultiCurlAdapter();
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+        $completeRequests = [];
+        $successRequests = [];
+        $errorRequests = [];
+
+        $firstRequest = $adapter->addGet($this->fileUrl($fixturePath));
+        $secondRequest = $adapter->addGet($this->fileUrl($fixturePath));
+
+        $adapter
+            ->complete(function (CurlAdapter $instance) use (&$completeRequests): void {
+                $completeRequests[$instance->getId()] = $instance;
+            })
+            ->success(function (CurlAdapter $instance) use (&$successRequests): void {
+                $successRequests[$instance->getId()] = $instance;
+            })
+            ->error(function (CurlAdapter $instance) use (&$errorRequests): void {
+                $errorRequests[$instance->getId()] = $instance;
+            })
+            ->start();
+
+        $this->assertSame(file_get_contents($fixturePath), $firstRequest->getResponse());
+        $this->assertSame(file_get_contents($fixturePath), $secondRequest->getResponse());
+        $this->assertFalse($firstRequest->isError());
+        $this->assertFalse($secondRequest->isError());
+        $this->assertSame([
+            $firstRequest->getId() => $firstRequest,
+            $secondRequest->getId() => $secondRequest,
+        ], $completeRequests);
+        $this->assertSame($completeRequests, $successRequests);
+        $this->assertSame([], $errorRequests);
+    }
+
+    public function testMultiCurlAdapterRemovesCompletedRequestsFromQueue(): void
+    {
+        $adapter = new MultiCurlAdapter();
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+        $completeRequests = [];
+
+        $adapter->complete(function (CurlAdapter $instance) use (&$completeRequests): void {
+            $completeRequests[] = $instance->getId();
+        });
+
+        $firstRequest = $adapter->addGet($this->fileUrl($fixturePath));
+        $adapter->start();
+
+        $secondRequest = $adapter->addGet($this->fileUrl($fixturePath));
+        $adapter->start();
+
+        $this->assertSame([$firstRequest->getId(), $secondRequest->getId()], $completeRequests);
+        $this->assertSame([], $adapter->getQueuedRequests());
+    }
+
+    public function testMultiCurlAdapterCleansQueueWhenCallbackThrows(): void
+    {
+        $adapter = new MultiCurlAdapter();
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+        $completeRequests = [];
+
+        $adapter
+            ->complete(function (): void {
+                throw new \RuntimeException('Callback failed');
+            })
+            ->addGet($this->fileUrl($fixturePath));
+
+        try {
+            $adapter->start();
+            $this->fail('Expected callback exception was not thrown');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('Callback failed', $e->getMessage());
+        }
+
+        $this->assertSame([], $adapter->getQueuedRequests());
+
+        $adapter
+            ->complete(function (CurlAdapter $instance) use (&$completeRequests): void {
+                $completeRequests[] = $instance->getId();
+            })
+            ->addGet($this->fileUrl($fixturePath));
 
         $adapter->start();
+
+        $this->assertCount(1, $completeRequests);
+        $this->assertSame([], $adapter->getQueuedRequests());
     }
 
-    public function testMultiCurlAdapterRegistersCallbacks(): void
+    public function testMultiCurlAdapterAppliesNativeHeadersAndOptionsToFutureQueuedRequests(): void
     {
-        $curl = Mockery::mock(Curl::class);
+        $adapter = new MultiCurlAdapter();
 
-        $multiCurl = Mockery::mock(MultiCurl::class);
-        $multiCurl->shouldReceive('success')
-            ->once()
-            ->andReturnUsing(function (callable $callback) use ($curl): void {
-                $callback($curl);
-            });
-        $multiCurl->shouldReceive('error')
-            ->once()
-            ->andReturnUsing(function (callable $callback) use ($curl): void {
-                $callback($curl);
-            });
+        $adapter
+            ->setHeader('Accept', 'application/json')
+            ->setHeaders(['X-Test' => 'yes'])
+            ->setOpt(CURLOPT_TIMEOUT, 10)
+            ->setOpts([CURLOPT_CONNECTTIMEOUT => 5]);
 
-        $adapter = new MultiCurlAdapter($multiCurl);
-        $successWrapped = null;
-        $errorWrapped = null;
+        $request = $adapter->addGet('https://example.com');
 
-        $this->assertSame($adapter, $adapter->success(function (CurlAdapter $instance) use (&$successWrapped): void {
-            $successWrapped = $instance;
-        }));
-        $this->assertSame($adapter, $adapter->error(function (CurlAdapter $instance) use (&$errorWrapped): void {
-            $errorWrapped = $instance;
-        }));
-        $this->assertInstanceOf(CurlAdapter::class, $successWrapped);
-        $this->assertInstanceOf(CurlAdapter::class, $errorWrapped);
+        $this->assertSame([
+            'Accept' => 'application/json',
+            'X-Test' => 'yes',
+        ], $this->getPrivateProperty($request, 'headers'));
+        $this->assertSame([
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ], $this->getPrivateProperty($adapter, 'options'));
     }
 
-    public function testMultiCurlAdapterWrapsCompleteCallbackInstance(): void
+    public function testMultiCurlAdapterAppliesNativeHeadersAndOptionsToExistingQueuedRequests(): void
     {
-        $curl = Mockery::mock(Curl::class);
+        $adapter = new MultiCurlAdapter();
+        $request = $adapter->addGet('https://example.com');
 
-        $multiCurl = Mockery::mock(MultiCurl::class);
-        $multiCurl->shouldReceive('complete')
-            ->once()
-            ->andReturnUsing(function (callable $callback) use ($curl): void {
-                $callback($curl);
-            });
+        $adapter
+            ->setHeader('Accept', 'application/json')
+            ->setHeaders(['X-Test' => 'yes'])
+            ->setOpt(CURLOPT_TIMEOUT, 10)
+            ->setOpts([CURLOPT_CONNECTTIMEOUT => 5]);
 
-        $adapter = new MultiCurlAdapter($multiCurl);
-        $wrapped = null;
-
-        $this->assertSame($adapter, $adapter->complete(function (CurlAdapter $instance) use (&$wrapped): void {
-            $wrapped = $instance;
-        }));
-
-        $this->assertInstanceOf(CurlAdapter::class, $wrapped);
+        $this->assertSame([
+            'Accept' => 'application/json',
+            'X-Test' => 'yes',
+        ], $this->getPrivateProperty($request, 'headers'));
+        $this->assertSame([
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ], $this->getPrivateProperty($adapter, 'options'));
     }
 
     public function testMultiCurlAdapterSupportsDocumentedMethods(): void
     {
-        $multiCurl = Mockery::mock(MultiCurl::class);
-        $multiCurl->shouldReceive('addGet')->once()->with('https://example.com', [])->andReturn((object) ['id' => 1]);
-
-        $adapter = new MultiCurlAdapter($multiCurl);
+        $adapter = new MultiCurlAdapter();
 
         $this->assertTrue($adapter->supportsMethod('addGet'));
         $this->assertFalse($adapter->supportsMethod('missingMethod'));
-        $this->assertEquals((object) ['id' => 1], $adapter->callMethod('addGet', ['https://example.com', []]));
+        $this->assertInstanceOf(CurlAdapter::class, $adapter->callMethod('addGet', ['https://example.com', []]));
+        $this->assertNull($adapter->callMethod('missingMethod', []));
+    }
+
+    private function fileUrl(string $path): string
+    {
+        return 'file:///' . str_replace('\\', '/', $path);
     }
 }

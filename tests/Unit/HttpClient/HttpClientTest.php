@@ -7,9 +7,6 @@ use Quantum\HttpClient\Adapters\MultiCurlAdapter;
 use Quantum\HttpClient\Adapters\CurlAdapter;
 use Quantum\HttpClient\HttpClient;
 use Quantum\Tests\Unit\AppTestCase;
-use Curl\CaseInsensitiveArray;
-use Curl\MultiCurl;
-use Curl\Curl;
 use Mockery;
 
 class HttpClientTest extends AppTestCase
@@ -58,20 +55,13 @@ class HttpClientTest extends AppTestCase
 
     public function testHttpClientIsMultiRequest(): void
     {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('setUrl')->with('https://example.com')->once();
-
-        $multi = Mockery::mock(MultiCurl::class);
-
-        $multi->shouldReceive('complete')->once();
-
-        $this->httpClient->createRequest('https://example.com', $curl);
+        $this->httpClient->createRequest('https://example.com');
 
         $this->assertFalse($this->httpClient->isMultiRequest());
 
         $this->assertInstanceOf(CurlAdapter::class, $this->httpClient->getAdapter());
 
-        $this->httpClient->createMultiRequest($multi);
+        $this->httpClient->createMultiRequest();
 
         $this->assertTrue($this->httpClient->isMultiRequest());
 
@@ -94,11 +84,7 @@ class HttpClientTest extends AppTestCase
 
     public function testHttpClientEnsureSingleRequestThrowsOnMulti(): void
     {
-        $multi = Mockery::mock(MultiCurl::class);
-
-        $multi->shouldReceive('complete')->once();
-
-        $this->httpClient->createMultiRequest($multi);
+        $this->httpClient->createMultiRequest();
 
         $this->expectException(HttpClientException::class);
 
@@ -107,26 +93,15 @@ class HttpClientTest extends AppTestCase
 
     public function testHttpClientSingleRequestResponseFlow(): void
     {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('setUrl')->with('https://example.com')->once();
-        $curl->shouldReceive('setOpt')->with(CURLOPT_CUSTOMREQUEST, 'GET')->once();
-        $curl->shouldReceive('exec')->once();
-        $curl->shouldReceive('isError')->andReturn(false);
-        $curl->shouldReceive('getId')->andReturn(0);
-        $curl->shouldReceive('getResponseHeaders')
-            ->andReturn(new CaseInsensitiveArray(['Content-Type' => 'text/plain']));
-        $curl->shouldReceive('getResponseCookies')->andReturn(['a' => 'b']);
-        $curl->shouldReceive('getResponse')->andReturn('ok');
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
 
         $this->httpClient
-            ->createRequest('https://example.com', $curl)
+            ->createRequest($this->fileUrl($fixturePath))
             ->start();
 
-        $this->assertEquals('text/plain', $this->httpClient->getResponseHeaders('content-type'));
-
-        $this->assertEquals('b', $this->httpClient->getResponseCookies('a'));
-
-        $this->assertEquals('ok', $this->httpClient->getResponseBody());
+        $this->assertSame([], $this->httpClient->getResponseHeaders());
+        $this->assertSame([], $this->httpClient->getResponseCookies());
+        $this->assertSame(file_get_contents($fixturePath), $this->httpClient->getResponseBody());
     }
 
     public function testHttpClientNativeSingleRequestResponseFlow(): void
@@ -144,180 +119,135 @@ class HttpClientTest extends AppTestCase
 
     public function testHttpClientPostRequestWithData(): void
     {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('setUrl')->with('https://example.com')->once();
-        $curl->shouldReceive('setOpt')->with(CURLOPT_CUSTOMREQUEST, 'POST')->once();
-        $curl->shouldReceive('buildPostData')->with(['x' => 1])->once()->andReturn('x=1');
-        $curl->shouldReceive('setOpt')->with(CURLOPT_POSTFIELDS, 'x=1')->once();
-        $curl->shouldReceive('exec')->once();
-        $curl->shouldReceive('isError')->andReturn(false);
-        $curl->shouldReceive('getId')->andReturn(0);
-        $curl->shouldReceive('getResponseHeaders')->andReturn(new CaseInsensitiveArray());
-        $curl->shouldReceive('getResponseCookies')->andReturn([]);
-        $curl->shouldReceive('getResponse')->andReturn((object) ['status' => 'ok']);
-
         $this->httpClient
-            ->createRequest('https://example.com', $curl)
+            ->createRequest($this->fileUrl(PROJECT_ROOT . DS . 'app.conf'))
             ->setMethod('POST')
-            ->setData(['x' => 1])
-            ->start();
+            ->setData(['x' => 1]);
 
-        $this->assertEquals('ok', $this->httpClient->getResponseBody()->status);
+        $this->assertSame('POST', $this->httpClient->getMethod());
+        $this->assertSame(['x' => 1], $this->httpClient->getData());
     }
 
     public function testHttpClientSingleRequestError(): void
     {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('setUrl')->with('https://bad.local')->once();
-        $curl->shouldReceive('setOpt')->with(CURLOPT_CUSTOMREQUEST, 'GET')->once();
-        $curl->shouldReceive('exec')->once();
-        $curl->shouldReceive('isError')->andReturn(true);
-        $curl->shouldReceive('getId')->andReturn(0);
-        $curl->shouldReceive('getErrorCode')->andReturn(6);
-        $curl->shouldReceive('getErrorMessage')->andReturn('DNS error');
-        $curl->shouldReceive('getResponseHeaders')->andReturn(new CaseInsensitiveArray());
-        $curl->shouldReceive('getResponseCookies')->andReturn([]);
-        $curl->shouldReceive('getResponse')->andReturn(null);
-
         $this->httpClient
-            ->createRequest('https://bad.local', $curl)
+            ->createRequest($this->fileUrl(PROJECT_ROOT . DS . 'missing.conf'))
             ->start();
 
         $errors = $this->httpClient->getErrors();
 
-        $this->assertEquals(6, $errors['code']);
-
-        $this->assertEquals('DNS error', $errors['message']);
+        $this->assertNotSame(0, $errors['code']);
+        $this->assertNotEmpty($errors['message']);
     }
 
     public function testHttpClientMultiRequestResponseStructure(): void
     {
-        $multi = Mockery::mock(MultiCurl::class);
-        $multi->shouldReceive('complete')
-            ->once()
-            ->andReturnUsing(function ($callback): void {
-                $curl = Mockery::mock(Curl::class);
-                $curl->shouldReceive('isError')->andReturn(false);
-                $curl->shouldReceive('getId')->andReturn(0);
-                $curl->shouldReceive('getResponseHeaders')->andReturn(new CaseInsensitiveArray());
-                $curl->shouldReceive('getResponseCookies')->andReturn([]);
-                $curl->shouldReceive('getResponse')->andReturn('ok');
+        $this->httpClient
+            ->createMultiRequest()
+            ->addGet($this->fileUrl(PROJECT_ROOT . DS . 'app.conf'))
+            ->start();
 
-                $callback($curl);
-            });
+        $response = $this->httpClient->getResponse();
+        $id = array_key_first($response);
 
-        $this->httpClient->createMultiRequest($multi);
+        $this->assertArrayHasKey('headers', $response[$id]);
+        $this->assertArrayHasKey('cookies', $response[$id]);
+        $this->assertArrayHasKey('body', $response[$id]);
+    }
+
+    public function testHttpClientNativeMultiRequestResponseFlow(): void
+    {
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+
+        $this->httpClient
+            ->createMultiRequest()
+            ->addGet($this->fileUrl($fixturePath))
+            ->addGet($this->fileUrl($fixturePath))
+            ->start();
 
         $response = $this->httpClient->getResponse();
 
-        $this->assertArrayHasKey(0, $response);
+        $this->assertCount(2, $response);
+        $this->assertSame([], $this->httpClient->getErrors());
 
-        $this->assertArrayHasKey('headers', $response[0]);
-
-        $this->assertArrayHasKey('cookies', $response[0]);
-
-        $this->assertArrayHasKey('body', $response[0]);
+        foreach ($response as $item) {
+            $this->assertSame([], $item['headers']);
+            $this->assertSame([], $item['cookies']);
+            $this->assertSame(file_get_contents($fixturePath), $item['body']);
+        }
     }
 
     public function testHttpClientMultiRequestAggregatesErrors(): void
     {
-        $multi = Mockery::mock(MultiCurl::class);
-        $multi->shouldReceive('complete')
-            ->once()
-            ->andReturnUsing(function ($callback): void {
-                foreach ([0, 1] as $id) {
-                    $curl = Mockery::mock(Curl::class);
-                    $curl->shouldReceive('isError')->andReturn(true);
-                    $curl->shouldReceive('getId')->andReturn($id);
-                    $curl->shouldReceive('getErrorCode')->andReturn(6);
-                    $curl->shouldReceive('getErrorMessage')->andReturn('DNS error');
-                    $curl->shouldReceive('getResponseHeaders')->andReturn(new CaseInsensitiveArray());
-                    $curl->shouldReceive('getResponseCookies')->andReturn([]);
-                    $curl->shouldReceive('getResponse')->andReturn(null);
-
-                    $callback($curl);
-                }
-            });
-
-        $this->httpClient->createMultiRequest($multi);
+        $this->httpClient
+            ->createMultiRequest()
+            ->addGet($this->fileUrl(PROJECT_ROOT . DS . 'missing-one.conf'))
+            ->addGet($this->fileUrl(PROJECT_ROOT . DS . 'missing-two.conf'))
+            ->start();
 
         $errors = $this->httpClient->getErrors();
 
         $this->assertCount(2, $errors);
-
-        $this->assertEquals(6, $errors[0]['code']);
-
-        $this->assertEquals(6, $errors[1]['code']);
+        foreach ($errors as $error) {
+            $this->assertNotSame(0, $error['code']);
+            $this->assertNotEmpty($error['message']);
+        }
     }
 
     public function testHttpClientCreateAsyncMultiRequestRegistersCallbacks(): void
     {
-        $curl = Mockery::mock(Curl::class);
-        $successWrapped = null;
-        $errorWrapped = null;
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+        $missingFixturePath = PROJECT_ROOT . DS . 'missing-async.conf';
+        $successWrapped = [];
+        $errorWrapped = [];
         $success = function (CurlAdapter $instance) use (&$successWrapped): void {
-            $successWrapped = $instance;
+            $successWrapped[$instance->getId()] = $instance;
         };
         $error = function (CurlAdapter $instance) use (&$errorWrapped): void {
-            $errorWrapped = $instance;
+            $errorWrapped[$instance->getId()] = $instance;
         };
 
-        $multi = Mockery::mock(MultiCurl::class);
-        $multi->shouldReceive('success')
-            ->once()
-            ->andReturnUsing(function (callable $callback) use ($curl): void {
-                $callback($curl);
-            });
-        $multi->shouldReceive('error')
-            ->once()
-            ->andReturnUsing(function (callable $callback) use ($curl): void {
-                $callback($curl);
-            });
-
-        $this->httpClient->createAsyncMultiRequest($success, $error, $multi);
+        $this->httpClient
+            ->createAsyncMultiRequest($success, $error)
+            ->addGet($this->fileUrl($fixturePath))
+            ->addGet($this->fileUrl($missingFixturePath));
 
         $this->assertTrue($this->httpClient->isMultiRequest());
-
         $this->assertInstanceOf(MultiCurlAdapter::class, $this->httpClient->getAdapter());
 
-        $this->assertInstanceOf(CurlAdapter::class, $successWrapped);
+        $queuedRequests = array_values($this->httpClient->getAdapter()->getQueuedRequests());
+        [$successRequest, $errorRequest] = $queuedRequests;
 
-        $this->assertInstanceOf(CurlAdapter::class, $errorWrapped);
+        $this->httpClient->start();
+
+        $this->assertSame([$successRequest->getId() => $successRequest], $successWrapped);
+        $this->assertSame([$errorRequest->getId() => $errorRequest], $errorWrapped);
+        $this->assertSame(file_get_contents($fixturePath), $successRequest->getResponse());
+
+        $response = $this->httpClient->getResponse();
+        $errors = $this->httpClient->getErrors();
+
+        $this->assertSame(file_get_contents($fixturePath), $response[$successRequest->getId()]['body']);
+        $this->assertSame('', $response[$errorRequest->getId()]['body']);
+        $this->assertArrayHasKey($errorRequest->getId(), $errors);
+        $this->assertNotSame(0, $errors[$errorRequest->getId()]['code']);
     }
 
     public function testHttpClientInfoAndUrl(): void
     {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('setUrl')->with('https://example.com')->once();
-        $curl->shouldReceive('setOpt')->with(CURLOPT_CUSTOMREQUEST, 'GET')->once();
-        $curl->shouldReceive('exec')->once();
-        $curl->shouldReceive('isError')->andReturn(false);
-        $curl->shouldReceive('getId')->andReturn(0);
-        $curl->shouldReceive('getResponseHeaders')->andReturn(new CaseInsensitiveArray());
-        $curl->shouldReceive('getResponseCookies')->andReturn([]);
-        $curl->shouldReceive('getResponse')->andReturn('');
-        $curl->shouldReceive('getInfo')->andReturnUsing(
-            fn ($opt = null) => $opt === CURLINFO_HTTP_CODE ? 200 : ['http_code' => 200]
-        );
-
         $this->httpClient
-            ->createRequest('https://example.com', $curl)
+            ->createRequest($this->fileUrl(PROJECT_ROOT . DS . 'app.conf'))
             ->start();
 
-        $this->assertEquals(200, $this->httpClient->info(CURLINFO_HTTP_CODE));
-
-        $this->assertEquals('https://example.com', $this->httpClient->url());
+        $this->assertIsArray($this->httpClient->info());
+        $this->assertSame($this->fileUrl(PROJECT_ROOT . DS . 'app.conf'), $this->httpClient->url());
     }
 
     public function testHttpClientPassesZeroInfoOption(): void
     {
-        $curl = Mockery::mock(Curl::class);
-        $curl->shouldReceive('setUrl')->with('https://example.com')->once();
-        $curl->shouldReceive('getInfo')->with(0)->once()->andReturn('zero');
+        $this->httpClient->createRequest($this->fileUrl(PROJECT_ROOT . DS . 'app.conf'));
 
-        $this->httpClient->createRequest('https://example.com', $curl);
-
-        $this->assertSame('zero', $this->httpClient->info(0));
+        $this->assertFalse($this->httpClient->info(0));
     }
 
     private function fileUrl(string $path): string

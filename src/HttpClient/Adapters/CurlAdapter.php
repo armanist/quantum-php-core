@@ -11,11 +11,11 @@ declare(strict_types=1);
 namespace Quantum\HttpClient\Adapters;
 
 use Quantum\HttpClient\Contracts\CurlAdapterInterface;
+use Quantum\HttpClient\Traits\AdapterTrait;
 use Quantum\HttpClient\ResponseHeaders;
 use JsonSerializable;
 use RuntimeException;
 use CurlHandle;
-use Curl\Curl;
 use CURLFile;
 
 /**
@@ -24,9 +24,11 @@ use CURLFile;
  */
 class CurlAdapter implements CurlAdapterInterface
 {
-    private static int $lastId = 0;
+    use AdapterTrait;
 
-    private ?Curl $client;
+    private const SUPPORTED_METHODS = ['setHeader', 'setHeaders', 'setOpt', 'setOpts'];
+
+    private static int $lastId = 0;
 
     private CurlHandle $handle;
 
@@ -59,12 +61,8 @@ class CurlAdapter implements CurlAdapterInterface
 
     private ?string $errorMessage = null;
 
-    /**
-     * The injected vendor client is a temporary bridge for MultiCurlAdapter until #567.
-     */
-    public function __construct(?Curl $client = null)
+    public function __construct()
     {
-        $this->client = $client;
         $this->id = self::$lastId++;
 
         $handle = curl_init();
@@ -102,7 +100,6 @@ class CurlAdapter implements CurlAdapterInterface
     {
         $this->url = $url;
         $this->applyOption(CURLOPT_URL, $url);
-        $this->client?->setUrl($url);
 
         return $this;
     }
@@ -113,7 +110,6 @@ class CurlAdapter implements CurlAdapterInterface
     public function setOpt(int $option, $value): CurlAdapterInterface
     {
         $this->applyOption($option, $value);
-        $this->client?->setOpt($option, $value);
 
         return $this;
     }
@@ -137,7 +133,6 @@ class CurlAdapter implements CurlAdapterInterface
     {
         $this->headers[$key] = $value;
         $this->applyHeaders();
-        $this->client?->setHeader($key, $value);
 
         return $this;
     }
@@ -152,7 +147,6 @@ class CurlAdapter implements CurlAdapterInterface
         }
 
         $this->applyHeaders();
-        $this->client?->setHeaders($headers);
 
         return $this;
     }
@@ -163,10 +157,6 @@ class CurlAdapter implements CurlAdapterInterface
      */
     public function buildPostData($data)
     {
-        if ($this->client !== null) {
-            return $this->client->buildPostData($data);
-        }
-
         if (
             $this->hasJsonContentType() &&
             (
@@ -239,14 +229,18 @@ class CurlAdapter implements CurlAdapterInterface
 
     public function start(): void
     {
-        if ($this->client !== null) {
-            $this->client->exec();
-            return;
-        }
-
         $this->resetResponseState();
 
         $rawResponse = curl_exec($this->handle);
+
+        $this->finalizeResponse($rawResponse);
+    }
+
+    /**
+     * @param mixed $rawResponse
+     */
+    public function finalizeResponse($rawResponse): void
+    {
         $curlErrorCode = curl_errno($this->handle);
         $curlErrorMessage = curl_error($this->handle);
         $httpStatusCode = (int) $this->getInfo(CURLINFO_HTTP_CODE);
@@ -270,22 +264,22 @@ class CurlAdapter implements CurlAdapterInterface
      */
     public function getId()
     {
-        return $this->client !== null ? $this->client->getId() : $this->id;
+        return $this->id;
     }
 
     public function isError(): bool
     {
-        return $this->client !== null ? $this->client->isError() : $this->error;
+        return $this->error;
     }
 
     public function getErrorCode(): int
     {
-        return $this->client !== null ? $this->client->getErrorCode() : $this->errorCode;
+        return $this->errorCode;
     }
 
     public function getErrorMessage(): ?string
     {
-        return $this->client !== null ? $this->client->getErrorMessage() : $this->errorMessage;
+        return $this->errorMessage;
     }
 
     /**
@@ -293,7 +287,7 @@ class CurlAdapter implements CurlAdapterInterface
      */
     public function getResponseHeaders(): iterable
     {
-        return $this->client !== null ? $this->client->getResponseHeaders() : $this->responseHeaders;
+        return $this->responseHeaders;
     }
 
     /**
@@ -301,7 +295,7 @@ class CurlAdapter implements CurlAdapterInterface
      */
     public function getResponseCookies()
     {
-        return $this->client !== null ? $this->client->getResponseCookies() : $this->responseCookies;
+        return $this->responseCookies;
     }
 
     /**
@@ -309,7 +303,7 @@ class CurlAdapter implements CurlAdapterInterface
      */
     public function getResponse()
     {
-        return $this->client !== null ? $this->client->getResponse() : $this->response;
+        return $this->response;
     }
 
     /**
@@ -317,39 +311,17 @@ class CurlAdapter implements CurlAdapterInterface
      */
     public function getInfo(?int $option = null)
     {
-        if ($this->client !== null) {
-            return $option !== null ? $this->client->getInfo($option) : $this->client->getInfo();
-        }
-
         return $option !== null ? curl_getinfo($this->handle, $option) : curl_getinfo($this->handle);
     }
 
     public function getUrl(): ?string
     {
-        return $this->url ?? $this->client?->getUrl();
+        return $this->url;
     }
 
-    public function supportsMethod(string $method): bool
+    public function getHandle(): CurlHandle
     {
-        return in_array($method, ['setHeader', 'setHeaders', 'setOpt', 'setOpts'], true)
-            || ($this->client !== null && method_exists($this->client, $method));
-    }
-
-    /**
-     * @param array<mixed> $arguments
-     * @return mixed
-     */
-    public function callMethod(string $method, array $arguments)
-    {
-        if (in_array($method, ['setHeader', 'setHeaders', 'setOpt', 'setOpts'], true)) {
-            return $this->$method(...$arguments);
-        }
-
-        if ($this->client === null) {
-            return null;
-        }
-
-        return $this->client->$method(...$arguments);
+        return $this->handle;
     }
 
     private function resetResponseState(): void

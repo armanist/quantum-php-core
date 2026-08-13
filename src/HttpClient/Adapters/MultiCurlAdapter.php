@@ -11,8 +11,9 @@ declare(strict_types=1);
 namespace Quantum\HttpClient\Adapters;
 
 use Quantum\HttpClient\Contracts\MultiCurlAdapterInterface;
-use Curl\MultiCurl;
-use Curl\Curl;
+use Quantum\HttpClient\Traits\AdapterTrait;
+use CurlMultiHandle;
+use CurlHandle;
 
 /**
  * Class MultiCurlAdapter
@@ -20,43 +21,76 @@ use Curl\Curl;
  */
 class MultiCurlAdapter implements MultiCurlAdapterInterface
 {
-    private MultiCurl $client;
+    use AdapterTrait;
 
-    public function __construct(?MultiCurl $client = null)
+    private const SUPPORTED_METHODS = ['addGet', 'addPost', 'setHeader', 'setHeaders', 'setOpt', 'setOpts'];
+
+    private CurlMultiHandle $handle;
+
+    /**
+     * @var array<int|string, CurlAdapter>
+     */
+    private array $queue = [];
+
+    /**
+     * @var array<int|string, mixed>
+     */
+    private array $headers = [];
+
+    /**
+     * @var array<int, mixed>
+     */
+    private array $options = [];
+
+    /**
+     * @var callable|null
+     */
+    private $completeCallback;
+
+    /**
+     * @var callable|null
+     */
+    private $successCallback;
+
+    /**
+     * @var callable|null
+     */
+    private $errorCallback;
+
+    public function __construct()
     {
-        $this->client = $client ?? new MultiCurl();
+        $this->handle = curl_multi_init();
+    }
+
+    public function __destruct()
+    {
+        curl_multi_close($this->handle);
     }
 
     public function complete(callable $callback): MultiCurlAdapterInterface
     {
-        $this->client->complete(function (Curl $instance) use ($callback): void {
-            $callback(new CurlAdapter($instance));
-        });
+        $this->completeCallback = $callback;
 
         return $this;
     }
 
     public function success(callable $callback): MultiCurlAdapterInterface
     {
-        $this->client->success(function (Curl $instance) use ($callback): void {
-            $callback(new CurlAdapter($instance));
-        });
+        $this->successCallback = $callback;
 
         return $this;
     }
 
     public function error(callable $callback): MultiCurlAdapterInterface
     {
-        $this->client->error(function (Curl $instance) use ($callback): void {
-            $callback(new CurlAdapter($instance));
-        });
+        $this->errorCallback = $callback;
 
         return $this;
     }
 
     public function start(): void
     {
-        $this->client->start();
+        $this->startNativeRequests();
     }
 
     /**
@@ -65,7 +99,11 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function addGet(string $url, array $data = [])
     {
-        return $this->wrapCurlResult($this->client->addGet($url, $data));
+        $adapter = $this->queueRequest($this->buildUrl($url, $data));
+        $adapter->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
+        $adapter->setOpt(CURLOPT_HTTPGET, true);
+
+        return $adapter;
     }
 
     /**
@@ -74,7 +112,16 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function addPost(string $url, $data = '', bool $follow_303_with_post = false)
     {
-        return $this->wrapCurlResult($this->client->addPost($url, $data, $follow_303_with_post));
+        $adapter = $this->queueRequest($url);
+
+        if ($follow_303_with_post) {
+            $adapter->setOpt(CURLOPT_CUSTOMREQUEST, 'POST');
+        }
+
+        $adapter->setOpt(CURLOPT_POST, true);
+        $adapter->setOpt(CURLOPT_POSTFIELDS, $adapter->buildPostData($data));
+
+        return $adapter;
     }
 
     /**
@@ -82,7 +129,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function setHeader(string $key, $value): MultiCurlAdapterInterface
     {
-        $this->client->setHeader($key, $value);
+        $this->applyHeader($key, $value);
 
         return $this;
     }
@@ -92,7 +139,9 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function setHeaders(array $headers): MultiCurlAdapterInterface
     {
-        $this->client->setHeaders($headers);
+        foreach ($headers as $key => $value) {
+            $this->applyHeader(trim((string) $key), trim((string) $value));
+        }
 
         return $this;
     }
@@ -102,7 +151,7 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function setOpt(int $option, $value): MultiCurlAdapterInterface
     {
-        $this->client->setOpt($option, $value);
+        $this->applyOption($option, $value);
 
         return $this;
     }
@@ -112,31 +161,119 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
      */
     public function setOpts(array $options): MultiCurlAdapterInterface
     {
-        $this->client->setOpts($options);
+        foreach ($options as $option => $value) {
+            $this->applyOption($option, $value);
+        }
 
         return $this;
     }
 
-    public function supportsMethod(string $method): bool
+    /**
+     * @return array<int|string, CurlAdapter>
+     */
+    public function getQueuedRequests(): array
     {
-        return method_exists($this->client, $method);
+        return $this->queue;
+    }
+
+    private function queueRequest(string $url): CurlAdapter
+    {
+        $adapter = new CurlAdapter();
+        $adapter->setUrl($url);
+        $adapter->setHeaders($this->headers);
+        $adapter->setOpts($this->options);
+
+        $this->queue[$adapter->getId()] = $adapter;
+
+        return $adapter;
     }
 
     /**
-     * @param array<mixed> $arguments
-     * @return mixed
+     * @param mixed $value
      */
-    public function callMethod(string $method, array $arguments)
+    private function applyHeader(string $key, $value): void
     {
-        return $this->client->$method(...$arguments);
+        $this->headers[$key] = $value;
+
+        foreach ($this->queue as $adapter) {
+            $adapter->setHeader($key, $value);
+        }
     }
 
     /**
-     * @param mixed $result
-     * @return mixed
+     * @param mixed $value
      */
-    private function wrapCurlResult($result)
+    private function applyOption(int $option, $value): void
     {
-        return $result instanceof Curl ? new CurlAdapter($result) : $result;
+        $this->options[$option] = $value;
+
+        foreach ($this->queue as $adapter) {
+            $adapter->setOpt($option, $value);
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function buildUrl(string $url, array $data): string
+    {
+        if ($data === []) {
+            return $url;
+        }
+
+        return $url . (str_contains($url, '?') ? '&' : '?') . http_build_query($data);
+    }
+
+    private function startNativeRequests(): void
+    {
+        foreach ($this->queue as $adapter) {
+            curl_multi_add_handle($this->handle, $adapter->getHandle());
+        }
+
+        $running = 0;
+
+        do {
+            do {
+                $status = curl_multi_exec($this->handle, $running);
+            } while ($status === CURLM_CALL_MULTI_PERFORM);
+
+            while ($info = curl_multi_info_read($this->handle)) {
+                $this->completeNativeRequest($info['handle']);
+            }
+
+            if ($running > 0 && curl_multi_select($this->handle) === -1) {
+                usleep(1000);
+            }
+        } while ($running > 0);
+    }
+
+    private function completeNativeRequest(CurlHandle $handle): void
+    {
+        foreach ($this->queue as $id => $adapter) {
+            if ($adapter->getHandle() !== $handle) {
+                continue;
+            }
+
+            try {
+                $adapter->finalizeResponse(curl_multi_getcontent($handle));
+
+                if ($this->completeCallback !== null) {
+                    ($this->completeCallback)($adapter);
+                }
+
+                if ($adapter->isError()) {
+                    if ($this->errorCallback !== null) {
+                        ($this->errorCallback)($adapter);
+                    }
+                } elseif ($this->successCallback !== null) {
+                    ($this->successCallback)($adapter);
+                }
+            } finally {
+                curl_multi_remove_handle($this->handle, $handle);
+                unset($this->queue[$id]);
+            }
+
+            return;
+        }
     }
 }

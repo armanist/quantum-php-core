@@ -17,23 +17,23 @@ use Iterator;
 /**
  * Class ResponseHeaders
  * @package Quantum\HttpClient
- * @implements ArrayAccess<int|string, mixed>
- * @implements Iterator<int|string, mixed>
+ * @implements ArrayAccess<string, mixed>
+ * @implements Iterator<string, mixed>
  */
 class ResponseHeaders implements ArrayAccess, Countable, Iterator
 {
     /**
-     * @var array<int|string, mixed>
+     * @var array<string, mixed>
      */
     private array $data = [];
 
     /**
-     * @var array<string, int|string>
+     * @var array<string, string>
      */
     private array $keys = [];
 
     /**
-     * @param array<int|string, mixed>|null $headers
+     * @param array<string, mixed>|null $headers
      */
     public function __construct(?array $headers = null)
     {
@@ -45,47 +45,46 @@ class ResponseHeaders implements ArrayAccess, Countable, Iterator
     }
 
     /**
-     * @param int|string|null $offset
+     * @param string|null $offset
      * @param mixed $value
      */
     public function offsetSet($offset, $value): void
     {
         if ($offset === null) {
-            $this->data[] = $value;
             return;
         }
 
-        $normalizedOffset = strtolower((string) $offset);
+        $normalizedOffset = strtolower($offset);
         $this->data[$normalizedOffset] = $value;
         $this->keys[$normalizedOffset] = $offset;
     }
 
     /**
-     * @param int|string $offset
+     * @param string $offset
      */
     public function offsetExists($offset): bool
     {
-        return array_key_exists(strtolower((string) $offset), $this->data);
+        return array_key_exists(strtolower($offset), $this->data);
     }
 
     /**
-     * @param int|string $offset
+     * @param string $offset
      */
     public function offsetUnset($offset): void
     {
-        $normalizedOffset = strtolower((string) $offset);
+        $normalizedOffset = strtolower($offset);
 
         unset($this->data[$normalizedOffset]);
         unset($this->keys[$normalizedOffset]);
     }
 
     /**
-     * @param int|string $offset
+     * @param string $offset
      * @return mixed|null
      */
     public function offsetGet($offset)
     {
-        return $this->data[strtolower((string) $offset)] ?? null;
+        return $this->data[strtolower($offset)] ?? null;
     }
 
     public function count(): int
@@ -107,7 +106,7 @@ class ResponseHeaders implements ArrayAccess, Countable, Iterator
     }
 
     /**
-     * @return int|string|null
+     * @return string|null
      */
     public function key()
     {
