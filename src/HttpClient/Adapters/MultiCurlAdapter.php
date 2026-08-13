@@ -254,22 +254,24 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
                 continue;
             }
 
-            $adapter->finalizeResponse(curl_multi_getcontent($handle));
+            try {
+                $adapter->finalizeResponse(curl_multi_getcontent($handle));
 
-            if ($this->completeCallback !== null) {
-                ($this->completeCallback)($adapter);
-            }
-
-            if ($adapter->isError()) {
-                if ($this->errorCallback !== null) {
-                    ($this->errorCallback)($adapter);
+                if ($this->completeCallback !== null) {
+                    ($this->completeCallback)($adapter);
                 }
-            } elseif ($this->successCallback !== null) {
-                ($this->successCallback)($adapter);
-            }
 
-            curl_multi_remove_handle($this->handle, $handle);
-            unset($this->queue[$id]);
+                if ($adapter->isError()) {
+                    if ($this->errorCallback !== null) {
+                        ($this->errorCallback)($adapter);
+                    }
+                } elseif ($this->successCallback !== null) {
+                    ($this->successCallback)($adapter);
+                }
+            } finally {
+                curl_multi_remove_handle($this->handle, $handle);
+                unset($this->queue[$id]);
+            }
 
             return;
         }

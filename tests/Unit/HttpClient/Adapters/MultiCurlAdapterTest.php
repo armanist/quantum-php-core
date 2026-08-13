@@ -89,6 +89,39 @@ class MultiCurlAdapterTest extends AppTestCase
         $this->assertSame([], $adapter->getQueuedRequests());
     }
 
+    public function testMultiCurlAdapterCleansQueueWhenCallbackThrows(): void
+    {
+        $adapter = new MultiCurlAdapter();
+        $fixturePath = PROJECT_ROOT . DS . 'app.conf';
+        $completeRequests = [];
+
+        $adapter
+            ->complete(function (): void {
+                throw new \RuntimeException('Callback failed');
+            })
+            ->addGet($this->fileUrl($fixturePath));
+
+        try {
+            $adapter->start();
+            $this->fail('Expected callback exception was not thrown');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('Callback failed', $e->getMessage());
+        }
+
+        $this->assertSame([], $adapter->getQueuedRequests());
+
+        $adapter
+            ->complete(function (CurlAdapter $instance) use (&$completeRequests): void {
+                $completeRequests[] = $instance->getId();
+            })
+            ->addGet($this->fileUrl($fixturePath));
+
+        $adapter->start();
+
+        $this->assertCount(1, $completeRequests);
+        $this->assertSame([], $adapter->getQueuedRequests());
+    }
+
     public function testMultiCurlAdapterAppliesNativeHeadersAndOptionsToFutureQueuedRequests(): void
     {
         $adapter = new MultiCurlAdapter();
