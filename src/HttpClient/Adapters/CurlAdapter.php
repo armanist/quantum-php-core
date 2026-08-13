@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Quantum\HttpClient\Adapters;
 
 use Quantum\HttpClient\Contracts\CurlAdapterInterface;
+use Quantum\HttpClient\Traits\AdapterTrait;
 use Quantum\HttpClient\ResponseHeaders;
 use JsonSerializable;
 use RuntimeException;
@@ -23,6 +24,10 @@ use CURLFile;
  */
 class CurlAdapter implements CurlAdapterInterface
 {
+    use AdapterTrait;
+
+    private const SUPPORTED_METHODS = ['setHeader', 'setHeaders', 'setOpt', 'setOpts'];
+
     private static int $lastId = 0;
 
     private CurlHandle $handle;
@@ -317,24 +322,6 @@ class CurlAdapter implements CurlAdapterInterface
     public function getHandle(): CurlHandle
     {
         return $this->handle;
-    }
-
-    public function supportsMethod(string $method): bool
-    {
-        return in_array($method, ['setHeader', 'setHeaders', 'setOpt', 'setOpts'], true);
-    }
-
-    /**
-     * @param array<mixed> $arguments
-     * @return mixed
-     */
-    public function callMethod(string $method, array $arguments)
-    {
-        if (in_array($method, ['setHeader', 'setHeaders', 'setOpt', 'setOpts'], true)) {
-            return $this->$method(...$arguments);
-        }
-
-        return null;
     }
 
     private function resetResponseState(): void

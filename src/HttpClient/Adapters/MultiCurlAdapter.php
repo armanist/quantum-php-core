@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Quantum\HttpClient\Adapters;
 
 use Quantum\HttpClient\Contracts\MultiCurlAdapterInterface;
+use Quantum\HttpClient\Traits\AdapterTrait;
 use CurlMultiHandle;
 use CurlHandle;
 
@@ -20,6 +21,10 @@ use CurlHandle;
  */
 class MultiCurlAdapter implements MultiCurlAdapterInterface
 {
+    use AdapterTrait;
+
+    private const SUPPORTED_METHODS = ['addGet', 'addPost', 'setHeader', 'setHeaders', 'setOpt', 'setOpts'];
+
     private CurlMultiHandle $handle;
 
     /**
@@ -163,30 +168,12 @@ class MultiCurlAdapter implements MultiCurlAdapterInterface
         return $this;
     }
 
-    public function supportsMethod(string $method): bool
-    {
-        return in_array($method, ['addGet', 'addPost', 'setHeader', 'setHeaders', 'setOpt', 'setOpts'], true);
-    }
-
     /**
      * @return array<int|string, CurlAdapter>
      */
     public function getQueuedRequests(): array
     {
         return $this->queue;
-    }
-
-    /**
-     * @param array<mixed> $arguments
-     * @return mixed
-     */
-    public function callMethod(string $method, array $arguments)
-    {
-        if (in_array($method, ['addGet', 'addPost', 'setHeader', 'setHeaders', 'setOpt', 'setOpts'], true)) {
-            return $this->$method(...$arguments);
-        }
-
-        return null;
     }
 
     private function queueRequest(string $url): CurlAdapter
