@@ -21,17 +21,17 @@ use Generator;
  * @package Quantum\Model
  * @template TKey of array-key
  * @template TValue of Model
- * @implements IteratorAggregate<TKey, TValue>
+ * @implements IteratorAggregate<int|TKey, TValue>
  */
 class ModelCollection implements Countable, IteratorAggregate
 {
     /**
-     * @var array<TKey, TValue>
+     * @var array<int, TValue>
      */
     private array $models = [];
 
     /**
-     * @var iterable<TKey, TValue>
+     * @var iterable<int|TKey, TValue>
      */
     private iterable $originalModels;
 
