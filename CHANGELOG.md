@@ -10,6 +10,7 @@ The format is based on Keep a Changelog.
 - Added adapter-based Lang provider support with `DeepL` and `Google Translate` adapters plus shared remote request/caching infrastructure (#533)
 
 ### Changed
+- Corrected cache adapter deserialization exception handling and `ModelCollection` key type declarations (#570)
 - Refactored `HttpClient` internals behind explicit `CurlAdapter` and `MultiCurlAdapter` wrappers while preserving the existing facade methods and keeping `php-curl-class` as the underlying transport for this phase (#534)
 - Replaced the single-request `HttpClient` `CurlAdapter` execution path with native PHP cURL (#566)
 - Replaced the multi-request `HttpClient` `MultiCurlAdapter` execution path with native PHP multi-curl and removed the `php-curl-class` dependency while preserving facade, factory, helper, callback, and response aggregation behavior (#567)

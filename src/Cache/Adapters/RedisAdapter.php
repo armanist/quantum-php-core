@@ -15,7 +15,7 @@ use Quantum\Cache\Traits\CacheTrait;
 use Psr\SimpleCache\CacheInterface;
 use InvalidArgumentException;
 use RedisException;
-use Exception;
+use Throwable;
 use Redis;
 
 /**
@@ -51,7 +51,7 @@ class RedisAdapter implements CacheInterface
 
             try {
                 return unserialize($cacheItem);
-            } catch (Exception) {
+            } catch (Throwable) {
                 $this->delete($key);
                 return $default;
             }

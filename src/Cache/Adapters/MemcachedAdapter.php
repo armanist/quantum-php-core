@@ -17,7 +17,7 @@ use Quantum\Cache\Traits\CacheTrait;
 use Psr\SimpleCache\CacheInterface;
 use InvalidArgumentException;
 use Memcached;
-use Exception;
+use Throwable;
 
 /**
  * Class MemcachedAdapter
@@ -56,7 +56,7 @@ class MemcachedAdapter implements CacheInterface
 
             try {
                 return unserialize($cacheItem);
-            } catch (Exception) {
+            } catch (Throwable) {
                 $this->delete($key);
                 return $default;
             }
