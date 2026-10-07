@@ -53,7 +53,7 @@ namespace Quantum\Tests\Unit\Di {
     use Quantum\Service\DummyService;
     use Quantum\Http\Response;
     use Quantum\Http\Request;
-    use Quantum\Loader\Setup;
+    use Quantum\Config\Setup;
     use Quantum\App\App;
     use Quantum\Di\Di;
 

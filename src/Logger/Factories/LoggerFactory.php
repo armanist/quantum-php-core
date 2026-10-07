@@ -21,7 +21,7 @@ use Quantum\Di\Exceptions\DiException;
 use Quantum\Logger\Enums\LoggerType;
 use Quantum\Logger\LoggerConfig;
 use Quantum\Logger\Logger;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Di\Di;
 

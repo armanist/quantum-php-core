@@ -12,7 +12,6 @@ namespace Quantum\Validation;
 
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Lang\Exceptions\LangException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Validation\Traits\Resource;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Validation\Traits\General;
@@ -189,7 +188,7 @@ class Validator
     /**
      * Gets validation errors with translations
      * @return array<string, array<int, string|null>>
-     * @throws ConfigException|LoaderException|LangException|DiException|ReflectionException
+     * @throws ConfigException|LangException|DiException|ReflectionException
      */
     public function getErrors(): array
     {
@@ -215,9 +214,8 @@ class Validator
 
     /**
      * Adds an error for a field and rule
-     * @param mixed|null $param
      */
-    protected function addError(string $field, string $rule, $param = null): void
+    protected function addError(string $field, string $rule, mixed $param = null): void
     {
         if (!isset($this->errors[$field])) {
             $this->errors[$field] = [];
@@ -236,10 +234,9 @@ class Validator
 
     /**
      * Executes user defined rule
-     * @param mixed $value
      * @param mixed ...$params
      */
-    protected function executeCustomRule(string $rule, $value, ...$params): bool
+    protected function executeCustomRule(string $rule, mixed $value, ...$params): bool
     {
         $function = $this->customRules[$rule];
 
@@ -250,10 +247,7 @@ class Validator
         return (bool) $function($value, ...$params);
     }
 
-    /**
-     * @param mixed $ruleParam
-     */
-    private function setOrUpdateRule(string $field, string $ruleName, $ruleParam): void
+    private function setOrUpdateRule(string $field, string $ruleName, mixed $ruleParam): void
     {
         if (!isset($this->rules[$field])) {
             $this->rules[$field] = [];

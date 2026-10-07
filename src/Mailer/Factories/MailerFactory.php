@@ -23,7 +23,7 @@ use Quantum\Mailer\Adapters\SmtpAdapter;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Mailer\Enums\MailerType;
 use Quantum\Mailer\Mailer;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Di\Di;
 

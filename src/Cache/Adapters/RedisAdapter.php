@@ -99,10 +99,19 @@ class RedisAdapter implements CacheInterface
      */
     public function set($key, $value, $ttl = null): bool
     {
-        return (bool) $this->redis->set(
-            $this->keyHash($key),
-            serialize($value),
-            $this->normalizeTtl($ttl)
+        $ttl = $this->normalizeTtl($ttl);
+        $key = $this->keyHash($key);
+
+        if ($ttl <= 0) {
+            $this->redis->del($key);
+
+            return true;
+        }
+
+        return (bool) $this->redis->setex(
+            $key,
+            $ttl,
+            serialize($value)
         );
     }
 

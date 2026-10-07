@@ -13,7 +13,7 @@ use Quantum\Service\DummyService;
 use Quantum\Di\DiContainer;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 class DiContainerTest extends AppTestCase
 {
@@ -35,7 +35,7 @@ class DiContainerTest extends AppTestCase
     public function testAttemptingToRegisterAlreadyRegisteredDependency(): void
     {
         $this->expectException(DiException::class);
-        $this->expectExceptionMessage('The dependency `Quantum\Loader\Setup` is already registered.');
+        $this->expectExceptionMessage('The dependency `Quantum\Config\Setup` is already registered.');
 
         $this->container->register(Setup::class);
         $this->container->register(Setup::class);

@@ -2,12 +2,13 @@
 
 namespace Quantum\Tests\Unit\Config;
 
+use Quantum\Tests\_root\modules\Test\Transformers\PostTransformer;
+use Quantum\Transformer\Contracts\TransformerInterface;
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Tests\Unit\AppTestCase;
 use Dflydev\DotAccessData\Data;
 use Quantum\Config\Config;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 class ConfigTest extends AppTestCase
 {
@@ -46,9 +47,126 @@ class ConfigTest extends AppTestCase
         $this->assertEquals('sqlite', $this->config->get('database.default'));
     }
 
+    public function testImportLoadsModuleConfig(): void
+    {
+        $this->config->import(new Setup('config', 'dependencies', true, 'Test'));
+
+        $this->assertSame(
+            PostTransformer::class,
+            $this->config->get('dependencies.' . TransformerInterface::class)
+        );
+    }
+
+    public function testModuleConfigTakesPrecedenceOverSharedConfig(): void
+    {
+        $moduleConfig = PROJECT_ROOT . DS . 'modules' . DS . 'Test' . DS . 'config' . DS . 'app.php';
+        $this->assertFileDoesNotExist($moduleConfig);
+
+        try {
+            $this->createFile($moduleConfig, "<?php\n\nreturn ['name' => 'Module app'];\n");
+            $this->config->import(new Setup('config', 'app', true, 'Test'));
+
+            $this->assertSame('Module app', $this->config->get('app.name'));
+        } finally {
+            $this->removeFile($moduleConfig);
+        }
+    }
+
+    public function testImportFallsBackToSharedConfig(): void
+    {
+        $this->config->import(new Setup('config', 'app', true, 'Test'));
+
+        $this->assertSame('Quantum PHP Framework', $this->config->get('app.name'));
+    }
+
+    public function testNonModuleConfigIsResolvedFromApplicationBase(): void
+    {
+        $filename = 'config_resolution_probe_' . uniqid();
+        $applicationConfigDirectory = PROJECT_ROOT . DS . 'config';
+        $applicationConfig = $applicationConfigDirectory . DS . $filename . '.php';
+        $workingDirectory = sys_get_temp_dir() . DS . 'quantum-config-' . uniqid();
+        $workingConfig = $workingDirectory . DS . 'config';
+        $workingConfigFile = $workingConfig . DS . $filename . '.php';
+        $currentDirectory = getcwd();
+        $createdApplicationConfigDirectory = !is_dir($applicationConfigDirectory);
+
+        if ($createdApplicationConfigDirectory) {
+            mkdir($applicationConfigDirectory, 0777, true);
+        }
+        mkdir($workingConfig, 0777, true);
+        $this->createFile($applicationConfig, "<?php\n\nreturn ['source' => 'application'];\n");
+        file_put_contents($workingConfigFile, "<?php\n\nreturn ['source' => 'working directory'];\n");
+
+        try {
+            chdir($workingDirectory);
+            $this->config->import(new Setup('config', $filename, false));
+
+            $this->assertSame('application', $this->config->get($filename . '.source'));
+        } finally {
+            chdir($currentDirectory);
+            $this->removeFile($applicationConfig);
+            if ($createdApplicationConfigDirectory) {
+                rmdir($applicationConfigDirectory);
+            }
+            unlink($workingConfigFile);
+            rmdir($workingConfig);
+            rmdir($workingDirectory);
+        }
+    }
+
+    public function testImportIfExistsReturnsFalseWithoutChangingConfig(): void
+    {
+        $this->assertFalse($this->config->importIfExists(new Setup('config', 'missing_optional')));
+        $this->assertNull($this->config->all());
+    }
+
+    public function testImportIfExistsTreatsEmptyConfigAsPresent(): void
+    {
+        $filePath = PROJECT_ROOT . DS . 'shared' . DS . 'config' . DS . 'empty_optional.php';
+        $this->assertFileDoesNotExist($filePath);
+
+        try {
+            $this->createFile($filePath, "<?php\n\nreturn [];\n");
+
+            $this->assertTrue($this->config->importIfExists(new Setup('config', 'empty_optional')));
+            $this->assertSame([], $this->config->get('empty_optional'));
+        } finally {
+            $this->removeFile($filePath);
+        }
+    }
+
+    public function testImportIfExistsPreservesCollision(): void
+    {
+        $this->config->import(new Setup('config', 'app'));
+
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Config key `app` is already in use');
+
+        $this->config->importIfExists(new Setup('config', 'app'));
+    }
+
+    public function testImportDoesNotFallBackWhenHierarchyIsDisabled(): void
+    {
+        try {
+            $this->config->import(new Setup('config', 'app', false, 'Test'));
+            $this->fail('Expected a missing config exception');
+        } catch (ConfigException $exception) {
+            $this->assertFalse($this->config->has('app'));
+        }
+    }
+
+    public function testLoadDoesNotReplacePreviouslyLoadedConfig(): void
+    {
+        $this->config->load(new Setup('config', 'app'));
+        $this->config->load(new Setup('config', 'database'));
+
+        $this->assertSame('Quantum PHP Framework', $this->config->get('name'));
+        $this->assertNull($this->config->get('default'));
+    }
+
     public function testImportingNonExistingConfigFile(): void
     {
-        $this->expectException(LoaderException::class);
+        $this->expectException(ConfigException::class);
 
         $this->expectExceptionMessage('File `config' . DS . 'somefile` not found!');
 

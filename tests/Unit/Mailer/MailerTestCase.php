@@ -11,7 +11,6 @@ abstract class MailerTestCase extends AppTestCase
     public function tearDown(): void
     {
         $coreDependencies = [
-            \Quantum\Loader\Loader::class => \Quantum\Loader\Loader::class,
             \Quantum\Http\Request::class => \Quantum\Http\Request::class,
             \Quantum\Http\Response::class => \Quantum\Http\Response::class,
         ];

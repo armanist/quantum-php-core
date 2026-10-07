@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Quantum\App\Adapters;
 
 use Quantum\Middleware\Exceptions\MiddlewareException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Stages\SetupErrorHandlerStage;
 use Quantum\Router\Exceptions\RouteException;
@@ -63,7 +62,7 @@ class WebAppAdapter extends AppAdapter
 
     /**
      * Starts the web app
-     * @throws MiddlewareException|LangException|RouteException|CsrfException|ConfigException|DiException|BaseException|LoaderException|ReflectionException
+     * @throws MiddlewareException|LangException|RouteException|CsrfException|ConfigException|DiException|BaseException|ReflectionException
      */
     public function start(): ?int
     {

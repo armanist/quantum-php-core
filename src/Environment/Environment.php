@@ -15,12 +15,9 @@ use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Environment\Enums\Env;
-use Quantum\Loader\Loader;
-use Quantum\Loader\Setup;
 use ReflectionException;
 use Quantum\App\App;
 use Dotenv\Dotenv;
-use Quantum\Di\Di;
 
 /**
  * Class Environment
@@ -29,11 +26,6 @@ use Quantum\Di\Di;
  */
 class Environment
 {
-    /**
-     * Environment file
-     */
-    private string $envFile = '.env';
-
     private bool $isMutable = false;
 
     /**
@@ -54,32 +46,20 @@ class Environment
 
     /**
      * Loads environment variables from file
-     * @throws EnvException|DiException|BaseException|ReflectionException
+     * @throws EnvException|DiException|BaseException
      */
-    public function load(Setup $setup): void
+    public function load(): void
     {
         if ($this->loaded) {
             return;
         }
 
-        if (!Di::isRegistered(Loader::class)) {
-            Di::register(Loader::class);
-        }
+        [$appEnv, $envFile] = $this->resolveEnvironmentFile();
+        $envContent = $this->loadDotenvFile($envFile);
 
-        $envConfig = Di::get(Loader::class)->setup($setup)->load();
-
-        $appEnv = $envConfig['app_env'] ?? Env::PRODUCTION;
-
-        $this->envFile = '.env' . ($appEnv !== Env::PRODUCTION ? ".$appEnv" : '');
-
-        if (!file_exists($this->getEnvFilePath())) {
-            throw EnvException::fileNotFound($this->envFile);
-        }
-
-        $this->envContent = $this->loadDotenvFile();
-
-        $this->loaded = true;
         $this->appEnv = $appEnv;
+        $this->envContent = $envContent;
+        $this->loaded = true;
     }
 
     /**
@@ -117,11 +97,9 @@ class Environment
 
     /**
      * Gets the environment variable value
-     * @param null|mixed $default
-     * @return mixed
      * @throws EnvException
      */
-    public function getValue(string $key, $default = null)
+    public function getValue(string $key, mixed $default = null): mixed
     {
         if (!$this->loaded) {
             throw EnvException::environmentNotLoaded();
@@ -174,7 +152,7 @@ class Environment
             $envFileContent = fs()->get($envFilePath);
 
             if (!is_string($envFileContent)) {
-                throw EnvException::fileNotFound($this->envFile);
+                throw EnvException::fileNotFound($this->getEnvFileName($this->appEnv));
             }
 
             $pattern = '/^' . preg_quote($key . '=' . $this->envContent[$key], '/') . '/m';
@@ -189,17 +167,45 @@ class Environment
     }
 
     /**
+     * @return array{string, string}
+     * @throws BaseException
+     */
+    private function resolveEnvironmentFile(): array
+    {
+        $filePath = base_dir() . DS . 'shared' . DS . 'config' . DS . 'env.php';
+
+        if (!file_exists($filePath)) {
+            throw EnvException::fileNotFound($filePath);
+        }
+
+        $envConfig = require $filePath;
+        $appEnv = $envConfig['app_env'] ?? Env::PRODUCTION;
+        $envFile = $this->getEnvFileName($appEnv);
+
+        if (!file_exists(App::getBaseDir() . DS . $envFile)) {
+            throw EnvException::fileNotFound($envFile);
+        }
+
+        return [$appEnv, $envFile];
+    }
+
+    /**
      * @return array<string, mixed>
      */
-    private function loadDotenvFile(): array
+    private function loadDotenvFile(string $envFile): array
     {
-        $loadedVars = Dotenv::createArrayBacked(App::getBaseDir(), $this->envFile)->load();
+        $loadedVars = Dotenv::createArrayBacked(App::getBaseDir(), $envFile)->load();
 
         return is_array($loadedVars) ? $loadedVars : [];
     }
 
     private function getEnvFilePath(): string
     {
-        return App::getBaseDir() . DS . $this->envFile;
+        return App::getBaseDir() . DS . $this->getEnvFileName($this->appEnv);
+    }
+
+    private function getEnvFileName(string $appEnv): string
+    {
+        return '.env' . ($appEnv !== Env::PRODUCTION ? ".$appEnv" : '');
     }
 }

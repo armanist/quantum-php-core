@@ -19,7 +19,7 @@ use Quantum\Database\Traits\RelationalTrait;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Database\Enums\DatabaseType;
 use Quantum\Di\Exceptions\DiException;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 
 /**

@@ -12,7 +12,7 @@ use Quantum\Model\Factories\ModelFactory;
 use Quantum\Session\Enums\SessionType;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Session\Session;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use Quantum\Di\Di;
 
 class SessionFactoryTest extends AppTestCase

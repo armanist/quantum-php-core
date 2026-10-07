@@ -1,9 +1,9 @@
 <?php
 
-namespace Quantum\Tests\Unit\Loader;
+namespace Quantum\Tests\Unit\Config;
 
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 class SetupTest extends AppTestCase
 {
@@ -32,6 +32,27 @@ class SetupTest extends AppTestCase
         $this->assertEquals(true, $setup->getHierarchy());
 
         $this->assertEquals('File `' . $setup->getPathPrefix() . DS . $setup->getFilename() . '` not found!', $setup->getExceptionMessage());
+    }
+
+    public function testSetupUsesCurrentRequestModuleWhenModuleIsOmitted(): void
+    {
+        $this->testRequest('/');
+
+        $setup = new Setup('config', 'dependencies');
+
+        request()->setMatchedRoute(null);
+
+        $this->assertSame('Test', $setup->getModule());
+        $this->assertSame('Meme', (new Setup('config', 'dependencies', true, 'Meme'))->getModule());
+    }
+
+    public function testDefaultExceptionMessageIsCapturedAtConstruction(): void
+    {
+        $setup = new Setup('config', 'app');
+
+        $setup->setPathPrefix('other')->setFilename('changed');
+
+        $this->assertSame('File `config' . DS . 'app` not found!', $setup->getExceptionMessage());
     }
 
     public function testSetGetPathPrefix(): void

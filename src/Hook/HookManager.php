@@ -11,10 +11,9 @@ declare(strict_types=1);
 namespace Quantum\Hook;
 
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Hook\Exceptions\HookException;
 use Quantum\Di\Exceptions\DiException;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 
 /**
@@ -35,7 +34,7 @@ class HookManager
     private array $store = [];
 
     /**
-     * @throws HookException|ConfigException|DiException|LoaderException|ReflectionException
+     * @throws HookException|ConfigException|DiException|ReflectionException
      */
     public function __construct()
     {

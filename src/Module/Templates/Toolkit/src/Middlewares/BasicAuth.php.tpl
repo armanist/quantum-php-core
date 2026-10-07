@@ -9,7 +9,7 @@
 namespace Modules\Toolkit\Middlewares;
 
 use Quantum\Middleware\Middleware;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 use Closure;

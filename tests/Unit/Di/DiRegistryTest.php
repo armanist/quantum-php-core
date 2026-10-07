@@ -5,7 +5,7 @@ namespace Quantum\Tests\Unit\Di;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Di\DiRegistry;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use Quantum\Http\Request;
 
 class DiRegistryTest extends AppTestCase
@@ -40,7 +40,7 @@ class DiRegistryTest extends AppTestCase
     public function testAttemptingToRegisterAlreadyRegisteredDependency(): void
     {
         $this->expectException(DiException::class);
-        $this->expectExceptionMessage('The dependency `Quantum\Loader\Setup` is already registered.');
+        $this->expectExceptionMessage('The dependency `Quantum\Config\Setup` is already registered.');
 
         $this->registry->register(Setup::class);
         $this->registry->register(Setup::class);
@@ -73,7 +73,7 @@ class DiRegistryTest extends AppTestCase
     public function testGetConcreteThrowsForUnregisteredDependency(): void
     {
         $this->expectException(DiException::class);
-        $this->expectExceptionMessage('The dependency `Quantum\Loader\Setup` is not registered.');
+        $this->expectExceptionMessage('The dependency `Quantum\Config\Setup` is not registered.');
 
         $this->registry->getConcrete(Setup::class);
     }

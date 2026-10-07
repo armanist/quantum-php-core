@@ -14,7 +14,7 @@ namespace Quantum\Tests\Unit\Auth {
     use Quantum\Database\Adapters\Sleekdb\SleekDbal;
     use Quantum\Tests\Unit\AppTestCase;
     use Quantum\Mailer\Mailer;
-    use Quantum\Loader\Setup;
+    use Quantum\Config\Setup;
     use Quantum\Auth\User;
     use Mockery;
 

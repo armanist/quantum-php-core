@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Quantum\Config\Contracts;
 
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 /**
  * Interface ConfigInterface
@@ -61,4 +61,9 @@ interface ConfigInterface
      * Imports new config file
      */
     public function import(Setup $setup): void;
+
+    /**
+     * Imports new config file when it exists
+     */
+    public function importIfExists(Setup $setup): bool;
 }

@@ -13,7 +13,6 @@ namespace Quantum\Lang\Traits;
 use Quantum\HttpClient\Exceptions\HttpClientException;
 use Quantum\Lang\Adapters\GoogleTranslateAdapter;
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Lang\Exceptions\LangException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Lang\Adapters\DeepLAdapter;
@@ -34,7 +33,7 @@ trait RemoteAdapterTrait
 
     /**
      * @param array<int|string, mixed>|string|null $params
-     * @throws LangException|LoaderException|ConfigException|DiException|BaseException|ReflectionException
+     * @throws LangException|ConfigException|DiException|BaseException|ReflectionException
      */
     protected function buildSourceText(string $key, array|string $params = null): string
     {
@@ -102,11 +101,7 @@ trait RemoteAdapterTrait
      * @param array<string, mixed> $headers
      * @param array<int, mixed> $options
      * @param string $method
-     * @return mixed
-     * @throws BaseException
-     * @throws ErrorException
-     * @throws LangException
-     * @throws HttpClientException
+     * @throws LangException|HttpClientException|ErrorException|BaseException
      */
     protected function sendRequest(string $url, $data = null, array $headers = [], array $options = [], string $method = 'POST'): mixed
     {

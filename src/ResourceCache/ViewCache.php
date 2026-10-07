@@ -12,13 +12,12 @@ namespace Quantum\ResourceCache;
 
 use Quantum\ResourceCache\Exceptions\ResourceCacheException;
 use Quantum\Storage\Factories\FileSystemFactory;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Storage\FileSystem;
 use Quantum\Http\Response;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use voku\helper\HtmlMin;
 use Exception;
@@ -51,7 +50,7 @@ class ViewCache
     }
 
     /**
-     * @throws ConfigException|DiException|LoaderException|ReflectionException
+     * @throws ConfigException|DiException|ReflectionException
      */
     public function setup(): void
     {

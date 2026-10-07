@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Quantum\Paginator\Traits;
 
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Lang\Exceptions\LangException;
 use Quantum\Paginator\Enums\Pagination;
 use Quantum\Di\Exceptions\DiException;
@@ -207,10 +206,6 @@ trait PaginatorTrait
         return implode('', $pagination);
     }
 
-    /**
-     * Get the URI for pagination
-     * @throws DiException|ReflectionException
-     */
     protected function getUri(bool $withBaseUrl = false): string
     {
         $routeUrl = preg_replace('/([?&](page|per_page)=\d+)/', '', request()->getUri() ?? '');
@@ -226,10 +221,6 @@ trait PaginatorTrait
         return $url . $delimiter;
     }
 
-    /**
-     * Get page link
-     * @throws DiException|ReflectionException
-     */
     protected function getPageLink(?int $pageNumber, bool $withBaseUrl = false): ?string
     {
         if ($pageNumber !== null && $pageNumber !== 0) {
@@ -241,7 +232,7 @@ trait PaginatorTrait
 
     /**
      * Get next page item HTML
-     * @throws LoaderException|ConfigException|DiException|ReflectionException|LangException
+     * @throws ConfigException|DiException|ReflectionException|LangException
      */
     protected function getNextPageItem(?string $nextPageLink): string
     {
@@ -261,7 +252,7 @@ trait PaginatorTrait
      */
     /**
      * Get previous page item HTML
-     * @throws LoaderException|ConfigException|DiException|LangException|ReflectionException
+     * @throws ConfigException|DiException|LangException|ReflectionException
      */
     protected function getPreviousPageItem(?string $previousPageLink): string
     {

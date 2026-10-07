@@ -12,7 +12,6 @@ namespace Quantum\Lang\Factories;
 
 use Quantum\Lang\Adapters\GoogleTranslateAdapter;
 use Quantum\Lang\Contracts\LangAdapterInterface;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Lang\Exceptions\LangException;
 use Quantum\App\Exceptions\BaseException;
@@ -21,7 +20,7 @@ use Quantum\Lang\Adapters\FileAdapter;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\HttpClient\HttpClient;
 use Quantum\Lang\Enums\LangType;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Lang\Lang;
 use Quantum\Di\Di;
@@ -44,7 +43,7 @@ class LangFactory
     private array $instances = [];
 
     /**
-     * @throws LangException|ConfigException|LoaderException|DiException|ReflectionException
+     * @throws LangException|ConfigException|DiException|ReflectionException
      */
     public static function get(?string $adapter = null): Lang
     {
@@ -56,7 +55,7 @@ class LangFactory
     }
 
     /**
-     * @throws LangException|ConfigException|DiException|ReflectionException|LoaderException|BaseException
+     * @throws LangException|ConfigException|DiException|ReflectionException|BaseException
      */
     public function resolve(?string $adapter = null): Lang
     {

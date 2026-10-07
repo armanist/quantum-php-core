@@ -8,7 +8,7 @@ use Quantum\Session\Contracts\SessionStorageInterface;
 use Quantum\Session\Exceptions\SessionException;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Session\Session;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 class SessionTest extends AppTestCase
 {

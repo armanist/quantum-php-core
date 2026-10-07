@@ -5,7 +5,7 @@ namespace Quantum\Tests\Unit\Mailer\Adapters;
 use Quantum\Mailer\Adapters\SendinblueAdapter;
 use Quantum\Mailer\Adapters\SmtpAdapter;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 class MailerAdapterTraitTest extends AppTestCase
 {

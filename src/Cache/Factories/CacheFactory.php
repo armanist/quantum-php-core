@@ -20,7 +20,7 @@ use Quantum\Cache\Adapters\FileAdapter;
 use Quantum\Di\Exceptions\DiException;
 use Psr\SimpleCache\CacheInterface;
 use Quantum\Cache\Enums\CacheType;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Cache\Cache;
 use Quantum\Di\Di;

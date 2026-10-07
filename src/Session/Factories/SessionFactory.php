@@ -19,7 +19,7 @@ use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Session\Enums\SessionType;
 use Quantum\Session\Session;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Di\Di;
 

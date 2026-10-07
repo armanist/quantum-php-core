@@ -163,6 +163,17 @@ class RedisAdapterTest extends AppTestCase
         $this->assertEquals('Test value', $this->redis->get('test'));
     }
 
+    public function testRedisAdapterSetWithNonPositiveTtlDeletesExistingKey(): void
+    {
+        foreach ([0, -1] as $ttl) {
+            $key = 'non_positive_ttl_' . $ttl;
+            $this->redis->set($key, 'Existing value');
+
+            $this->assertTrue($this->redis->set($key, 'Expired value', $ttl));
+            $this->assertFalse($this->redis->has($key));
+        }
+    }
+
     public function testRedisAdapterSetWithDateIntervalTtl(): void
     {
         $this->redis->set('test', 'Test value', new DateInterval('PT60S'));
