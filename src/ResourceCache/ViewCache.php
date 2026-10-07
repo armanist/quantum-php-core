@@ -12,7 +12,6 @@ namespace Quantum\ResourceCache;
 
 use Quantum\ResourceCache\Exceptions\ResourceCacheException;
 use Quantum\Storage\Factories\FileSystemFactory;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
@@ -51,7 +50,7 @@ class ViewCache
     }
 
     /**
-     * @throws ConfigException|DiException|LoaderException|ReflectionException
+     * @throws ConfigException|DiException|ReflectionException
      */
     public function setup(): void
     {

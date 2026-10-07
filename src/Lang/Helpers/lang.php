@@ -7,14 +7,13 @@
  */
 
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Lang\Exceptions\LangException;
 use Quantum\Lang\Factories\LangFactory;
 use Quantum\Di\Exceptions\DiException;
 
 /**
  * Gets the current lang
- * @throws LangException|LoaderException|ConfigException|DiException|ReflectionException
+ * @throws LangException|ConfigException|DiException|ReflectionException
  */
 function current_lang(): ?string
 {
@@ -24,9 +23,9 @@ function current_lang(): ?string
 /**
  * Gets translation
  * @param array<int|string, mixed>|string|null $params
- * @throws LangException|LoaderException|ConfigException|DiException|ReflectionException
+ * @throws LangException|ConfigException|DiException|ReflectionException
  */
-function t(string $key, $params = null): ?string
+function t(string $key, array|string $params = null): ?string
 {
     return LangFactory::get()->getTranslation($key, $params);
 }
@@ -34,9 +33,9 @@ function t(string $key, $params = null): ?string
 /**
  * Outputs the translation
  * @param array<int|string, mixed>|string|null $params
- * @throws LangException|LoaderException|ConfigException|DiException|ReflectionException
+ * @throws LangException|ConfigException|DiException|ReflectionException
  */
-function _t(string $key, $params = null): void
+function _t(string $key, array|string $params = null): void
 {
     echo t($key, $params);
 }

@@ -16,7 +16,6 @@ use Quantum\Storage\Exceptions\FileSystemException;
 use Quantum\Storage\Exceptions\FileUploadException;
 use Quantum\Storage\Uploads\UploadConfigProvider;
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Lang\Exceptions\LangException;
 use Quantum\Storage\Uploads\UploadStorage;
 use Quantum\App\Exceptions\BaseException;
@@ -147,6 +146,7 @@ class UploadedFile extends SplFileInfo
 
     /**
      * Get name
+     * @throws ConfigException|DiException|BaseException|ReflectionException
      */
     public function getName(): string
     {
@@ -197,6 +197,7 @@ class UploadedFile extends SplFileInfo
 
     /**
      * Get file name with extension
+     * @throws ConfigException|DiException|BaseException|ReflectionException
      */
     public function getNameWithExtension(): string
     {
@@ -312,7 +313,7 @@ class UploadedFile extends SplFileInfo
     }
 
     /**
-     * Sets modification function on image
+     * Sets a modification function on an image
      * @param array<mixed> $params
      * @throws FileUploadException|LangException|BaseException
      */
@@ -388,7 +389,7 @@ class UploadedFile extends SplFileInfo
     }
 
     /**
-     * @throws FileUploadException|LoaderException|ConfigException|DiException|ReflectionException
+     * @throws FileUploadException|ConfigException
      */
     private function ensureAllowedMimeTypesLoaded(): void
     {
@@ -404,11 +405,9 @@ class UploadedFile extends SplFileInfo
 
     /**
      * Applies modifications on image
-     * @param string $filePath
-     * @return void
      * @throws ImageResizeException
      */
-    protected function applyModifications(string $filePath)
+    protected function applyModifications(string $filePath): void
     {
         $image = new ImageResize($filePath);
         $callable = [$image, $this->imageModifierFuncName ?? ''];

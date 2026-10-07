@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Quantum\Console\Commands;
 
 use Quantum\Storage\Factories\FileSystemFactory;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
@@ -124,7 +123,7 @@ class ResourceCacheClearCommand extends CliCommand
     }
 
     /**
-     * @throws LoaderException|ConfigException|DiException|ReflectionException
+     * @throws ConfigException|DiException|ReflectionException
      */
     private function importConfig(): void
     {

@@ -12,7 +12,6 @@ namespace Quantum\Lang\Adapters;
 
 use Quantum\Lang\Contracts\LangAdapterInterface;
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Lang\Exceptions\LangException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
@@ -50,7 +49,7 @@ class FileAdapter implements LangAdapterInterface
     }
 
     /**
-     * @throws LangException|LoaderException|ConfigException|DiException|BaseException|ReflectionException
+     * @throws LangException|ConfigException|DiException|BaseException|ReflectionException
      */
     public function loadTranslations(): void
     {
@@ -84,6 +83,7 @@ class FileAdapter implements LangAdapterInterface
 
     /**
      * @param array<int|string, mixed>|string|null $params
+     * @throws LangException|ConfigException|DiException|BaseException|ReflectionException
      */
     public function get(string $key, array|string $params = null): string
     {

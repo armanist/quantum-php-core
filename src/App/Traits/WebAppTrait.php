@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Quantum\App\Traits;
 
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Router\Exceptions\RouteException;
 use Quantum\Lang\Exceptions\LangException;
 use Quantum\App\Exceptions\BaseException;
@@ -54,7 +53,7 @@ trait WebAppTrait
 
     /**
      * Resolve lang config and current locale before controller hooks run.
-     * @throws LangException|ConfigException|LoaderException|DiException|ReflectionException
+     * @throws LangException|ConfigException|DiException|ReflectionException
      */
     private function loadLanguage(): void
     {
@@ -74,7 +73,7 @@ trait WebAppTrait
     }
 
     /**
-     * @throws ConfigException|DiException|ReflectionException|LoaderException
+     * @throws ConfigException|DiException|ReflectionException
      */
     private function setupViewCache(): ViewCache
     {
@@ -92,7 +91,7 @@ trait WebAppTrait
     }
 
     /**
-     * @throws ConfigException|LoaderException|DiException|ReflectionException
+     * @throws ConfigException|DiException|ReflectionException
      */
     private function handleCors(Response $response): void
     {
@@ -106,7 +105,7 @@ trait WebAppTrait
     }
 
     /**
-     * @throws ConfigException|LoaderException|DiException|ReflectionException|Exception
+     * @throws ConfigException|DiException|ReflectionException|Exception
      */
     private function sendResponse(Response $response): void
     {
