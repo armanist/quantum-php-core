@@ -10,6 +10,10 @@ The format is based on Keep a Changelog.
 - Added adapter-based Lang provider support with `DeepL` and `Google Translate` adapters plus shared remote request/caching infrastructure (#533)
 
 ### Changed
+- **BREAKING:** Removed `Quantum\Loader` and moved its responsibilities to their owning packages (#535):
+  - Moved `Setup` to `Quantum\Config\Setup`; required config failures now use `ConfigException`, and optional imports use `Config::importIfExists()`.
+  - `Environment::load()` no longer accepts `Setup`, reads only `shared/config/env.php`, and reports missing files with `EnvException`.
+  - App boot now loads component, app, and module helpers directly.
 - Corrected cache adapter deserialization exception handling and `ModelCollection` key type declarations (#570)
 - Refactored `HttpClient` internals behind explicit `CurlAdapter` and `MultiCurlAdapter` wrappers while preserving the existing facade methods and keeping `php-curl-class` as the underlying transport for this phase (#534)
 - Replaced the single-request `HttpClient` `CurlAdapter` execution path with native PHP cURL (#566)
