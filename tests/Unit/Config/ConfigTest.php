@@ -79,6 +79,41 @@ class ConfigTest extends AppTestCase
         $this->assertSame('Quantum PHP Framework', $this->config->get('app.name'));
     }
 
+    public function testNonModuleConfigIsResolvedFromApplicationBase(): void
+    {
+        $filename = 'config_resolution_probe_' . uniqid();
+        $applicationConfigDirectory = PROJECT_ROOT . DS . 'config';
+        $applicationConfig = $applicationConfigDirectory . DS . $filename . '.php';
+        $workingDirectory = sys_get_temp_dir() . DS . 'quantum-config-' . uniqid();
+        $workingConfig = $workingDirectory . DS . 'config';
+        $workingConfigFile = $workingConfig . DS . $filename . '.php';
+        $currentDirectory = getcwd();
+        $createdApplicationConfigDirectory = !is_dir($applicationConfigDirectory);
+
+        if ($createdApplicationConfigDirectory) {
+            mkdir($applicationConfigDirectory, 0777, true);
+        }
+        mkdir($workingConfig, 0777, true);
+        $this->createFile($applicationConfig, "<?php\n\nreturn ['source' => 'application'];\n");
+        file_put_contents($workingConfigFile, "<?php\n\nreturn ['source' => 'working directory'];\n");
+
+        try {
+            chdir($workingDirectory);
+            $this->config->import(new Setup('config', $filename, false));
+
+            $this->assertSame('application', $this->config->get($filename . '.source'));
+        } finally {
+            chdir($currentDirectory);
+            $this->removeFile($applicationConfig);
+            if ($createdApplicationConfigDirectory) {
+                rmdir($applicationConfigDirectory);
+            }
+            unlink($workingConfigFile);
+            rmdir($workingConfig);
+            rmdir($workingDirectory);
+        }
+    }
+
     public function testImportIfExistsReturnsFalseWithoutChangingConfig(): void
     {
         $this->assertFalse($this->config->importIfExists(new Setup('config', 'missing_optional')));

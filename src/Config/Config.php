@@ -145,7 +145,7 @@ class Config implements ConfigInterface
 
     private function resolveFilePath(Setup $setup): ?string
     {
-        $filePath = '';
+        $filePath = App::getBaseDir() . DS;
 
         if ($setup->getModule()) {
             $filePath = modules_dir() . DS . $setup->getModule() . DS;

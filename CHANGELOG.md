@@ -12,6 +12,7 @@ The format is based on Keep a Changelog.
 ### Changed
 - **BREAKING:** Removed `Quantum\Loader` and moved its responsibilities to their owning packages (#535):
   - Moved `Setup` to `Quantum\Config\Setup`; required config failures now use `ConfigException`, and optional imports use `Config::importIfExists()`.
+  - Config paths resolve from the application base directory, independent of the process working directory.
   - `Environment::load()` no longer accepts `Setup`, reads only `shared/config/env.php`, and reports missing files with `EnvException`.
   - App boot now loads component, app, and module helpers directly.
 - Corrected cache adapter deserialization exception handling and `ModelCollection` key type declarations (#570)
