@@ -25,6 +25,7 @@ class LoadEnvironmentStageTest extends AppTestCase
         $stage = new LoadEnvironmentStage();
         $stage->process($this->context);
 
+        $this->assertSame('testing', environment()->getAppEnv());
         $this->assertNotEmpty(env('APP_KEY'));
     }
 }

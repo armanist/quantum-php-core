@@ -2,6 +2,8 @@
 
 namespace Quantum\Tests\Unit\Config;
 
+use Quantum\Tests\_root\modules\Test\Transformers\PostTransformer;
+use Quantum\Transformer\Contracts\TransformerInterface;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Tests\Unit\AppTestCase;
@@ -44,6 +46,57 @@ class ConfigTest extends AppTestCase
         $this->assertNotNull($this->config->get('database.default'));
 
         $this->assertEquals('sqlite', $this->config->get('database.default'));
+    }
+
+    public function testImportLoadsModuleConfig(): void
+    {
+        $this->config->import(new Setup('config', 'dependencies', true, 'Test'));
+
+        $this->assertSame(
+            PostTransformer::class,
+            $this->config->get('dependencies.' . TransformerInterface::class)
+        );
+    }
+
+    public function testModuleConfigTakesPrecedenceOverSharedConfig(): void
+    {
+        $moduleConfig = PROJECT_ROOT . DS . 'modules' . DS . 'Test' . DS . 'config' . DS . 'app.php';
+        $this->assertFileDoesNotExist($moduleConfig);
+
+        try {
+            $this->createFile($moduleConfig, "<?php\n\nreturn ['name' => 'Module app'];\n");
+            $this->config->import(new Setup('config', 'app', true, 'Test'));
+
+            $this->assertSame('Module app', $this->config->get('app.name'));
+        } finally {
+            $this->removeFile($moduleConfig);
+        }
+    }
+
+    public function testImportFallsBackToSharedConfig(): void
+    {
+        $this->config->import(new Setup('config', 'app', true, 'Test'));
+
+        $this->assertSame('Quantum PHP Framework', $this->config->get('app.name'));
+    }
+
+    public function testImportDoesNotFallBackWhenHierarchyIsDisabled(): void
+    {
+        try {
+            $this->config->import(new Setup('config', 'app', false, 'Test'));
+            $this->fail('Expected a missing config exception');
+        } catch (LoaderException $exception) {
+            $this->assertFalse($this->config->has('app'));
+        }
+    }
+
+    public function testLoadDoesNotReplacePreviouslyLoadedConfig(): void
+    {
+        $this->config->load(new Setup('config', 'app'));
+        $this->config->load(new Setup('config', 'database'));
+
+        $this->assertSame('Quantum PHP Framework', $this->config->get('name'));
+        $this->assertNull($this->config->get('default'));
     }
 
     public function testImportingNonExistingConfigFile(): void

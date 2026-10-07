@@ -2,8 +2,11 @@
 
 namespace Quantum\Tests\Unit\Environment;
 
+use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\App\AppContext;
+use Quantum\Loader\Setup;
 use Quantum\App\App;
 
 class EnvironmentTest extends AppTestCase
@@ -20,6 +23,21 @@ class EnvironmentTest extends AppTestCase
     public function testEnvironmentGetAppEnv(): void
     {
         $this->assertEquals('testing', $this->env->getAppEnv());
+    }
+
+    public function testLoadReportsMissingBootstrapConfig(): void
+    {
+        $context = App::getContext();
+
+        try {
+            App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer()));
+
+            $this->expectException(LoaderException::class);
+
+            (new Environment())->load(new Setup('config', 'env'));
+        } finally {
+            App::setContext($context);
+        }
     }
 
     public function testEnvironmentGetValue(): void
