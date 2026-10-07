@@ -2,11 +2,10 @@
 
 namespace Quantum\Tests\Unit\Environment;
 
-use Quantum\Loader\Exceptions\LoaderException;
+use Quantum\Environment\Exceptions\EnvException;
 use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\AppContext;
-use Quantum\Config\Setup;
 use Quantum\App\App;
 
 class EnvironmentTest extends AppTestCase
@@ -32,9 +31,45 @@ class EnvironmentTest extends AppTestCase
         try {
             App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer()));
 
-            $this->expectException(LoaderException::class);
+            $this->expectException(EnvException::class);
+            $this->expectExceptionMessage('shared' . DS . 'config' . DS . 'env.php');
 
-            (new Environment())->load(new Setup('config', 'env'));
+            (new Environment())->load();
+        } finally {
+            App::setContext($context);
+        }
+    }
+
+    public function testLoadIgnoresModuleBootstrapConfig(): void
+    {
+        $moduleConfig = PROJECT_ROOT . DS . 'modules' . DS . 'Test' . DS . 'config' . DS . 'env.php';
+        $this->assertFileDoesNotExist($moduleConfig);
+
+        try {
+            $this->createFile($moduleConfig, "<?php\n\nreturn ['app_env' => 'staging'];\n");
+            $this->testRequest('/');
+
+            $environment = new Environment();
+            $environment->load();
+
+            $this->assertSame('testing', $environment->getAppEnv());
+        } finally {
+            $this->removeFile($moduleConfig);
+        }
+    }
+
+    public function testLoadDoesNotReadBootstrapAgain(): void
+    {
+        $environment = new Environment();
+        $environment->load();
+        $context = App::getContext();
+
+        try {
+            App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer()));
+
+            $environment->load();
+
+            $this->assertSame('testing', $environment->getAppEnv());
         } finally {
             App::setContext($context);
         }

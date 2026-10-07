@@ -16,8 +16,6 @@ use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Environment\Environment;
 use Quantum\App\AppContext;
-use Quantum\Config\Setup;
-use ReflectionException;
 use Quantum\Di\Di;
 
 /**
@@ -27,13 +25,13 @@ use Quantum\Di\Di;
 class LoadEnvironmentStage implements BootStageInterface
 {
     /**
-     * @throws EnvException|DiException|BaseException|ReflectionException
+     * @throws EnvException|DiException|BaseException
      */
     public function process(AppContext $context): void
     {
         $environment = new Environment();
 
-        $environment->load(new Setup('config', 'env'));
+        $environment->load();
 
         Di::set(Environment::class, $environment);
     }
