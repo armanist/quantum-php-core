@@ -13,6 +13,7 @@ namespace Quantum\Config;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Config\Contracts\ConfigInterface;
 use Dflydev\DotAccessData\Data;
+use Quantum\App\App;
 
 /**
  * Class Config
@@ -161,7 +162,7 @@ class Config implements ConfigInterface
         }
 
         if ($setup->getHierarchy()) {
-            $filePath = base_dir() . DS . 'shared' . DS
+            $filePath = App::getBaseDir() . DS . 'shared' . DS
                 . strtolower($setup->getPathPrefix() ?? '') . DS
                 . $setup->getFilename() . '.php';
 
