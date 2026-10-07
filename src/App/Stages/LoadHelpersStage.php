@@ -11,12 +11,8 @@ declare(strict_types=1);
 namespace Quantum\App\Stages;
 
 use Quantum\App\Contracts\BootStageInterface;
-use Quantum\Di\Exceptions\DiException;
 use Quantum\App\AppContext;
-use Quantum\Loader\Loader;
-use ReflectionException;
 use Quantum\App\App;
-use Quantum\Di\Di;
 
 /**
  * Class LoadHelpersStage
@@ -24,23 +20,14 @@ use Quantum\Di\Di;
  */
 class LoadHelpersStage implements BootStageInterface
 {
-    /**
-     * @throws DiException|ReflectionException
-     */
     public function process(AppContext $context): void
     {
-        if (!Di::isRegistered(Loader::class)) {
-            Di::register(Loader::class);
-        }
-
-        $loader = Di::get(Loader::class);
-
-        $this->loadComponentHelpers($loader);
-        $this->loadAppHelpers($loader);
-        $this->loadModuleHelpers($loader);
+        $this->loadComponentHelpers();
+        $this->loadAppHelpers();
+        $this->loadModuleHelpers();
     }
 
-    private function loadComponentHelpers(Loader $loader): void
+    private function loadComponentHelpers(): void
     {
         $srcDir = dirname(__DIR__, 2);
 
@@ -49,18 +36,31 @@ class LoadHelpersStage implements BootStageInterface
         foreach (is_array($componentDirs) ? $componentDirs : [] as $componentDir) {
             $helperPath = $componentDir . DS . 'Helpers';
             if (is_dir($helperPath)) {
-                $loader->loadDir($helperPath);
+                $this->loadHelperFiles($helperPath);
             }
         }
     }
 
-    private function loadAppHelpers(Loader $loader): void
+    private function loadAppHelpers(): void
     {
-        $loader->loadDir(App::getBaseDir() . DS . 'helpers');
+        $this->loadHelperFiles(App::getBaseDir() . DS . 'helpers');
     }
 
-    private function loadModuleHelpers(Loader $loader): void
+    private function loadModuleHelpers(): void
     {
-        $loader->loadDir(App::getBaseDir() . DS . 'modules' . DS . '*' . DS . 'helpers');
+        $this->loadHelperFiles(App::getBaseDir() . DS . 'modules' . DS . '*' . DS . 'helpers');
+    }
+
+    private function loadHelperFiles(string $dir): void
+    {
+        $files = glob($dir . DS . '*.php');
+
+        if (!is_array($files)) {
+            return;
+        }
+
+        foreach ($files as $filename) {
+            require_once $filename;
+        }
     }
 }
