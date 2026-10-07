@@ -27,7 +27,7 @@ use Quantum\Storage\Enums\FileSystemType;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\HttpClient\HttpClient;
 use Quantum\Storage\FileSystem;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Di\Di;
 

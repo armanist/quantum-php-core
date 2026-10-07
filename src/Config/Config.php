@@ -11,14 +11,8 @@ declare(strict_types=1);
 namespace Quantum\Config;
 
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Config\Contracts\ConfigInterface;
-use Quantum\Di\Exceptions\DiException;
 use Dflydev\DotAccessData\Data;
-use Quantum\Loader\Loader;
-use Quantum\Loader\Setup;
-use ReflectionException;
-use Quantum\Di\Di;
 
 /**
  * Class Config
@@ -30,7 +24,7 @@ class Config implements ConfigInterface
 
     /**
      * @inheritDoc
-     * @throws DiException|LoaderException|ReflectionException
+     * @throws ConfigException
      */
     public function load(Setup $setup): void
     {
@@ -44,8 +38,6 @@ class Config implements ConfigInterface
     /**
      * @inheritDoc
      * @throws ConfigException
-     * @throws DiException
-     * @throws ReflectionException|LoaderException
      */
     public function import(Setup $setup): void
     {
@@ -62,6 +54,21 @@ class Config implements ConfigInterface
         } else {
             $this->configs->import([$fileName => $data]);
         }
+    }
+
+    /**
+     * @inheritDoc
+     * @throws ConfigException
+     */
+    public function importIfExists(Setup $setup): bool
+    {
+        if ($this->resolveFilePath($setup) === null) {
+            return false;
+        }
+
+        $this->import($setup);
+
+        return true;
     }
 
     /**
@@ -122,14 +129,47 @@ class Config implements ConfigInterface
 
     /**
      * @return array<string, mixed>
-     * @throws DiException|LoaderException|ReflectionException
+     * @throws ConfigException
      */
     private function loadConfig(Setup $setup): array
     {
-        if (!Di::isRegistered(Loader::class)) {
-            Di::register(Loader::class);
+        $filePath = $this->resolveFilePath($setup);
+
+        if ($filePath === null) {
+            throw new ConfigException(_message($setup->getExceptionMessage(), $setup->getFilename() ?? ''));
         }
 
-        return Di::get(Loader::class)->setup($setup)->load();
+        return require $filePath;
+    }
+
+    private function resolveFilePath(Setup $setup): ?string
+    {
+        $filePath = '';
+
+        if ($setup->getModule()) {
+            $filePath = modules_dir() . DS . $setup->getModule() . DS;
+        }
+
+        if ($setup->getPathPrefix()) {
+            $filePath .= $setup->getPathPrefix() . DS;
+        }
+
+        $filePath .= $setup->getFilename() . '.php';
+
+        if (file_exists($filePath)) {
+            return $filePath;
+        }
+
+        if ($setup->getHierarchy()) {
+            $filePath = base_dir() . DS . 'shared' . DS
+                . strtolower($setup->getPathPrefix() ?? '') . DS
+                . $setup->getFilename() . '.php';
+
+            if (file_exists($filePath)) {
+                return $filePath;
+            }
+        }
+
+        return null;
     }
 }

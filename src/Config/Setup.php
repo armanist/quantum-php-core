@@ -8,14 +8,14 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\Loader;
+namespace Quantum\Config;
 
 use Quantum\Di\Exceptions\DiException;
 use ReflectionException;
 
 /**
  * Class Setup
- * @package Quantum\Loader
+ * @package Quantum\Config
  */
 class Setup
 {

@@ -19,7 +19,7 @@ use Quantum\App\Exceptions\BaseException;
 use Quantum\Renderer\Enums\RendererType;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Renderer\Renderer;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Di\Di;
 

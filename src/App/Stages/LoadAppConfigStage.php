@@ -15,7 +15,7 @@ use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\App\AppContext;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 
 /**

@@ -4,7 +4,7 @@ namespace Quantum\Tests\Unit\Loader;
 
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Loader\Loader;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 class LoaderTest extends AppTestCase
 {

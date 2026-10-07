@@ -23,7 +23,7 @@ use Quantum\Router\MatchedRoute;
 use Quantum\Router\RouteFinder;
 use Quantum\Debugger\Debugger;
 use Quantum\Http\Response;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Di\Di;
 use Exception;

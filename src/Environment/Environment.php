@@ -16,7 +16,7 @@ use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Environment\Enums\Env;
 use Quantum\Loader\Loader;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\App\App;
 use Dotenv\Dotenv;

@@ -12,7 +12,7 @@ use Quantum\Mailer\Contracts\MailerInterface;
 use Quantum\Mailer\Adapters\SmtpAdapter;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Mailer\Mailer;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionMethod;
 
 class MailerTest extends AppTestCase

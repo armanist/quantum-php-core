@@ -19,7 +19,7 @@ use Quantum\RateLimit\Enums\RateLimitType;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\RateLimit\RateLimiter;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Di\Di;
 

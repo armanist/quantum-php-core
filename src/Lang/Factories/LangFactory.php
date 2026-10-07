@@ -21,7 +21,7 @@ use Quantum\Lang\Adapters\FileAdapter;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\HttpClient\HttpClient;
 use Quantum\Lang\Enums\LangType;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Lang\Lang;
 use Quantum\Di\Di;

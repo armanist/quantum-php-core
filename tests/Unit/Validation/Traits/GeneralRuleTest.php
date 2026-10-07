@@ -8,7 +8,7 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Validation\Validator;
 use Quantum\Database\Database;
 use Quantum\Validation\Rule;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 class GeneralRuleTest extends AppTestCase
 {

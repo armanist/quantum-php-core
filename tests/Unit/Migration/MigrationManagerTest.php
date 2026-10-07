@@ -8,7 +8,7 @@ use Quantum\Migration\MigrationManager;
 use Quantum\Migration\MigrationTable;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Database\Database;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use Mockery;
 
 class MigrationManagerTest extends AppTestCase

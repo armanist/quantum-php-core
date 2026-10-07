@@ -5,7 +5,7 @@ namespace Quantum\Tests\Unit\Cache\Adapters;
 use Quantum\Database\Adapters\Sleekdb\SleekDbal;
 use Quantum\Cache\Adapters\DatabaseAdapter;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use DateInterval;
 
 class DatabaseAdapterTest extends AppTestCase

@@ -11,36 +11,21 @@ declare(strict_types=1);
 namespace Quantum\Storage\Uploads;
 
 use Quantum\Storage\Exceptions\FileUploadException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Di\Exceptions\DiException;
-use Quantum\Loader\Loader;
-use Quantum\Loader\Setup;
-use ReflectionException;
-use Quantum\Di\Di;
+use Quantum\Config\Setup;
 
 class UploadConfigProvider
 {
     /**
      * @return array<string, list<string>>
-     * @throws FileUploadException|LoaderException|ConfigException|DiException|ReflectionException
+     * @throws FileUploadException|ConfigException
      */
     public function getAllowedMimeTypesMap(): array
     {
         if (!config()->has('uploads')) {
-            if (!Di::isRegistered(Loader::class)) {
-                Di::register(Loader::class);
-            }
-
-            $loader = Di::get(Loader::class);
-            $setup = new Setup('config', 'uploads');
-            $loader->setup($setup);
-
-            if (!$loader->fileExists()) {
+            if (!config()->importIfExists(new Setup('config', 'uploads'))) {
                 return [];
             }
-
-            config()->import($setup);
         }
 
         $allowedMimeTypesMap = config()->get('uploads.allowed_mime_types') ?? [];

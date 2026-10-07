@@ -20,7 +20,7 @@ use Quantum\Di\Exceptions\DiException;
 use Quantum\Captcha\Enums\CaptchaType;
 use Quantum\HttpClient\HttpClient;
 use Quantum\Captcha\Captcha;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use ReflectionException;
 use Quantum\Di\Di;
 

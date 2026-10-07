@@ -6,7 +6,7 @@ use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\AppContext;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use Quantum\App\App;
 
 class EnvironmentTest extends AppTestCase

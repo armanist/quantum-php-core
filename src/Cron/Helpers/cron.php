@@ -11,7 +11,7 @@ use Quantum\Di\Exceptions\DiException;
 use Quantum\Cron\CronManager;
 use Quantum\Cron\CronTask;
 use Quantum\Cron\Schedule;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 if (!function_exists('cron_config')) {
     /**

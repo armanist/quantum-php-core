@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Quantum\Loader;
 
 use Quantum\Loader\Exceptions\LoaderException;
+use Quantum\Config\Setup;
 use Quantum\App\App;
 
 /**

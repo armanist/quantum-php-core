@@ -8,7 +8,7 @@ use Quantum\Model\Factories\ModelFactory;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Model\ModelCollection;
 use Quantum\Paginator\Paginator;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 use Quantum\Model\Model;
 
 class ModelSoftDeletesSleekTest extends AppTestCase

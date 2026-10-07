@@ -5,11 +5,10 @@ namespace Quantum\Tests\Unit\Config;
 use Quantum\Tests\_root\modules\Test\Transformers\PostTransformer;
 use Quantum\Transformer\Contracts\TransformerInterface;
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\Loader\Exceptions\LoaderException;
 use Quantum\Tests\Unit\AppTestCase;
 use Dflydev\DotAccessData\Data;
 use Quantum\Config\Config;
-use Quantum\Loader\Setup;
+use Quantum\Config\Setup;
 
 class ConfigTest extends AppTestCase
 {
@@ -80,12 +79,43 @@ class ConfigTest extends AppTestCase
         $this->assertSame('Quantum PHP Framework', $this->config->get('app.name'));
     }
 
+    public function testImportIfExistsReturnsFalseWithoutChangingConfig(): void
+    {
+        $this->assertFalse($this->config->importIfExists(new Setup('config', 'missing_optional')));
+        $this->assertNull($this->config->all());
+    }
+
+    public function testImportIfExistsTreatsEmptyConfigAsPresent(): void
+    {
+        $filePath = PROJECT_ROOT . DS . 'shared' . DS . 'config' . DS . 'empty_optional.php';
+        $this->assertFileDoesNotExist($filePath);
+
+        try {
+            $this->createFile($filePath, "<?php\n\nreturn [];\n");
+
+            $this->assertTrue($this->config->importIfExists(new Setup('config', 'empty_optional')));
+            $this->assertSame([], $this->config->get('empty_optional'));
+        } finally {
+            $this->removeFile($filePath);
+        }
+    }
+
+    public function testImportIfExistsPreservesCollision(): void
+    {
+        $this->config->import(new Setup('config', 'app'));
+
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Config key `app` is already in use');
+
+        $this->config->importIfExists(new Setup('config', 'app'));
+    }
+
     public function testImportDoesNotFallBackWhenHierarchyIsDisabled(): void
     {
         try {
             $this->config->import(new Setup('config', 'app', false, 'Test'));
             $this->fail('Expected a missing config exception');
-        } catch (LoaderException $exception) {
+        } catch (ConfigException $exception) {
             $this->assertFalse($this->config->has('app'));
         }
     }
@@ -101,7 +131,7 @@ class ConfigTest extends AppTestCase
 
     public function testImportingNonExistingConfigFile(): void
     {
-        $this->expectException(LoaderException::class);
+        $this->expectException(ConfigException::class);
 
         $this->expectExceptionMessage('File `config' . DS . 'somefile` not found!');
 
