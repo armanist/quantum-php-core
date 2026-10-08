@@ -95,4 +95,73 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertSame('1', response()->getHeader('X-Test'));
         $this->assertSame(200, response()->getStatusCode());
     }
+
+    public function testWebAppAdapterBootFiresAppHelperListenerAtModulesBeforeEvent(): void
+    {
+        $this->withTemporaryAppHelper(function (): void {
+            $context = $this->createContext();
+
+            new WebAppAdapter($context);
+
+            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
+            $this->assertSame($context, $GLOBALS['bootEventPayloads'][0]['context']);
+        });
+    }
+
+    public function testWebAppAdapterBootRegistersAppHelperListenerBeforeAppConfigIsLoaded(): void
+    {
+        $this->withTemporaryAppHelper(function (): void {
+            new WebAppAdapter($this->createContext());
+
+            $this->assertFalse($GLOBALS['bootEventConfigLoadedAtRegistration']);
+            $this->assertTrue(config()->has('app'));
+        });
+    }
+
+    public function testWebAppAdapterSecondBootDoesNotRegisterAppHelperListenerAgain(): void
+    {
+        $this->withTemporaryAppHelper(function (): void {
+            new WebAppAdapter($this->createContext());
+            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
+
+            // Helper files load with require_once, so a new container does not get the listener again.
+            new WebAppAdapter($this->createContext());
+            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
+        });
+    }
+
+    private function withTemporaryAppHelper(callable $test): void
+    {
+        $dir = PROJECT_ROOT . DS . 'helpers';
+        $createdDir = !is_dir($dir);
+        $file = $dir . DS . uniqid('event_listener_helper_') . '.php';
+
+        $helper = <<<'PHP'
+<?php
+
+$GLOBALS['bootEventConfigLoadedAtRegistration'] = config()->has('app');
+
+event()->listen('boot.modules.before', function (array $payload): void {
+    $GLOBALS['bootEventPayloads'][] = $payload;
+});
+PHP;
+
+        try {
+            if ($createdDir) {
+                $this->assertTrue(mkdir($dir));
+            }
+
+            $this->assertNotFalse(file_put_contents($file, $helper));
+
+            $test();
+        } finally {
+            if (is_file($file)) {
+                unlink($file);
+            }
+            if ($createdDir && is_dir($dir)) {
+                rmdir($dir);
+            }
+            unset($GLOBALS['bootEventPayloads'], $GLOBALS['bootEventConfigLoadedAtRegistration']);
+        }
+    }
 }

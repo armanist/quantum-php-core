@@ -18,7 +18,7 @@ class EventManagerTest extends AppTestCase
         $this->events = new EventManager();
     }
 
-    public function testListenAndDispatch(): void
+    public function testEventManagerDispatchesToListener(): void
     {
         $output = '';
 
@@ -31,7 +31,7 @@ class EventManagerTest extends AppTestCase
         $this->assertSame('Saved!', $output);
     }
 
-    public function testDispatchPassesPayloadToListener(): void
+    public function testEventManagerPassesPayloadToListener(): void
     {
         $received = null;
 
@@ -44,7 +44,7 @@ class EventManagerTest extends AppTestCase
         $this->assertSame(['user' => 'John'], $received);
     }
 
-    public function testDispatchWithoutPayloadPassesEmptyArray(): void
+    public function testEventManagerPassesEmptyPayloadWhenNoneGiven(): void
     {
         $received = null;
 
@@ -57,7 +57,7 @@ class EventManagerTest extends AppTestCase
         $this->assertSame([], $received);
     }
 
-    public function testListenersRunInRegistrationOrder(): void
+    public function testEventManagerRunsListenersInRegistrationOrder(): void
     {
         $output = '';
 
@@ -74,7 +74,7 @@ class EventManagerTest extends AppTestCase
         $this->assertSame('AB', $output);
     }
 
-    public function testListenersPersistAfterDispatch(): void
+    public function testEventManagerKeepsListenersAfterDispatch(): void
     {
         $count = 0;
 
@@ -88,7 +88,7 @@ class EventManagerTest extends AppTestCase
         $this->assertSame(2, $count);
     }
 
-    public function testListenersAreScopedByEventName(): void
+    public function testEventManagerScopesListenersByEventName(): void
     {
         $output = '';
 
@@ -105,14 +105,14 @@ class EventManagerTest extends AppTestCase
         $this->assertSame('delete', $output);
     }
 
-    public function testDispatchWithoutListenersIsNoOp(): void
+    public function testEventManagerIgnoresDispatchWithoutListeners(): void
     {
         $this->events->dispatch('NEVER_LISTENED');
 
         $this->assertSame([], $this->events->getRegistered());
     }
 
-    public function testListenerExceptionPropagatesAndStopsLaterListeners(): void
+    public function testEventManagerPropagatesListenerExceptionAndStopsLaterListeners(): void
     {
         $called = false;
 
@@ -134,7 +134,7 @@ class EventManagerTest extends AppTestCase
         $this->assertFalse($called);
     }
 
-    public function testListenWithEmptyNameThrows(): void
+    public function testEventManagerThrowsWhenListeningWithEmptyName(): void
     {
         $this->expectException(EventException::class);
         $this->expectExceptionMessage('The event name must not be empty.');
@@ -143,7 +143,7 @@ class EventManagerTest extends AppTestCase
         });
     }
 
-    public function testDispatchWithEmptyNameThrows(): void
+    public function testEventManagerThrowsWhenDispatchingWithEmptyName(): void
     {
         $this->expectException(EventException::class);
         $this->expectExceptionMessage('The event name must not be empty.');
@@ -151,7 +151,7 @@ class EventManagerTest extends AppTestCase
         $this->events->dispatch('');
     }
 
-    public function testGetRegisteredReturnsListenersByName(): void
+    public function testEventManagerGetRegisteredReturnsListenersByName(): void
     {
         $this->events->listen('SAVE', function (): void {
         });
@@ -165,7 +165,7 @@ class EventManagerTest extends AppTestCase
         $this->assertCount(2, $registered['SAVE']);
     }
 
-    public function testWorksWithoutLoadedConfig(): void
+    public function testEventManagerWorksWithoutLoadedConfig(): void
     {
         config()->flush();
 
