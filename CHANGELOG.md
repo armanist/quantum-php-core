@@ -7,9 +7,16 @@ The format is based on Keep a Changelog.
 ## [3.1.0] - TBD
 
 ### Added
+- Added boot stage lifecycle events: stages may declare `BEFORE`/`AFTER` event names and `BootPipeline` dispatches them with the `AppContext` as a named payload. The environment, config, error handler, HTTP, and modules stages declare `boot.<stage>.before` and `boot.<stage>.after` (#536)
 - Added adapter-based Lang provider support with `DeepL` and `Google Translate` adapters plus shared remote request/caching infrastructure (#533)
 
 ### Changed
+- **BREAKING:** Replaced the `Quantum\Hook` package with `Quantum\Event` (#536):
+  - `hook()` is now `event()`; `on()` and `fire()` are now `listen()` and `dispatch()`, and no aliases remain. Listeners receive one named payload array, which is empty when none is given.
+  - Event names no longer need to be registered, so `shared/config/hooks.php` is no longer read; dispatching a name without listeners does nothing and an empty name throws `EventException`.
+  - Listeners stay registered after `dispatch()` instead of being removed after the first call.
+  - Listeners can be registered from app helper files, which load before config and before any boot event.
+  - Removed the unused `hooks_dir()` helper and renamed the debugger tab constant `Debugger::HOOKS` to `Debugger::EVENTS`; the debugbar tab is now `events` and lists only events that have listeners.
 - **BREAKING:** Removed `Quantum\Loader` and moved its responsibilities to their owning packages (#535):
   - Moved `Setup` to `Quantum\Config\Setup`; required config failures now use `ConfigException`, and optional imports use `Config::importIfExists()`.
   - Config paths resolve from the application base directory, independent of the process working directory.

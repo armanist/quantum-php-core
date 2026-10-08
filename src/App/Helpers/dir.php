@@ -65,14 +65,6 @@ function assets_dir(): string
 }
 
 /**
- * Gets hooks directory
- */
-function hooks_dir(): string
-{
-    return App::getBaseDir() . DS . 'hooks';
-}
-
-/**
  * Recursively deletes folder
  */
 function deleteDirectoryWithFiles(string $dir): bool

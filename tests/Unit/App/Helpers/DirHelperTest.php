@@ -52,10 +52,4 @@ class DirHelperTest extends AppTestCase
         $expected = dirname(__DIR__, 3) . DS . '_root' . DS . 'public' . DS . 'assets';
         $this->assertEquals($expected, assets_dir());
     }
-
-    public function testHooksDir(): void
-    {
-        $expected = dirname(__DIR__, 3) . DS . '_root' . DS . 'hooks';
-        $this->assertEquals($expected, hooks_dir());
-    }
 }

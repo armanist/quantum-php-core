@@ -11,11 +11,9 @@ declare(strict_types=1);
 namespace Quantum\App\Stages;
 
 use Quantum\App\Contracts\BootStageInterface;
-use Quantum\Di\Exceptions\DiException;
 use Quantum\App\AppContext;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
-use ReflectionException;
 use Quantum\Di\Di;
 
 /**
@@ -24,9 +22,10 @@ use Quantum\Di\Di;
  */
 class InitHttpStage implements BootStageInterface
 {
-    /**
-     * @throws DiException|ReflectionException
-     */
+    public const BEFORE = 'boot.http.before';
+
+    public const AFTER = 'boot.http.after';
+
     public function process(AppContext $context): void
     {
         if (!Di::isRegistered(Request::class)) {

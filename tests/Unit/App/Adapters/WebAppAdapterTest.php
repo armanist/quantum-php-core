@@ -5,7 +5,9 @@ namespace Quantum\Tests\Unit\App\Adapters;
 use Quantum\Http\Exceptions\HttpException;
 use Quantum\App\Adapters\WebAppAdapter;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;
+use Quantum\Di\Di;
 use Throwable;
 
 class WebAppAdapterTest extends AppTestCase
@@ -19,6 +21,10 @@ class WebAppAdapterTest extends AppTestCase
 
     public function tearDown(): void
     {
+        if (Di::isRegistered(Debugger::class)) {
+            Di::get(Debugger::class)->resetStore();
+        }
+
         config()->flush();
         $this->clearAppContext();
     }
@@ -94,5 +100,114 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertSame(['foo' => 'bar'], response()->all());
         $this->assertSame('1', response()->getHeader('X-Test'));
         $this->assertSame(200, response()->getStatusCode());
+    }
+
+    public function testWebAppAdapterLogsRegisteredEventsToDebugger(): void
+    {
+        config()->set('app.debug', true);
+
+        $listener = function (): void {
+        };
+
+        event()->listen('test.event', $listener);
+
+        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
+
+        $cell = debugbar()->getStoreCell(Debugger::EVENTS);
+
+        $this->assertCount(1, $cell);
+        $this->assertSame(['test.event' => [$listener]], $cell[0]['info']);
+    }
+
+    public function testWebAppAdapterLogsNothingToDebuggerWithoutEventListeners(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->assertSame([], event()->getRegistered());
+
+        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
+
+        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
+    }
+
+    public function testWebAppAdapterSkipsDebuggerEventLogWhenDebugDisabled(): void
+    {
+        config()->set('app.debug', false);
+
+        event()->listen('test.event', function (): void {
+        });
+
+        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
+
+        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
+    }
+
+    public function testWebAppAdapterBootFiresAppHelperListenerAtModulesBeforeEvent(): void
+    {
+        $this->withTemporaryAppHelper(function (): void {
+            $context = $this->createContext();
+
+            new WebAppAdapter($context);
+
+            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
+            $this->assertSame($context, $GLOBALS['bootEventPayloads'][0]['context']);
+        });
+    }
+
+    public function testWebAppAdapterBootRegistersAppHelperListenerBeforeAppConfigIsLoaded(): void
+    {
+        $this->withTemporaryAppHelper(function (): void {
+            new WebAppAdapter($this->createContext());
+
+            $this->assertFalse($GLOBALS['bootEventConfigLoadedAtRegistration']);
+            $this->assertTrue(config()->has('app'));
+        });
+    }
+
+    public function testWebAppAdapterSecondBootDoesNotRegisterAppHelperListenerAgain(): void
+    {
+        $this->withTemporaryAppHelper(function (): void {
+            new WebAppAdapter($this->createContext());
+            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
+
+            // Helper files load with require_once, so a new container does not get the listener again.
+            new WebAppAdapter($this->createContext());
+            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
+        });
+    }
+
+    private function withTemporaryAppHelper(callable $test): void
+    {
+        $dir = PROJECT_ROOT . DS . 'helpers';
+        $createdDir = !is_dir($dir);
+        $file = $dir . DS . uniqid('event_listener_helper_') . '.php';
+
+        $helper = <<<'PHP'
+<?php
+
+$GLOBALS['bootEventConfigLoadedAtRegistration'] = config()->has('app');
+
+event()->listen('boot.modules.before', function (array $payload): void {
+    $GLOBALS['bootEventPayloads'][] = $payload;
+});
+PHP;
+
+        try {
+            if ($createdDir) {
+                $this->assertTrue(mkdir($dir));
+            }
+
+            $this->assertNotFalse(file_put_contents($file, $helper));
+
+            $test();
+        } finally {
+            if (is_file($file)) {
+                unlink($file);
+            }
+            if ($createdDir && is_dir($dir)) {
+                rmdir($dir);
+            }
+            unset($GLOBALS['bootEventPayloads'], $GLOBALS['bootEventConfigLoadedAtRegistration']);
+        }
     }
 }

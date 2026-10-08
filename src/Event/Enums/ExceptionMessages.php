@@ -8,17 +8,15 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\Hook\Enums;
+namespace Quantum\Event\Enums;
 
 use Quantum\App\Enums\ExceptionMessages as BaseExceptionMessages;
 
 /**
  * Class ExceptionMessages
- * @package Quantum\Hook
+ * @package Quantum\Event
  */
 final class ExceptionMessages extends BaseExceptionMessages
 {
-    public const DUPLICATE_HOOK_NAME = 'The Hook `{%1}` already registered.';
-
-    public const UNREGISTERED_HOOK_NAME = 'The Hook `{%1}` was not registered.';
+    public const EMPTY_EVENT_NAME = 'The event name must not be empty.';
 }

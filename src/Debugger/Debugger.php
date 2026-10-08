@@ -44,9 +44,9 @@ class Debugger
     public const ROUTES = 'routes';
 
     /**
-     * Hooks tab
+     * Events tab
      */
-    public const HOOKS = 'hooks';
+    public const EVENTS = 'events';
 
     /**
      * Mails tab
@@ -104,7 +104,7 @@ class Debugger
             Debugger::MESSAGES,
             Debugger::QUERIES,
             Debugger::ROUTES,
-            Debugger::HOOKS,
+            Debugger::EVENTS,
             Debugger::MAILS,
         ]);
     }
@@ -151,7 +151,7 @@ class Debugger
             return '';
         }
 
-        foreach ([self::MESSAGES, self::QUERIES, self::ROUTES, self::HOOKS, self::MAILS] as $tab) {
+        foreach ([self::MESSAGES, self::QUERIES, self::ROUTES, self::EVENTS, self::MAILS] as $tab) {
             $this->createTab($tab);
         }
 
