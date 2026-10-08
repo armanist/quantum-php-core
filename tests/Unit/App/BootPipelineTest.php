@@ -69,6 +69,40 @@ class BootPipelineTest extends TestCase
         $pipeline->run(new AppContext('', new DiContainer()));
     }
 
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testStageEventsAreSkippedWhileEventHelperIsNotLoaded(): void
+    {
+        $this->assertFalse(function_exists('event'));
+
+        $processed = false;
+
+        $stage = new class (function () use (&$processed): void {
+            $processed = true;
+        }) implements BootStageInterface {
+            public const BEFORE = 'test.early.before';
+            public const AFTER = 'test.early.after';
+
+            private $callback;
+
+            public function __construct(callable $callback)
+            {
+                $this->callback = $callback;
+            }
+
+            public function process(AppContext $context): void
+            {
+                ($this->callback)($context);
+            }
+        };
+
+        (new BootPipeline([$stage]))->run(new AppContext('', new DiContainer()));
+
+        $this->assertTrue($processed);
+    }
+
     public function testPipelineRejectsInvalidStage(): void
     {
         $this->expectException(InvalidArgumentException::class);

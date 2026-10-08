@@ -24,6 +24,10 @@ use Quantum\Di\Di;
  */
 class LoadEnvironmentStage implements BootStageInterface
 {
+    public const BEFORE = 'boot.environment.before';
+
+    public const AFTER = 'boot.environment.after';
+
     /**
      * @throws EnvException|DiException|BaseException
      */

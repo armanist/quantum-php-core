@@ -43,7 +43,26 @@ class BootPipeline
     public function run(AppContext $context): void
     {
         foreach ($this->stages as $stage) {
+            $this->dispatchStageEvent($stage, 'BEFORE', $context);
+
             $stage->process($context);
+
+            $this->dispatchStageEvent($stage, 'AFTER', $context);
         }
+    }
+
+    /**
+     * Dispatches the event a stage declares for the given point, if any.
+     * Skipped while the event() helper is not loaded yet, since nothing can listen then.
+     */
+    private function dispatchStageEvent(BootStageInterface $stage, string $point, AppContext $context): void
+    {
+        $constant = $stage::class . '::' . $point;
+
+        if (!defined($constant) || !function_exists('event')) {
+            return;
+        }
+
+        event()->dispatch((string) constant($constant), ['context' => $context]);
     }
 }
