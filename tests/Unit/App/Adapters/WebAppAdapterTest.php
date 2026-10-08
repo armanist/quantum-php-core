@@ -113,7 +113,7 @@ class WebAppAdapterTest extends AppTestCase
 
         $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
 
-        $cell = debugbar()->getStoreCell(Debugger::HOOKS);
+        $cell = debugbar()->getStoreCell(Debugger::EVENTS);
 
         $this->assertCount(1, $cell);
         $this->assertSame(['test.event' => [$listener]], $cell[0]['info']);
@@ -127,7 +127,7 @@ class WebAppAdapterTest extends AppTestCase
 
         $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
 
-        $this->assertSame([], debugbar()->getStoreCell(Debugger::HOOKS));
+        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
     }
 
     public function testWebAppAdapterSkipsDebuggerEventLogWhenDebugDisabled(): void
@@ -139,7 +139,7 @@ class WebAppAdapterTest extends AppTestCase
 
         $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
 
-        $this->assertSame([], debugbar()->getStoreCell(Debugger::HOOKS));
+        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
     }
 
     public function testWebAppAdapterBootFiresAppHelperListenerAtModulesBeforeEvent(): void

@@ -16,6 +16,7 @@ The format is based on Keep a Changelog.
   - Event names no longer need to be registered, so `shared/config/hooks.php` is no longer read; dispatching a name without listeners does nothing and an empty name throws `EventException`.
   - Listeners stay registered after `dispatch()` instead of being removed after the first call.
   - Listeners can be registered from app helper files, which load before config and before any boot event.
+  - Removed the unused `hooks_dir()` helper and renamed the debugger tab constant `Debugger::HOOKS` to `Debugger::EVENTS`; the debugbar tab is now `events` and lists only events that have listeners.
 - **BREAKING:** Removed `Quantum\Loader` and moved its responsibilities to their owning packages (#535):
   - Moved `Setup` to `Quantum\Config\Setup`; required config failures now use `ConfigException`, and optional imports use `Config::importIfExists()`.
   - Config paths resolve from the application base directory, independent of the process working directory.

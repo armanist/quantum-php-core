@@ -59,7 +59,7 @@ class DebuggerTest extends AppTestCase
         $this->assertTrue($this->debuggerStore->has(Debugger::MESSAGES));
         $this->assertTrue($this->debuggerStore->has(Debugger::QUERIES));
         $this->assertTrue($this->debuggerStore->has(Debugger::ROUTES));
-        $this->assertTrue($this->debuggerStore->has(Debugger::HOOKS));
+        $this->assertTrue($this->debuggerStore->has(Debugger::EVENTS));
         $this->assertTrue($this->debuggerStore->has(Debugger::MAILS));
     }
 
