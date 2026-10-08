@@ -5,7 +5,9 @@ namespace Quantum\Tests\Unit\App\Adapters;
 use Quantum\Http\Exceptions\HttpException;
 use Quantum\App\Adapters\WebAppAdapter;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;
+use Quantum\Di\Di;
 use Throwable;
 
 class WebAppAdapterTest extends AppTestCase
@@ -19,6 +21,10 @@ class WebAppAdapterTest extends AppTestCase
 
     public function tearDown(): void
     {
+        if (Di::isRegistered(Debugger::class)) {
+            Di::get(Debugger::class)->resetStore();
+        }
+
         config()->flush();
         $this->clearAppContext();
     }
@@ -94,6 +100,46 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertSame(['foo' => 'bar'], response()->all());
         $this->assertSame('1', response()->getHeader('X-Test'));
         $this->assertSame(200, response()->getStatusCode());
+    }
+
+    public function testWebAppAdapterLogsRegisteredEventsToDebugger(): void
+    {
+        config()->set('app.debug', true);
+
+        $listener = function (): void {
+        };
+
+        event()->listen('test.event', $listener);
+
+        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
+
+        $cell = debugbar()->getStoreCell(Debugger::HOOKS);
+
+        $this->assertCount(1, $cell);
+        $this->assertSame(['test.event' => [$listener]], $cell[0]['info']);
+    }
+
+    public function testWebAppAdapterLogsNothingToDebuggerWithoutEventListeners(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->assertSame([], event()->getRegistered());
+
+        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
+
+        $this->assertSame([], debugbar()->getStoreCell(Debugger::HOOKS));
+    }
+
+    public function testWebAppAdapterSkipsDebuggerEventLogWhenDebugDisabled(): void
+    {
+        config()->set('app.debug', false);
+
+        event()->listen('test.event', function (): void {
+        });
+
+        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
+
+        $this->assertSame([], debugbar()->getStoreCell(Debugger::HOOKS));
     }
 
     public function testWebAppAdapterBootFiresAppHelperListenerAtModulesBeforeEvent(): void
