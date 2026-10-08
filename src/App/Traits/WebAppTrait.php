@@ -68,7 +68,7 @@ trait WebAppTrait
         $debugbar = debugbar();
 
         if ($debugbar->isEnabled()) {
-            $debugbar->addToStoreCell(Debugger::HOOKS, 'info', hook()->getRegistered());
+            $debugbar->addToStoreCell(Debugger::HOOKS, 'info', event()->getRegistered());
         }
     }
 
