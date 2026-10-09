@@ -2,9 +2,14 @@
 
 namespace Quantum\Tests\Unit\App\Adapters;
 
+use Quantum\Router\Exceptions\RouteException;
 use Quantum\Http\Exceptions\HttpException;
 use Quantum\App\Adapters\WebAppAdapter;
+use Quantum\ResourceCache\ViewCache;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\Http\Enums\ContentType;
+use Quantum\Http\Enums\StatusCode;
+use Quantum\Router\MatchedRoute;
 use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;
 use Quantum\Di\Di;
@@ -68,6 +73,126 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertSame(0, $result);
         $this->assertNull(request()->getMatchedRoute());
         $this->assertNull(request()->getUri());
+    }
+
+    public function testWebAppAdapterStartHandlesOptionsPreflight(): void
+    {
+        request()->create('OPTIONS', '/test/am/tests');
+
+        ob_start();
+        $result = $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertSame(0, $result);
+        $this->assertSame(StatusCode::NO_CONTENT, response()->getStatusCode());
+        $this->assertSame('', response()->getContent());
+        $this->assertSame('*', response()->getHeader('Access-Control-Allow-Origin'));
+        $this->assertSame('*', response()->getHeader('Access-Control-Allow-Methods'));
+        $this->assertNull(request()->getMatchedRoute());
+        $this->assertNull(request()->getUri());
+    }
+
+    public function testWebAppAdapterStartRespondsWithJsonNotFoundForJsonRequests(): void
+    {
+        request()->create('GET', '/non-existing-uri', [], ['Accept' => 'application/json']);
+
+        ob_start();
+        $result = $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertSame(0, $result);
+        $this->assertSame(StatusCode::NOT_FOUND, response()->getStatusCode());
+        $this->assertSame(ContentType::JSON, response()->getContentType());
+        $this->assertStringContainsString('Page not found', response()->getContent());
+        $this->assertNull(request()->getMatchedRoute());
+        $this->assertNull(request()->getUri());
+    }
+
+    public function testWebAppAdapterStartRespondsWithHtmlNotFoundForOtherRequests(): void
+    {
+        request()->create('GET', '/non-existing-uri');
+
+        ob_start();
+        $result = $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertSame(0, $result);
+        $this->assertSame(StatusCode::NOT_FOUND, response()->getStatusCode());
+        $this->assertSame(ContentType::HTML, response()->getContentType());
+        $this->assertNotSame('', response()->getContent());
+        $this->assertNull(request()->getMatchedRoute());
+        $this->assertNull(request()->getUri());
+    }
+
+    public function testWebAppAdapterStartSendsMatchedRouteResponse(): void
+    {
+        request()->create('GET', '/test/am/tests');
+
+        ob_start();
+        $result = $this->webAppAdapter->start();
+        $output = ob_get_clean();
+
+        $this->assertSame(0, $result);
+        $this->assertSame(StatusCode::OK, response()->getStatusCode());
+        $this->assertSame('', response()->getContent());
+        $this->assertSame('', $output);
+        $this->assertSame('*', response()->getHeader('Access-Control-Allow-Origin'));
+        $this->assertNull(request()->getMatchedRoute());
+        $this->assertNull(request()->getUri());
+    }
+
+    public function testWebAppAdapterStartServesViewCacheHit(): void
+    {
+        request()->create('GET', '/test/am/tests');
+
+        $uri = request()->getUri();
+
+        // The view cache directory depends on the current module, which is only known once a route is matched.
+        request()->setMatchedRoute(new MatchedRoute(
+            (new Route(['GET'], '/test/am/tests', 'TestController', 'tests'))->module('Test'),
+            []
+        ));
+
+        if (!Di::isRegistered(ViewCache::class)) {
+            Di::register(ViewCache::class);
+        }
+
+        $viewCache = Di::get(ViewCache::class);
+        $viewCache->setup();
+        $viewCache->enableCaching(true);
+        $viewCache->set($uri, '<p>cached page</p>');
+
+        try {
+            ob_start();
+            $result = $this->webAppAdapter->start();
+            $output = ob_get_clean();
+
+            $this->assertSame(0, $result);
+            $this->assertSame('<p>cached page</p>', response()->getContent());
+            $this->assertSame('<p>cached page</p>', $output);
+        } finally {
+            $viewCache->delete($uri);
+            $viewCache->enableCaching(false);
+        }
+    }
+
+    public function testWebAppAdapterStartPropagatesDispatchExceptionWithoutCleanup(): void
+    {
+        request()->create('GET', '/test/Test/5');
+
+        ob_start();
+
+        try {
+            $this->webAppAdapter->start();
+            $this->fail('Expected the dispatcher to fail for a missing controller action.');
+        } catch (RouteException $exception) {
+            $this->assertInstanceOf(RouteException::class, $exception);
+        } finally {
+            ob_end_clean();
+        }
+
+        $this->assertNotNull(request()->getMatchedRoute());
+        $this->assertNotNull(request()->getUri());
     }
 
     public function testWebAppAdapterCleansUpOnException(): void
