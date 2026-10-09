@@ -147,6 +147,11 @@ class WebAppAdapterTest extends AppTestCase
 
         $uri = request()->getUri();
 
+        $viewsDir = base_dir() . DS . 'cache' . DS . 'views';
+        $moduleDir = $viewsDir . DS . 'test';
+        $viewsDirExisted = is_dir($viewsDir);
+        $moduleDirExisted = is_dir($moduleDir);
+
         // The view cache directory depends on the current module, which is only known once a route is matched.
         request()->setMatchedRoute(new MatchedRoute(
             (new Route(['GET'], '/test/am/tests', 'TestController', 'tests'))->module('Test'),
@@ -173,6 +178,14 @@ class WebAppAdapterTest extends AppTestCase
         } finally {
             $viewCache->delete($uri);
             $viewCache->enableCaching(false);
+
+            if (!$moduleDirExisted && is_dir($moduleDir)) {
+                rmdir($moduleDir);
+            }
+
+            if (!$viewsDirExisted && is_dir($viewsDir)) {
+                rmdir($viewsDir);
+            }
         }
     }
 
