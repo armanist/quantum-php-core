@@ -113,6 +113,37 @@ class ConsoleAppAdapterTest extends AppTestCase
         });
     }
 
+    public function testConsoleAppAdapterStartRegistersCoreCommandsBeforeAppCommands(): void
+    {
+        $coreDirectory = PROJECT_ROOT . DS . 'vendor' . DS . 'quantum' . DS . 'framework' . DS . 'src' . DS . 'Console' . DS . 'Commands';
+        $appDirectory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($coreDirectory, 'Quantum\Console\Commands', function (string $coreCommand) use ($appDirectory): void {
+            $this->withTemporaryCommand($appDirectory, 'Shared\Commands', function (string $appCommand) use ($coreCommand): void {
+                $application = new Application('Qt Console Application', 'test');
+                $application->setAutoExit(false);
+                $application->setCatchExceptions(false);
+
+                $adapter = Mockery::mock(ConsoleAppAdapter::class)
+                    ->shouldAllowMockingProtectedMethods()
+                    ->makePartial();
+
+                $adapter->shouldReceive('createApplication')->andReturn($application);
+
+                $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+                $adapter->__construct($this->createContext());
+                $adapter->start();
+
+                $names = array_keys($application->all());
+
+                $this->assertContains($coreCommand, $names);
+                $this->assertContains($appCommand, $names);
+                $this->assertLessThan(array_search($appCommand, $names, true), array_search($coreCommand, $names, true));
+            });
+        });
+    }
+
     public function testConsoleAppAdapterBootsAllStagesForRegularCommands(): void
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];

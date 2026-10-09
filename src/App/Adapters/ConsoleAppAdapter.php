@@ -10,14 +10,19 @@ declare(strict_types=1);
 
 namespace Quantum\App\Adapters;
 
+use Quantum\App\Stages\Console\RegisterCoreCommandsStage;
+use Quantum\App\Stages\Console\RegisterAppCommandsStage;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Quantum\App\Stages\Console\ValidateCommandStage;
+use Quantum\App\Stages\Console\RunCommandStage;
 use Symfony\Component\Console\Input\ArgvInput;
 use Quantum\App\Stages\SetupErrorHandlerStage;
 use Quantum\App\Stages\LoadEnvironmentStage;
 use Symfony\Component\Console\Application;
 use Quantum\App\Stages\LoadAppConfigStage;
 use Quantum\App\Stages\LoadHelpersStage;
-use Quantum\App\Traits\ConsoleAppTrait;
+use Quantum\App\ConsolePipeline;
+use Quantum\App\ConsoleContext;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;
@@ -33,8 +38,6 @@ if (!defined('DS')) {
  */
 class ConsoleAppAdapter extends AppAdapter
 {
-    use ConsoleAppTrait;
-
     protected ArgvInput $input;
 
     protected ConsoleOutput $output;
@@ -73,18 +76,27 @@ class ConsoleAppAdapter extends AppAdapter
         );
     }
 
+    public function createApplication(string $name, string $version): Application
+    {
+        return new Application($name, $version);
+    }
+
     /**
     * @throws Exception
     */
     public function start(): ?int
     {
-        $this->registerCoreCommands();
-        $this->registerAppCommands();
+        $context = new ConsoleContext($this->context, $this->application, $this->input, $this->output);
 
-        $this->validateCommand();
+        $pipeline = new ConsolePipeline([
+            new RegisterCoreCommandsStage(),
+            new RegisterAppCommandsStage(),
+            new ValidateCommandStage(),
+            new RunCommandStage(),
+        ]);
 
-        $exitCode = $this->application->run($this->input, $this->output);
+        $pipeline->run($context);
 
-        return $exitCode ?: ExitCode::SUCCESS;
+        return $context->getExitCode() ?: ExitCode::SUCCESS;
     }
 }
