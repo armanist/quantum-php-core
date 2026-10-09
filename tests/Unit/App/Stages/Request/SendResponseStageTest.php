@@ -5,7 +5,7 @@ namespace Quantum\Tests\Unit\App\Stages\Request;
 use Quantum\App\Stages\Request\SendResponseStage;
 use Quantum\Http\Exceptions\HttpException;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Router\MatchedRoute;
 use Quantum\Router\Route;
 use Quantum\Http\Response;

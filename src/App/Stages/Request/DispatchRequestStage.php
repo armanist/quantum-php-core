@@ -15,7 +15,7 @@ use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Middleware\MiddlewareManager;
 use Quantum\Router\RouteDispatcher;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 use RuntimeException;

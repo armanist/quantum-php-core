@@ -12,7 +12,7 @@ namespace Quantum\App\Stages\Request;
 
 use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\Http\Enums\StatusCode;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 
 /**
  * Class HandlePreflightStage

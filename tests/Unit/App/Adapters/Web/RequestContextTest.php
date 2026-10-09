@@ -1,11 +1,11 @@
 <?php
 
-namespace Quantum\Tests\Unit\App;
+namespace Quantum\Tests\Unit\App\Adapters\Web;
 
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Router\MatchedRoute;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\App\AppContext;
 use Quantum\Router\Route;
 use Quantum\App\App;

@@ -8,12 +8,13 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App;
+namespace Quantum\App\Adapters\Console;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Application;
 use Quantum\App\Enums\ExitCode;
+use Quantum\App\AppContext;
 
 /**
  * Class ConsoleContext

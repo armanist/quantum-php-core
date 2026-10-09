@@ -13,7 +13,7 @@ namespace Quantum\App\Stages\Console;
 use Symfony\Component\Console\Command\Command;
 use Quantum\App\Contracts\ConsoleStageInterface;
 use Quantum\Console\CommandDiscovery;
-use Quantum\App\ConsoleContext;
+use Quantum\App\Adapters\Console\ConsoleContext;
 
 /**
  * Class RegisterCommandsStage

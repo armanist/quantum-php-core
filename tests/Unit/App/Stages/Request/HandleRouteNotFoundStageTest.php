@@ -6,7 +6,7 @@ use Quantum\App\Stages\Request\HandleRouteNotFoundStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Http\Enums\ContentType;
 use Quantum\Http\Enums\StatusCode;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Router\MatchedRoute;
 use Quantum\Router\Route;
 use Quantum\App\App;

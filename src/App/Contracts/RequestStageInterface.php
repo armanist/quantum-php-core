@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Quantum\App\Contracts;
 
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 
 /**
  * Interface RequestStageInterface

@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App;
+namespace Quantum\App\Adapters\Web;
 
 use Quantum\App\Contracts\RequestStageInterface;
 use InvalidArgumentException;

@@ -5,7 +5,7 @@ namespace Quantum\Tests\Unit\App\Stages\Request;
 use Quantum\App\Stages\Request\PrepareRequestStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\ResourceCache\ViewCache;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Router\MatchedRoute;
 use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;

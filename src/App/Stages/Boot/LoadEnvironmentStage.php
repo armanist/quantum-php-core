@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages;
+namespace Quantum\App\Stages\Boot;
 
 use Quantum\Environment\Exceptions\EnvException;
 use Quantum\App\Contracts\BootStageInterface;

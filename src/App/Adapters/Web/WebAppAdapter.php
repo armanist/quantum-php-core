@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Adapters;
+namespace Quantum\App\Adapters\Web;
 
 use Quantum\App\Stages\Request\HandleRouteNotFoundStage;
 use Quantum\App\Stages\Request\HandlePreflightStage;
@@ -16,16 +16,14 @@ use Quantum\App\Stages\Request\DispatchRequestStage;
 use Quantum\App\Stages\Request\PrepareRequestStage;
 use Quantum\App\Stages\Request\SendResponseStage;
 use Quantum\App\Stages\Request\ResolveRouteStage;
-use Quantum\App\Stages\SetupErrorHandlerStage;
-use Quantum\App\Stages\LoadEnvironmentStage;
-use Quantum\App\Stages\LoadAppConfigStage;
-use Quantum\App\Stages\InitDebuggerStage;
+use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
+use Quantum\App\Stages\Boot\LoadEnvironmentStage;
+use Quantum\App\Stages\Boot\LoadAppConfigStage;
+use Quantum\App\Stages\Boot\InitDebuggerStage;
 use Quantum\App\Contracts\AppInterface;
-use Quantum\App\Stages\LoadModulesStage;
-use Quantum\App\Stages\LoadHelpersStage;
-use Quantum\App\Stages\InitHttpStage;
-use Quantum\App\RequestPipeline;
-use Quantum\App\RequestContext;
+use Quantum\App\Stages\Boot\LoadModulesStage;
+use Quantum\App\Stages\Boot\LoadHelpersStage;
+use Quantum\App\Stages\Boot\InitHttpStage;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;

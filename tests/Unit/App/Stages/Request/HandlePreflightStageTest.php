@@ -5,7 +5,7 @@ namespace Quantum\Tests\Unit\App\Stages\Request;
 use Quantum\App\Stages\Request\HandlePreflightStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Http\Enums\StatusCode;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\App\App;
 
 class HandlePreflightStageTest extends AppTestCase

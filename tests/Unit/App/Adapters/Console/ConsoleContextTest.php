@@ -1,12 +1,12 @@
 <?php
 
-namespace Quantum\Tests\Unit\App;
+namespace Quantum\Tests\Unit\App\Adapters\Console;
 
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Application;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\App\ConsoleContext;
+use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;
 use Quantum\App\App;

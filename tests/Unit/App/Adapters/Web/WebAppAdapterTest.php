@@ -1,9 +1,9 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Adapters;
+namespace Quantum\Tests\Unit\App\Adapters\Web;
 
 use Quantum\Router\Exceptions\RouteException;
-use Quantum\App\Adapters\WebAppAdapter;
+use Quantum\App\Adapters\Web\WebAppAdapter;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Http\Enums\ContentType;

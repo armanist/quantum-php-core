@@ -16,7 +16,7 @@ use Quantum\Lang\Exceptions\LangException;
 use Quantum\Lang\Factories\LangFactory;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\ResourceCache\ViewCache;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Debugger\Debugger;
 use ReflectionException;
 use Quantum\Di\Di;

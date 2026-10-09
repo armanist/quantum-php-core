@@ -1,6 +1,6 @@
 <?php
 
-namespace Quantum\Tests\Unit\App;
+namespace Quantum\Tests\Unit\App\Adapters\Console;
 
 use Symfony\Component\Console\Output\BufferedOutput;
 use Quantum\App\Contracts\ConsoleStageInterface;
@@ -9,9 +9,9 @@ use Quantum\App\Contracts\BootStageInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Application;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\App\ConsoleContext;
-use Quantum\App\ConsolePipeline;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Console\ConsoleContext;
+use Quantum\App\Adapters\Console\ConsolePipeline;
+use Quantum\App\Adapters\Web\RequestContext;
 use InvalidArgumentException;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;

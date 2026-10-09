@@ -1,8 +1,8 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Adapters;
+namespace Quantum\Tests\Unit\App\Adapters\Console;
 
-use Quantum\App\Adapters\ConsoleAppAdapter;
+use Quantum\App\Adapters\Console\ConsoleAppAdapter;
 use Symfony\Component\Console\Application;
 use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;

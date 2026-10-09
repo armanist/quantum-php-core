@@ -1,12 +1,12 @@
 <?php
 
-namespace Quantum\Tests\Unit\App;
+namespace Quantum\Tests\Unit\App\Adapters\Web;
 
 use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\App\Contracts\BootStageInterface;
-use Quantum\App\RequestPipeline;
+use Quantum\App\Adapters\Web\RequestPipeline;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use InvalidArgumentException;
 use Quantum\App\AppContext;
 use RuntimeException;

@@ -14,7 +14,7 @@ use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use ReflectionException;
 
 /**

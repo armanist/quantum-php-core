@@ -34,7 +34,7 @@ namespace Quantum\Tests\Unit\App\Stages\Request {
     use Quantum\Router\Exceptions\RouteException;
     use Quantum\Tests\Unit\AppTestCase;
     use Quantum\ResourceCache\ViewCache;
-    use Quantum\App\RequestContext;
+    use Quantum\App\Adapters\Web\RequestContext;
     use Quantum\Router\MatchedRoute;
     use Quantum\Http\Enums\StatusCode;
     use Quantum\Router\Route;

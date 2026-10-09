@@ -14,7 +14,7 @@ use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\Router\Exceptions\RouteException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Router\RouteCollection;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Router\RouteFinder;
 use Quantum\Di\Di;
 

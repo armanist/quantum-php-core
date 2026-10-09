@@ -1,8 +1,8 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages;
+namespace Quantum\Tests\Unit\App\Stages\Boot;
 
-use Quantum\App\Stages\LoadHelpersStage;
+use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Quantum\Tests\Unit\AppTestCase;
 
 class LoadHelpersStageTest extends AppTestCase

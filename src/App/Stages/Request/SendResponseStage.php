@@ -13,7 +13,7 @@ namespace Quantum\App\Stages\Request;
 use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Di\Exceptions\DiException;
-use Quantum\App\RequestContext;
+use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Http\Response;
 use Quantum\Config\Setup;
 use ReflectionException;

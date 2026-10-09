@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Quantum\App\Contracts;
 
-use Quantum\App\ConsoleContext;
+use Quantum\App\Adapters\Console\ConsoleContext;
 
 /**
  * Interface ConsoleStageInterface

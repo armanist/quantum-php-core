@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages;
+namespace Quantum\App\Stages\Boot;
 
 use Quantum\App\Contracts\BootStageInterface;
 use Quantum\App\AppContext;
@@ -29,7 +29,7 @@ class LoadHelpersStage implements BootStageInterface
 
     private function loadComponentHelpers(): void
     {
-        $srcDir = dirname(__DIR__, 2);
+        $srcDir = dirname(__DIR__, 3);
 
         $componentDirs = glob($srcDir . DS . '*', GLOB_ONLYDIR);
 

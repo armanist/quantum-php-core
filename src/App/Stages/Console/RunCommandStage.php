@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Quantum\App\Stages\Console;
 
 use Quantum\App\Contracts\ConsoleStageInterface;
-use Quantum\App\ConsoleContext;
+use Quantum\App\Adapters\Console\ConsoleContext;
 use Exception;
 
 /**

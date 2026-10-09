@@ -8,10 +8,11 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App;
+namespace Quantum\App\Adapters\Web;
 
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Router\MatchedRoute;
+use Quantum\App\AppContext;
 use Quantum\Http\Response;
 
 /**
