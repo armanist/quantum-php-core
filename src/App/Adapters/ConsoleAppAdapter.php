@@ -21,6 +21,7 @@ use Quantum\App\Stages\LoadEnvironmentStage;
 use Symfony\Component\Console\Application;
 use Quantum\App\Stages\LoadAppConfigStage;
 use Quantum\App\Stages\LoadHelpersStage;
+use Quantum\App\Contracts\AppInterface;
 use Quantum\App\ConsolePipeline;
 use Quantum\App\ConsoleContext;
 use Quantum\App\Enums\ExitCode;
@@ -36,8 +37,10 @@ if (!defined('DS')) {
  * Class ConsoleAppAdapter
  * @package Quantum\App
  */
-class ConsoleAppAdapter extends AppAdapter
+class ConsoleAppAdapter implements AppInterface
 {
+    protected AppContext $context;
+
     protected ArgvInput $input;
 
     protected ConsoleOutput $output;
@@ -46,7 +49,7 @@ class ConsoleAppAdapter extends AppAdapter
 
     public function __construct(AppContext $context)
     {
-        parent::__construct($context);
+        $this->context = $context;
 
         $this->input = new ArgvInput();
         $this->output = new ConsoleOutput();

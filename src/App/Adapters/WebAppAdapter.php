@@ -20,6 +20,7 @@ use Quantum\App\Stages\SetupErrorHandlerStage;
 use Quantum\App\Stages\LoadEnvironmentStage;
 use Quantum\App\Stages\LoadAppConfigStage;
 use Quantum\App\Stages\InitDebuggerStage;
+use Quantum\App\Contracts\AppInterface;
 use Quantum\App\Stages\LoadModulesStage;
 use Quantum\App\Stages\LoadHelpersStage;
 use Quantum\App\Stages\InitHttpStage;
@@ -33,11 +34,13 @@ use Quantum\App\AppContext;
  * Class WebAppAdapter
  * @package Quantum\App
  */
-class WebAppAdapter extends AppAdapter
+class WebAppAdapter implements AppInterface
 {
+    protected AppContext $context;
+
     public function __construct(AppContext $context)
     {
-        parent::__construct($context);
+        $this->context = $context;
 
         $pipeline = new BootPipeline([
             new LoadHelpersStage(),
