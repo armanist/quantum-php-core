@@ -3,7 +3,6 @@
 namespace Quantum\Tests\Unit\App\Adapters;
 
 use Quantum\Router\Exceptions\RouteException;
-use Quantum\Http\Exceptions\HttpException;
 use Quantum\App\Adapters\WebAppAdapter;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Tests\Unit\AppTestCase;
@@ -13,7 +12,6 @@ use Quantum\Router\MatchedRoute;
 use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;
 use Quantum\Di\Di;
-use Throwable;
 
 class WebAppAdapterTest extends AppTestCase
 {
@@ -90,6 +88,32 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertSame('*', response()->getHeader('Access-Control-Allow-Methods'));
         $this->assertNull(request()->getMatchedRoute());
         $this->assertNull(request()->getUri());
+    }
+
+    public function testWebAppAdapterStartSkipsLanguageLoadingForPreflight(): void
+    {
+        request()->create('OPTIONS', '/test/am/tests');
+
+        $this->assertFalse(config()->has('lang'));
+
+        ob_start();
+        $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertFalse(config()->has('lang'));
+    }
+
+    public function testWebAppAdapterStartSkipsLanguageLoadingForNotFound(): void
+    {
+        request()->create('GET', '/non-existing-uri');
+
+        $this->assertFalse(config()->has('lang'));
+
+        ob_start();
+        $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertFalse(config()->has('lang'));
     }
 
     public function testWebAppAdapterStartRespondsWithJsonNotFoundForJsonRequests(): void
@@ -206,78 +230,6 @@ class WebAppAdapterTest extends AppTestCase
 
         $this->assertNotNull(request()->getMatchedRoute());
         $this->assertNotNull(request()->getUri());
-    }
-
-    public function testWebAppAdapterCleansUpOnException(): void
-    {
-        request()->create('GET', '/test/am/tests');
-        request()->setMatchedRoute(null);
-        request()->setMatchedRoute(new \Quantum\Router\MatchedRoute(
-            new Route(['GET'], '/test/am/tests', 'TestController', 'tests'),
-            []
-        ));
-        response()->setHeader('X-Test', '1');
-        response()->json(['foo' => 'bar']);
-
-        $throwingResponse = new class () extends \Quantum\Http\Response {
-            public function send(): void
-            {
-                throw new HttpException('boom');
-            }
-        };
-
-        try {
-            $this->invokePrivateMethod($this->webAppAdapter, 'sendResponse', [$throwingResponse]);
-            $this->fail('Expected response sending to fail.');
-        } catch (Throwable $exception) {
-            $this->assertInstanceOf(HttpException::class, $exception);
-        }
-
-        $this->assertNull(request()->getMatchedRoute());
-        $this->assertNull(request()->getUri());
-        $this->assertSame(['foo' => 'bar'], response()->all());
-        $this->assertSame('1', response()->getHeader('X-Test'));
-        $this->assertSame(200, response()->getStatusCode());
-    }
-
-    public function testWebAppAdapterLogsRegisteredEventsToDebugger(): void
-    {
-        config()->set('app.debug', true);
-
-        $listener = function (): void {
-        };
-
-        event()->listen('test.event', $listener);
-
-        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
-
-        $cell = debugbar()->getStoreCell(Debugger::EVENTS);
-
-        $this->assertCount(1, $cell);
-        $this->assertSame(['test.event' => [$listener]], $cell[0]['info']);
-    }
-
-    public function testWebAppAdapterLogsNothingToDebuggerWithoutEventListeners(): void
-    {
-        config()->set('app.debug', true);
-
-        $this->assertSame([], event()->getRegistered());
-
-        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
-
-        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
-    }
-
-    public function testWebAppAdapterSkipsDebuggerEventLogWhenDebugDisabled(): void
-    {
-        config()->set('app.debug', false);
-
-        event()->listen('test.event', function (): void {
-        });
-
-        $this->invokePrivateMethod($this->webAppAdapter, 'logDebugInfo');
-
-        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
     }
 
     public function testWebAppAdapterBootFiresAppHelperListenerAtModulesBeforeEvent(): void

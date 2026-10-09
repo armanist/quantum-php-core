@@ -10,30 +10,24 @@ declare(strict_types=1);
 
 namespace Quantum\App\Adapters;
 
-use Quantum\Middleware\Exceptions\MiddlewareException;
-use Quantum\Config\Exceptions\ConfigException;
+use Quantum\App\Stages\Request\HandleRouteNotFoundStage;
+use Quantum\App\Stages\Request\HandlePreflightStage;
+use Quantum\App\Stages\Request\DispatchRequestStage;
+use Quantum\App\Stages\Request\PrepareRequestStage;
+use Quantum\App\Stages\Request\SendResponseStage;
+use Quantum\App\Stages\Request\ResolveRouteStage;
 use Quantum\App\Stages\SetupErrorHandlerStage;
-use Quantum\Router\Exceptions\RouteException;
 use Quantum\App\Stages\LoadEnvironmentStage;
-use Quantum\Csrf\Exceptions\CsrfException;
-use Quantum\Lang\Exceptions\LangException;
 use Quantum\App\Stages\LoadAppConfigStage;
-use Quantum\App\Exceptions\BaseException;
 use Quantum\App\Stages\InitDebuggerStage;
-use Quantum\Middleware\MiddlewareManager;
 use Quantum\App\Stages\LoadModulesStage;
 use Quantum\App\Stages\LoadHelpersStage;
-use Quantum\Di\Exceptions\DiException;
 use Quantum\App\Stages\InitHttpStage;
-use Quantum\App\Traits\WebAppTrait;
-use Quantum\Router\RouteDispatcher;
-use Quantum\Http\Enums\StatusCode;
+use Quantum\App\RequestPipeline;
+use Quantum\App\RequestContext;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;
-use Quantum\Http\Response;
-use Quantum\Http\Request;
-use ReflectionException;
 
 /**
  * Class WebAppAdapter
@@ -41,8 +35,6 @@ use ReflectionException;
  */
 class WebAppAdapter extends AppAdapter
 {
-    use WebAppTrait;
-
     public function __construct(AppContext $context)
     {
         parent::__construct($context);
@@ -60,37 +52,18 @@ class WebAppAdapter extends AppAdapter
         $pipeline->run($this->context);
     }
 
-    /**
-     * Starts the web app
-     * @throws MiddlewareException|LangException|RouteException|CsrfException|ConfigException|DiException|BaseException|ReflectionException
-     */
     public function start(): ?int
     {
-        if (request()->isMethod('OPTIONS')) {
-            $this->sendResponse(response()->setStatusCode(StatusCode::NO_CONTENT));
-            return ExitCode::SUCCESS;
-        }
+        $pipeline = new RequestPipeline([
+            new HandlePreflightStage(),
+            new ResolveRouteStage(),
+            new HandleRouteNotFoundStage(),
+            new PrepareRequestStage(),
+            new DispatchRequestStage(),
+            new SendResponseStage(),
+        ]);
 
-        $matchedRoute = $this->resolveRoute();
-
-        if ($matchedRoute === null) {
-            $this->sendResponse(page_not_found_response());
-
-            return ExitCode::SUCCESS;
-        }
-
-        $this->loadLanguage();
-
-        $this->logDebugInfo();
-
-        $viewCache = $this->setupViewCache();
-
-        $terminal = fn (Request $request): Response => $viewCache->getCachedResponse($request->getUri() ?? '')
-            ?? (new RouteDispatcher())->dispatch($matchedRoute, $request);
-
-        $response = (new MiddlewareManager($matchedRoute))->applyMiddlewares(request(), $terminal);
-
-        $this->sendResponse($response);
+        $pipeline->run(new RequestContext($this->context));
 
         return ExitCode::SUCCESS;
     }

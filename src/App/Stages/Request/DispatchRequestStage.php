@@ -10,9 +10,9 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Request;
 
+use Quantum\Middleware\Exceptions\MiddlewareException;
 use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\App\Exceptions\BaseException;
-use Quantum\Middleware\Exceptions\MiddlewareException;
 use Quantum\Middleware\MiddlewareManager;
 use Quantum\Router\RouteDispatcher;
 use Quantum\App\RequestContext;
