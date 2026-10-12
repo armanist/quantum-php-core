@@ -16,6 +16,9 @@ use Exception;
 
 /**
  * Class RunCommandStage
+ *
+ * Runs the requested command; a missing or unknown command is rejected before anything runs.
+ *
  * @package Quantum\App
  */
 class RunCommandStage implements ConsoleStageInterface
@@ -25,6 +28,12 @@ class RunCommandStage implements ConsoleStageInterface
      */
     public function process(ConsoleContext $context): void
     {
+        $commandName = $context->getInput()->getFirstArgument();
+
+        if ($commandName === null || !$context->getApplication()->has($commandName)) {
+            throw new Exception("Command `$commandName` is not defined");
+        }
+
         $context->setExitCode(
             $context->getApplication()->run($context->getInput(), $context->getOutput())
         );

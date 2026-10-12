@@ -8,6 +8,7 @@ use Quantum\App\Stages\Console\RunCommandStage;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Application;
 use Quantum\App\Enums\ExitCode;
+use Exception;
 
 class RunCommandStageTest extends ConsoleStageTestCase
 {
@@ -46,6 +47,40 @@ class RunCommandStageTest extends ConsoleStageTestCase
         (new RunCommandStage())->process($context);
 
         $this->assertStringContainsString('hello from run:ok', $context->getOutput()->fetch());
+    }
+
+    public function testRunCommandStageRejectsUnknownCommand(): void
+    {
+        $context = $this->createConsoleContext(['command' => 'unknown:command'], $this->createApplication('run:ok', 0));
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Command `unknown:command` is not defined');
+
+        (new RunCommandStage())->process($context);
+    }
+
+    public function testRunCommandStageRejectsMissingCommandName(): void
+    {
+        $context = $this->createConsoleContext([], $this->createApplication('run:ok', 0));
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Command `` is not defined');
+
+        (new RunCommandStage())->process($context);
+    }
+
+    public function testRunCommandStageRunsNothingWhenTheCommandNameIsMissing(): void
+    {
+        $context = $this->createConsoleContext([], $this->createApplication('run:fail', 3));
+
+        try {
+            (new RunCommandStage())->process($context);
+        } catch (Exception $e) {
+            // expected, the command name is missing
+        }
+
+        $this->assertSame(ExitCode::SUCCESS, $context->getExitCode());
+        $this->assertSame('', $context->getOutput()->fetch());
     }
 
     private function createApplication(string $commandName, int $exitCode): Application

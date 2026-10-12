@@ -13,7 +13,6 @@ namespace Quantum\App\Adapters\Console;
 use Quantum\App\Stages\Console\RegisterCoreCommandsStage;
 use Quantum\App\Stages\Console\RegisterAppCommandsStage;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Quantum\App\Stages\Console\ValidateCommandStage;
 use Quantum\App\Stages\Console\RunCommandStage;
 use Symfony\Component\Console\Input\ArgvInput;
 use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
@@ -92,7 +91,6 @@ class ConsoleAppAdapter implements AppInterface
         $pipeline = new ConsolePipeline([
             new RegisterCoreCommandsStage(),
             new RegisterAppCommandsStage(),
-            new ValidateCommandStage(),
             new RunCommandStage(),
         ]);
 
