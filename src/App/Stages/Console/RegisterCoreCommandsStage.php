@@ -10,19 +10,27 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Console;
 
+use Quantum\App\Contracts\ConsoleStageInterface;
+use Quantum\App\Adapters\Console\ConsoleContext;
+use Quantum\Console\CommandRegistrar;
+use ReflectionException;
+
 /**
  * Class RegisterCoreCommandsStage
  * @package Quantum\App
  */
-class RegisterCoreCommandsStage extends RegisterCommandsStage
+class RegisterCoreCommandsStage implements ConsoleStageInterface
 {
-    protected function getDirectory(): string
+    /**
+     * Registers the commands that ship with the framework
+     * @throws ReflectionException
+     */
+    public function process(ConsoleContext $context): void
     {
-        return framework_dir() . DS . 'Console' . DS . 'Commands';
-    }
-
-    protected function getNamespace(): string
-    {
-        return '\\Quantum\\Console\\Commands\\';
+        CommandRegistrar::register(
+            $context->getApplication(),
+            framework_dir() . DS . 'Console' . DS . 'Commands',
+            '\\Quantum\\Console\\Commands\\'
+        );
     }
 }
