@@ -29,8 +29,18 @@ class RegisterCoreCommandsStage implements ConsoleStageInterface
     {
         CommandRegistrar::register(
             $context->getApplication(),
-            framework_dir() . DS . 'Console' . DS . 'Commands',
-            '\\Quantum\\Console\\Commands\\'
+            $this->directory(),
+            $this->namespace(),
         );
+    }
+
+    private function namespace(): string
+    {
+        return '\\Quantum\\Console\\Commands\\';
+    }
+
+    private function directory(): string
+    {
+        return framework_dir() . DS . 'Console' . DS . 'Commands';
     }
 }

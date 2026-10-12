@@ -29,8 +29,18 @@ class RegisterAppCommandsStage implements ConsoleStageInterface
     {
         CommandRegistrar::register(
             $context->getApplication(),
-            base_dir() . DS . 'shared' . DS . 'Commands',
-            '\\Shared\\Commands\\'
+            $this->directory(),
+            $this->namespace(),
         );
+    }
+
+    private function namespace(): string
+    {
+        return '\\Shared\\Commands\\';
+    }
+
+    private function directory(): string
+    {
+        return base_dir() . DS . 'shared' . DS . 'Commands';
     }
 }
