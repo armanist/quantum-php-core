@@ -144,6 +144,52 @@ class ConsoleAppAdapterTest extends AppTestCase
         });
     }
 
+    public function testConsoleAppAdapterStartLetsAppCommandOverrideCoreCommandWithSameName(): void
+    {
+        $coreDirectory = PROJECT_ROOT . DS . 'vendor' . DS . 'quantum' . DS . 'framework' . DS . 'src' . DS . 'Console' . DS . 'Commands';
+        $appDirectory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($coreDirectory, 'Quantum\Console\Commands', function (string $sharedName) use ($appDirectory): void {
+            $this->withTemporaryCommand($appDirectory, 'Shared\Commands', function (string $commandName): void {
+                $this->assertSame(0, $this->startWithRealApplication($commandName));
+                $this->assertSame('Shared\Commands', $GLOBALS['tmpCommandSource'] ?? null);
+            }, $sharedName);
+        });
+    }
+
+    public function testConsoleAppAdapterStartWorksWithoutAppCommandsDirectory(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+        $hidden = PROJECT_ROOT . DS . 'shared' . DS . 'Commands_hidden';
+
+        $this->assertTrue(rename($directory, $hidden));
+
+        try {
+            $this->assertSame(0, $this->startWithRealApplication('list'));
+        } finally {
+            rename($hidden, $directory);
+        }
+    }
+
+    public function testConsoleAppAdapterStartRegistersOnlyInstantiableCommands(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $before = $this->registeredCommandNames();
+
+        $plain = 'TmpPlain' . substr(md5(uniqid('', true)), 0, 8);
+        $abstract = 'TmpAbstract' . substr(md5(uniqid('', true)), 0, 8);
+
+        $plainCode = "<?php\n\nnamespace Shared\\Commands;\n\nclass {$plain}\n{\n}\n";
+        $abstractCode = "<?php\n\nnamespace Shared\\Commands;\n\nabstract class {$abstract} extends \\Quantum\\Console\\CliCommand\n{\n}\n";
+
+        $this->withTemporaryFile($directory, $plain, $plainCode, function () use ($directory, $abstract, $abstractCode, $before): void {
+            $this->withTemporaryFile($directory, $abstract, $abstractCode, function () use ($before): void {
+                $this->assertSame($before, $this->registeredCommandNames());
+            });
+        });
+    }
+
     public function testConsoleAppAdapterBootsAllStagesForRegularCommands(): void
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
@@ -190,22 +236,40 @@ class ConsoleAppAdapterTest extends AppTestCase
     }
 
     /**
+     * Returns the names of the commands that start() leaves registered on a real Symfony Application.
+     * @return array<int, string>
+     */
+    private function registeredCommandNames(): array
+    {
+        $application = new Application('Qt Console Application', 'test');
+        $application->setAutoExit(false);
+        $application->setCatchExceptions(false);
+
+        $adapter = Mockery::mock(ConsoleAppAdapter::class)
+            ->shouldAllowMockingProtectedMethods()
+            ->makePartial();
+
+        $adapter->shouldReceive('createApplication')->andReturn($application);
+
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $adapter->__construct($this->createContext());
+        $adapter->start();
+
+        return array_keys($application->all());
+    }
+
+    /**
      * Creates a temporary command class in the given directory, loads it, runs the test
      * with the command name, and removes the file and any directories it had to create.
-     * The command records that it ran in $GLOBALS['tmpCommandRan'].
+     * The command records that it ran, and from which namespace, in $GLOBALS['tmpCommandRan'] and
+     * $GLOBALS['tmpCommandSource']. A fixed command name creates two commands with the same name.
      */
-    private function withTemporaryCommand(string $directory, string $namespace, callable $test): void
+    private function withTemporaryCommand(string $directory, string $namespace, callable $test, ?string $name = null): void
     {
         $suffix = substr(md5(uniqid('', true)), 0, 8);
         $className = 'TmpCommand' . $suffix;
-        $commandName = 'tmp:command' . $suffix;
-        $file = $directory . DS . $className . '.php';
-
-        $missing = [];
-
-        for ($dir = $directory; !is_dir($dir); $dir = dirname($dir)) {
-            array_unshift($missing, $dir);
-        }
+        $commandName = $name ?? 'tmp:command' . $suffix;
 
         $command = <<<PHP
 <?php
@@ -223,20 +287,40 @@ class {$className} extends CliCommand
     public function exec(): void
     {
         \$GLOBALS['tmpCommandRan'] = '{$commandName}';
+        \$GLOBALS['tmpCommandSource'] = '{$namespace}';
     }
 }
 PHP;
+
+        $this->withTemporaryFile($directory, $className, $command, function () use ($test, $commandName): void {
+            $test($commandName);
+        });
+    }
+
+    /**
+     * Writes a temporary PHP file named after the class into the directory, loads it, runs the test,
+     * and removes the file and any directories it had to create.
+     */
+    private function withTemporaryFile(string $directory, string $className, string $code, callable $test): void
+    {
+        $file = $directory . DS . $className . '.php';
+
+        $missing = [];
+
+        for ($dir = $directory; !is_dir($dir); $dir = dirname($dir)) {
+            array_unshift($missing, $dir);
+        }
 
         try {
             if ($missing !== []) {
                 $this->assertTrue(mkdir($directory, 0777, true));
             }
 
-            $this->assertNotFalse(file_put_contents($file, $command));
+            $this->assertNotFalse(file_put_contents($file, $code));
 
             require_once $file;
 
-            $test($commandName);
+            $test();
         } finally {
             if (is_file($file)) {
                 unlink($file);
@@ -248,7 +332,7 @@ PHP;
                 }
             }
 
-            unset($GLOBALS['tmpCommandRan']);
+            unset($GLOBALS['tmpCommandRan'], $GLOBALS['tmpCommandSource']);
         }
     }
 }
