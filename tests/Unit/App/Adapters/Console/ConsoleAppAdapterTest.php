@@ -2,6 +2,7 @@
 
 namespace Quantum\Tests\Unit\App\Adapters\Console;
 
+use Quantum\Environment\Exceptions\EnvException;
 use Quantum\App\Adapters\Console\ConsoleAppAdapter;
 use Symfony\Component\Console\Application;
 use Quantum\Environment\Environment;
@@ -202,15 +203,41 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertTrue(config()->has('app'));
     }
 
-    public function testConsoleAppAdapterBootsReducedStagesForCoreEnvCommand(): void
+    public function testConsoleAppAdapterBootsReducedStagesForCoreEnvCommandWhenTheEnvFileIsMissing(): void
+    {
+        $_SERVER['argv'] = ['qt', 'core:env'];
+
+        $this->withoutEnvironmentFile(function (): void {
+            $this->consoleAppAdapter->__construct($this->createContext());
+
+            $this->assertFalse(Di::has(Environment::class));
+            $this->assertFalse(Di::isRegistered(ErrorHandler::class));
+            $this->assertFalse(config()->has('app'));
+        });
+    }
+
+    public function testConsoleAppAdapterBootsAllStagesForCoreEnvCommandWhenTheEnvFileExists(): void
     {
         $_SERVER['argv'] = ['qt', 'core:env'];
 
         $this->consoleAppAdapter->__construct($this->createContext());
 
-        $this->assertFalse(Di::has(Environment::class));
-        $this->assertFalse(Di::isRegistered(ErrorHandler::class));
-        $this->assertFalse(config()->has('app'));
+        $this->assertTrue(Di::has(Environment::class));
+        $this->assertTrue(Di::isRegistered(ErrorHandler::class));
+        $this->assertTrue(config()->has('app'));
+    }
+
+    public function testConsoleAppAdapterBootsReducedStagesForAnyCommandWhenTheEnvFileIsMissing(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $this->withoutEnvironmentFile(function (): void {
+            $this->consoleAppAdapter->__construct($this->createContext());
+
+            $this->assertFalse(Di::has(Environment::class));
+            $this->assertFalse(Di::isRegistered(ErrorHandler::class));
+            $this->assertFalse(config()->has('app'));
+        });
     }
 
     public function testConsoleAppAdapterBootsAllStagesForUnknownCommand(): void
@@ -224,15 +251,17 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertTrue(config()->has('app'));
     }
 
-    public function testConsoleAppAdapterBootsReducedStagesForCoreEnvCommandWithOptions(): void
+    public function testConsoleAppAdapterBootsReducedStagesForCoreEnvCommandWithOptionsWhenTheEnvFileIsMissing(): void
     {
         $_SERVER['argv'] = ['qt', 'core:env', '--yes'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $this->withoutEnvironmentFile(function (): void {
+            $this->consoleAppAdapter->__construct($this->createContext());
 
-        $this->assertFalse(Di::has(Environment::class));
-        $this->assertFalse(Di::isRegistered(ErrorHandler::class));
-        $this->assertFalse(config()->has('app'));
+            $this->assertFalse(Di::has(Environment::class));
+            $this->assertFalse(Di::isRegistered(ErrorHandler::class));
+            $this->assertFalse(config()->has('app'));
+        });
     }
 
     public function testConsoleAppAdapterMakesEnvironmentMutableForRegularCommands(): void
@@ -262,10 +291,65 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'core:env'];
 
-        $adapter = new ConsoleAppAdapter($this->createContext());
+        $this->withoutEnvironmentFile(function (): void {
+            $adapter = new ConsoleAppAdapter($this->createContext());
 
-        $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getName());
-        $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getVersion());
+            $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getName());
+            $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getVersion());
+        });
+    }
+
+    public function testConsoleAppAdapterStartRejectsACommandThatRequiresTheEnvironmentWhenTheEnvFileIsMissing(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
+
+            $this->withoutEnvironmentFile(function (): void {
+                $this->consoleAppAdapter->__construct($this->createContext());
+
+                $this->expectException(EnvException::class);
+
+                $this->consoleAppAdapter->start();
+            });
+        });
+    }
+
+    public function testConsoleAppAdapterStartRunsACommandThatDoesNotRequireTheEnvironmentWhenTheEnvFileIsMissing(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $this->withoutEnvironmentFile(function () use ($commandName): void {
+                $this->assertSame(0, $this->startWithRealApplication($commandName));
+                $this->assertSame($commandName, $GLOBALS['tmpCommandRan'] ?? null);
+            });
+        }, null, false);
+    }
+
+    public function testConsoleAppAdapterStartRunsListWhenTheEnvFileIsMissing(): void
+    {
+        $this->withoutEnvironmentFile(function (): void {
+            $this->assertSame(0, $this->startWithRealApplication('list'));
+        });
+    }
+
+    /**
+     * Hides the environment file of the test app for the duration of the callback
+     */
+    private function withoutEnvironmentFile(callable $test): void
+    {
+        $file = PROJECT_ROOT . DS . '.env.testing';
+        $hidden = $file . '.hidden';
+
+        $this->assertTrue(rename($file, $hidden));
+
+        try {
+            $test();
+        } finally {
+            rename($hidden, $file);
+        }
     }
 
     /**
@@ -330,13 +414,15 @@ class ConsoleAppAdapterTest extends AppTestCase
      * Creates a temporary command class in the given directory, loads it, runs the test
      * with the command name, and removes the file and any directories it had to create.
      * The command records that it ran, and from which namespace, in $GLOBALS['tmpCommandRan'] and
-     * $GLOBALS['tmpCommandSource']. A fixed command name creates two commands with the same name.
+     * $GLOBALS['tmpCommandSource']. A fixed command name creates two commands with the same name,
+     * and the command can declare that it does not require the environment.
      */
-    private function withTemporaryCommand(string $directory, string $namespace, callable $test, ?string $name = null): void
+    private function withTemporaryCommand(string $directory, string $namespace, callable $test, ?string $name = null, bool $requiresEnvironment = true): void
     {
         $suffix = substr(md5(uniqid('', true)), 0, 8);
         $className = 'TmpCommand' . $suffix;
         $commandName = $name ?? 'tmp:command' . $suffix;
+        $requires = $requiresEnvironment ? 'true' : 'false';
 
         $command = <<<PHP
 <?php
@@ -350,6 +436,8 @@ class {$className} extends CliCommand
     protected ?string \$name = '{$commandName}';
     protected ?string \$description = 'Temporary command';
     protected ?string \$help = 'Created by a test';
+
+    protected bool \$requiresEnvironment = {$requires};
 
     public function exec(): void
     {

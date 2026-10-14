@@ -21,6 +21,7 @@ use Symfony\Component\Console\Application;
 use Quantum\App\Stages\Boot\LoadAppConfigStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Quantum\App\Contracts\AppInterface;
+use Quantum\Environment\Environment;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;
@@ -51,13 +52,13 @@ class ConsoleAppAdapter implements AppInterface
         $this->input = new ArgvInput();
         $this->output = new ConsoleOutput();
 
-        $commandName = $this->input->getFirstArgument();
+        $environmentFileExists = (new Environment())->fileExists();
 
         $stages = [
             new LoadHelpersStage(),
         ];
 
-        if ($commandName !== 'core:env') {
+        if ($environmentFileExists) {
             $stages[] = new LoadEnvironmentStage();
             $stages[] = new LoadAppConfigStage();
             $stages[] = new SetupErrorHandlerStage();
@@ -66,7 +67,7 @@ class ConsoleAppAdapter implements AppInterface
         $pipeline = new BootPipeline($stages);
         $pipeline->run($this->context);
 
-        if ($commandName !== 'core:env') {
+        if ($environmentFileExists) {
             environment()->setMutable(true);
         }
 
