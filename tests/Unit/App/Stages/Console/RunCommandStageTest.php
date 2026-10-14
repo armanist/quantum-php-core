@@ -3,13 +3,13 @@
 namespace Quantum\Tests\Unit\App\Stages\Console;
 
 use Symfony\Component\Console\Output\OutputInterface;
-use Quantum\Environment\Exceptions\EnvException;
 use Symfony\Component\Console\Input\InputInterface;
 use Quantum\App\Stages\Console\RunCommandStage;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Application;
 use Quantum\App\Enums\ExitCode;
 use Quantum\Console\CliCommand;
+use RuntimeException;
 use Exception;
 
 class RunCommandStageTest extends ConsoleStageTestCase
@@ -85,49 +85,54 @@ class RunCommandStageTest extends ConsoleStageTestCase
         $this->assertSame('', $context->getOutput()->fetch());
     }
 
-    public function testRunCommandStageRejectsACommandThatRequiresTheEnvironmentWhenTheEnvFileIsMissing(): void
+    public function testRunCommandStageRejectsUnknownCommandWhenTheBootFailed(): void
     {
-        $context = $this->createConsoleContext(['command' => 'needs:env'], $this->createCliApplication('needs:env', true));
+        $context = $this->createConsoleContext(['command' => 'unknown:command'], $this->createApplication('run:ok', 0), new RuntimeException('The boot failed'));
 
-        $this->withoutEnvironmentFile(function () use ($context): void {
-            try {
-                (new RunCommandStage())->process($context);
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Command `unknown:command` is not defined');
 
-                $this->fail('The command must not run without the environment file.');
-            } catch (EnvException $e) {
-                $this->assertStringContainsString('.env.testing', $e->getMessage());
-            }
-        });
+        (new RunCommandStage())->process($context);
+    }
+
+    public function testRunCommandStageRejectsACommandThatRequiresTheEnvironmentWhenTheBootFailed(): void
+    {
+        $failure = new RuntimeException('The boot failed');
+        $context = $this->createConsoleContext(['command' => 'needs:env'], $this->createCliApplication('needs:env', true), $failure);
+
+        try {
+            (new RunCommandStage())->process($context);
+
+            $this->fail('The command must not run after a failed boot.');
+        } catch (RuntimeException $e) {
+            $this->assertSame($failure, $e);
+        }
 
         $this->assertSame(ExitCode::SUCCESS, $context->getExitCode());
         $this->assertSame('', $context->getOutput()->fetch());
     }
 
-    public function testRunCommandStageRunsACommandThatDoesNotRequireTheEnvironmentWhenTheEnvFileIsMissing(): void
+    public function testRunCommandStageRunsACommandThatDoesNotRequireTheEnvironmentWhenTheBootFailed(): void
     {
-        $context = $this->createConsoleContext(['command' => 'opt:out'], $this->createCliApplication('opt:out', false));
+        $context = $this->createConsoleContext(['command' => 'opt:out'], $this->createCliApplication('opt:out', false), new RuntimeException('The boot failed'));
 
-        $this->withoutEnvironmentFile(function () use ($context): void {
-            (new RunCommandStage())->process($context);
-        });
+        (new RunCommandStage())->process($context);
 
         $this->assertSame(ExitCode::SUCCESS, $context->getExitCode());
         $this->assertStringContainsString('ran opt:out', $context->getOutput()->fetch());
     }
 
-    public function testRunCommandStageRunsAPlainSymfonyCommandWhenTheEnvFileIsMissing(): void
+    public function testRunCommandStageRunsAPlainSymfonyCommandWhenTheBootFailed(): void
     {
-        $context = $this->createConsoleContext(['command' => 'run:ok'], $this->createApplication('run:ok', 0));
+        $context = $this->createConsoleContext(['command' => 'run:ok'], $this->createApplication('run:ok', 0), new RuntimeException('The boot failed'));
 
-        $this->withoutEnvironmentFile(function () use ($context): void {
-            (new RunCommandStage())->process($context);
-        });
+        (new RunCommandStage())->process($context);
 
         $this->assertSame(ExitCode::SUCCESS, $context->getExitCode());
         $this->assertStringContainsString('hello from run:ok', $context->getOutput()->fetch());
     }
 
-    public function testRunCommandStageRunsACommandThatRequiresTheEnvironmentWhenTheEnvFileExists(): void
+    public function testRunCommandStageRunsACommandThatRequiresTheEnvironmentWhenTheBootSucceeded(): void
     {
         $context = $this->createConsoleContext(['command' => 'needs:env'], $this->createCliApplication('needs:env', true));
 
@@ -160,23 +165,6 @@ class RunCommandStageTest extends ConsoleStageTestCase
         });
 
         return $application;
-    }
-
-    /**
-     * Hides the environment file of the test app for the duration of the callback
-     */
-    private function withoutEnvironmentFile(callable $test): void
-    {
-        $file = PROJECT_ROOT . DS . '.env.testing';
-        $hidden = $file . '.hidden';
-
-        $this->assertTrue(rename($file, $hidden));
-
-        try {
-            $test();
-        } finally {
-            rename($hidden, $file);
-        }
     }
 
     private function createApplication(string $commandName, int $exitCode): Application

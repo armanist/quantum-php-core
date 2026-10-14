@@ -2,14 +2,17 @@
 
 namespace Quantum\Tests\Unit\App\Adapters\Console;
 
-use Quantum\Environment\Exceptions\EnvException;
 use Quantum\App\Adapters\Console\ConsoleAppAdapter;
+use Quantum\Environment\Exceptions\EnvException;
 use Symfony\Component\Console\Application;
+use Dotenv\Exception\InvalidFileException;
 use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
 use Quantum\Di\Di;
 use ReflectionProperty;
+use RuntimeException;
+use Throwable;
 use Exception;
 use Mockery;
 
@@ -203,19 +206,6 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertTrue(config()->has('app'));
     }
 
-    public function testConsoleAppAdapterBootsReducedStagesForCoreEnvCommandWhenTheEnvFileIsMissing(): void
-    {
-        $_SERVER['argv'] = ['qt', 'core:env'];
-
-        $this->withoutEnvironmentFile(function (): void {
-            $this->consoleAppAdapter->__construct($this->createContext());
-
-            $this->assertFalse(Di::has(Environment::class));
-            $this->assertFalse(Di::isRegistered(ErrorHandler::class));
-            $this->assertFalse(config()->has('app'));
-        });
-    }
-
     public function testConsoleAppAdapterBootsAllStagesForCoreEnvCommandWhenTheEnvFileExists(): void
     {
         $_SERVER['argv'] = ['qt', 'core:env'];
@@ -227,7 +217,27 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertTrue(config()->has('app'));
     }
 
-    public function testConsoleAppAdapterBootsReducedStagesForAnyCommandWhenTheEnvFileIsMissing(): void
+    public function testConsoleAppAdapterRecordsNoBootFailureAfterASuccessfulBoot(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $this->consoleAppAdapter->__construct($this->createContext());
+
+        $this->assertNull($this->bootFailureOf($this->consoleAppAdapter));
+    }
+
+    public function testConsoleAppAdapterRecordsTheBootFailureInsteadOfThrowingWhenTheEnvFileIsMissing(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $this->withoutEnvironmentFile(function (): void {
+            $this->consoleAppAdapter->__construct($this->createContext());
+
+            $this->assertInstanceOf(EnvException::class, $this->bootFailureOf($this->consoleAppAdapter));
+        });
+    }
+
+    public function testConsoleAppAdapterDoesNotMakeTheEnvironmentMutableAfterAFailedBoot(): void
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
@@ -235,9 +245,22 @@ class ConsoleAppAdapterTest extends AppTestCase
             $this->consoleAppAdapter->__construct($this->createContext());
 
             $this->assertFalse(Di::has(Environment::class));
-            $this->assertFalse(Di::isRegistered(ErrorHandler::class));
-            $this->assertFalse(config()->has('app'));
         });
+    }
+
+    public function testConsoleAppAdapterNamesTheApplicationUnknownWhenTheAppNameIsEmpty(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $context = $this->createContext();
+
+        config()->set('app', ['name' => null, 'version' => null]);
+
+        $adapter = new ConsoleAppAdapter($context);
+
+        $this->assertNull($this->bootFailureOf($adapter));
+        $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getName());
+        $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getVersion());
     }
 
     public function testConsoleAppAdapterBootsAllStagesForUnknownCommand(): void
@@ -249,19 +272,6 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertTrue(Di::has(Environment::class));
         $this->assertTrue(Di::isRegistered(ErrorHandler::class));
         $this->assertTrue(config()->has('app'));
-    }
-
-    public function testConsoleAppAdapterBootsReducedStagesForCoreEnvCommandWithOptionsWhenTheEnvFileIsMissing(): void
-    {
-        $_SERVER['argv'] = ['qt', 'core:env', '--yes'];
-
-        $this->withoutEnvironmentFile(function (): void {
-            $this->consoleAppAdapter->__construct($this->createContext());
-
-            $this->assertFalse(Di::has(Environment::class));
-            $this->assertFalse(Di::isRegistered(ErrorHandler::class));
-            $this->assertFalse(config()->has('app'));
-        });
     }
 
     public function testConsoleAppAdapterMakesEnvironmentMutableForRegularCommands(): void
@@ -287,7 +297,7 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertNotSame('UNKNOWN', $this->applicationOf($adapter)->getName());
     }
 
-    public function testConsoleAppAdapterNamesTheApplicationUnknownAfterTheReducedBoot(): void
+    public function testConsoleAppAdapterNamesTheApplicationUnknownAfterAFailedBoot(): void
     {
         $_SERVER['argv'] = ['qt', 'core:env'];
 
@@ -335,6 +345,184 @@ class ConsoleAppAdapterTest extends AppTestCase
         });
     }
 
+    public function testConsoleAppAdapterStartRunsACommandThatDoesNotRequireTheEnvironmentWhenTheEnvFileIsMalformed(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $this->withEnvironmentFileContent("APP_NAME=two words here\n", function () use ($commandName): void {
+                $adapter = $this->bootRealAdapter($commandName);
+
+                $this->assertSame(0, $adapter->start());
+                $this->assertSame($commandName, $GLOBALS['tmpCommandRan'] ?? null);
+            });
+        }, null, false);
+    }
+
+    public function testConsoleAppAdapterStartRunsACommandThatDoesNotRequireTheEnvironmentWhenTheEnvFileIsEmpty(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $this->withEnvironmentFileContent('', function () use ($commandName): void {
+                $adapter = $this->bootRealAdapter($commandName);
+
+                $this->assertSame(0, $adapter->start());
+                $this->assertSame($commandName, $GLOBALS['tmpCommandRan'] ?? null);
+            });
+        }, null, false);
+    }
+
+    public function testConsoleAppAdapterStartRejectsACommandThatRequiresTheEnvironmentWhenTheEnvFileIsMalformed(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $this->withEnvironmentFileContent("APP_NAME=two words here\n", function () use ($commandName): void {
+                $adapter = $this->bootRealAdapter($commandName);
+
+                try {
+                    $adapter->start();
+                    $this->fail('The command must not run when the environment file is malformed.');
+                } catch (InvalidFileException $exception) {
+                    $this->assertArrayNotHasKey('tmpCommandRan', $GLOBALS);
+                }
+            });
+        });
+    }
+
+    public function testConsoleAppAdapterStartRunsListWhenTheEnvFileIsMalformed(): void
+    {
+        $this->withEnvironmentFileContent("APP_NAME=two words here\n", function (): void {
+            $this->assertSame(0, $this->bootRealAdapter('list')->start());
+        });
+    }
+
+    public function testConsoleAppAdapterStartReportsTheBootFailureForAnUnknownCommandWhenTheEnvFileIsMalformed(): void
+    {
+        $this->withEnvironmentFileContent("APP_NAME=two words here\n", function (): void {
+            $adapter = $this->bootRealAdapter('unknown:command');
+
+            $this->expectException(InvalidFileException::class);
+
+            $adapter->start();
+        });
+    }
+
+    public function testConsoleAppAdapterStartReportsTheBootFailureForAnUnknownCommandWhenTheEnvFileIsMissing(): void
+    {
+        $this->withoutEnvironmentFile(function (): void {
+            $adapter = $this->bootRealAdapter('unknown:command');
+
+            $this->expectException(EnvException::class);
+
+            $adapter->start();
+        });
+    }
+
+    public function testConsoleAppAdapterStartReportsTheBootFailureWhenACommandCannotBeCreatedAfterAFailedBoot(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withBrokenCommand($directory, function (): void {
+            $this->withoutEnvironmentFile(function (): void {
+                $adapter = $this->bootRealAdapter('list');
+
+                $this->expectException(EnvException::class);
+
+                $adapter->start();
+            });
+        });
+    }
+
+    public function testConsoleAppAdapterStartReportsTheCommandFailureWhenACommandCannotBeCreatedAfterASuccessfulBoot(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withBrokenCommand($directory, function (): void {
+            $adapter = $this->bootRealAdapter('list');
+
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('The command cannot be created');
+
+            $adapter->start();
+        });
+    }
+
+    /**
+     * Replaces the content of the environment file of the test app for the duration of the callback
+     */
+    private function withEnvironmentFileContent(string $content, callable $test): void
+    {
+        $file = PROJECT_ROOT . DS . '.env.testing';
+        $backup = $file . '.backup';
+
+        $this->assertTrue(rename($file, $backup));
+
+        try {
+            $this->assertNotFalse(file_put_contents($file, $content));
+
+            $test();
+        } finally {
+            if (is_file($file)) {
+                unlink($file);
+            }
+
+            rename($backup, $file);
+        }
+    }
+
+    /**
+     * Boots the real adapter, with its own createApplication(), for the command and keeps
+     * the Symfony Application from exiting and from catching exceptions, so start() can be asserted on
+     */
+    private function bootRealAdapter(string $commandName): ConsoleAppAdapter
+    {
+        $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
+
+        $adapter = new ConsoleAppAdapter($this->createContext());
+
+        $application = $this->applicationOf($adapter);
+        $application->setAutoExit(false);
+        $application->setCatchExceptions(false);
+
+        return $adapter;
+    }
+
+    /**
+     * Puts an app command whose constructor throws into the directory for the duration of the test
+     */
+    private function withBrokenCommand(string $directory, callable $test): void
+    {
+        $className = 'TmpBrokenCommand' . substr(md5(uniqid('', true)), 0, 8);
+
+        $command = <<<PHP
+<?php
+
+namespace Shared\Commands;
+
+use Quantum\Console\CliCommand;
+
+class {$className} extends CliCommand
+{
+    protected ?string \$name = 'tmp:broken';
+    protected ?string \$description = 'Temporary command';
+    protected ?string \$help = 'Created by a test';
+
+    public function __construct()
+    {
+        throw new \RuntimeException('The command cannot be created');
+    }
+
+    public function exec(): void
+    {
+    }
+}
+PHP;
+
+        $this->withTemporaryFile($directory, $className, $command, $test);
+    }
+
     /**
      * Hides the environment file of the test app for the duration of the callback
      */
@@ -352,6 +540,16 @@ class ConsoleAppAdapterTest extends AppTestCase
         }
     }
 
+    /**
+     * The failure the adapter recorded while booting, if there was one
+     */
+    private function bootFailureOf(ConsoleAppAdapter $adapter): ?Throwable
+    {
+        $property = new ReflectionProperty(ConsoleAppAdapter::class, 'bootFailure');
+        $property->setAccessible(true);
+
+        return $property->getValue($adapter);
+    }
     /**
      * The Symfony Application the adapter built while booting
      */

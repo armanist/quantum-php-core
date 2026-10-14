@@ -13,18 +13,18 @@ namespace Quantum\App\Adapters\Console;
 use Quantum\App\Stages\Console\RegisterCoreCommandsStage;
 use Quantum\App\Stages\Console\RegisterAppCommandsStage;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Quantum\App\Stages\Console\RunCommandStage;
-use Symfony\Component\Console\Input\ArgvInput;
 use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
 use Quantum\App\Stages\Boot\LoadEnvironmentStage;
-use Symfony\Component\Console\Application;
+use Quantum\App\Stages\Console\RunCommandStage;
+use Symfony\Component\Console\Input\ArgvInput;
 use Quantum\App\Stages\Boot\LoadAppConfigStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
+use Symfony\Component\Console\Application;
 use Quantum\App\Contracts\AppInterface;
-use Quantum\Environment\Environment;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;
+use Throwable;
 use Exception;
 
 if (!defined('DS')) {
@@ -37,6 +37,8 @@ if (!defined('DS')) {
  */
 class ConsoleAppAdapter implements AppInterface
 {
+    private const UNKNOWN = 'UNKNOWN';
+
     protected AppContext $context;
 
     protected ArgvInput $input;
@@ -45,6 +47,8 @@ class ConsoleAppAdapter implements AppInterface
 
     protected Application $application;
 
+    protected ?Throwable $bootFailure = null;
+
     public function __construct(AppContext $context)
     {
         $this->context = $context;
@@ -52,29 +56,25 @@ class ConsoleAppAdapter implements AppInterface
         $this->input = new ArgvInput();
         $this->output = new ConsoleOutput();
 
-        $environmentFileExists = (new Environment())->fileExists();
+        $this->application = $this->createApplication(self::UNKNOWN, self::UNKNOWN);
 
-        $stages = [
-            new LoadHelpersStage(),
-        ];
+        try {
+            $pipeline = new BootPipeline([
+                new LoadHelpersStage(),
+                new LoadEnvironmentStage(),
+                new LoadAppConfigStage(),
+                new SetupErrorHandlerStage(),
+            ]);
 
-        if ($environmentFileExists) {
-            $stages[] = new LoadEnvironmentStage();
-            $stages[] = new LoadAppConfigStage();
-            $stages[] = new SetupErrorHandlerStage();
-        }
+            $pipeline->run($this->context);
 
-        $pipeline = new BootPipeline($stages);
-        $pipeline->run($this->context);
-
-        if ($environmentFileExists) {
             environment()->setMutable(true);
-        }
 
-        $this->application = $this->createApplication(
-            config()->get('app.name', 'UNKNOWN'),
-            config()->get('app.version', 'UNKNOWN')
-        );
+            $this->application->setName(config()->get('app.name') ?: self::UNKNOWN);
+            $this->application->setVersion(config()->get('app.version') ?: self::UNKNOWN);
+        } catch (Throwable $exception) {
+            $this->bootFailure = $exception;
+        }
     }
 
     public function createApplication(string $name, string $version): Application
@@ -83,11 +83,11 @@ class ConsoleAppAdapter implements AppInterface
     }
 
     /**
-    * @throws Exception
+    * @throws Exception|Throwable
     */
     public function start(): ?int
     {
-        $context = new ConsoleContext($this->context, $this->application, $this->input, $this->output);
+        $context = new ConsoleContext($this->context, $this->application, $this->input, $this->output, $this->bootFailure);
 
         $pipeline = new ConsolePipeline([
             new RegisterCoreCommandsStage(),
@@ -95,7 +95,11 @@ class ConsoleAppAdapter implements AppInterface
             new RunCommandStage(),
         ]);
 
-        $pipeline->run($context);
+        try {
+            $pipeline->run($context);
+        } catch (Throwable $exception) {
+            throw $this->bootFailure ?? $exception;
+        }
 
         return $context->getExitCode() ?: ExitCode::SUCCESS;
     }
