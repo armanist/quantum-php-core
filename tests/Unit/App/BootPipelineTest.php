@@ -9,6 +9,7 @@ use Quantum\App\Stages\Boot\LoadAppConfigStage;
 use Quantum\App\Stages\Boot\InitDebuggerStage;
 use Quantum\App\Stages\Boot\LoadModulesStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
+use Quantum\App\Stages\Boot\InitConsoleStage;
 use Quantum\App\Stages\Boot\InitHttpStage;
 use Quantum\Tests\Unit\AppTestCase;
 use InvalidArgumentException;
@@ -218,6 +219,9 @@ class BootPipelineTest extends AppTestCase
 
         $this->assertSame('boot.http.before', InitHttpStage::BEFORE);
         $this->assertSame('boot.http.after', InitHttpStage::AFTER);
+
+        $this->assertSame('boot.console.before', InitConsoleStage::BEFORE);
+        $this->assertSame('boot.console.after', InitConsoleStage::AFTER);
 
         $this->assertSame('boot.modules.before', LoadModulesStage::BEFORE);
         $this->assertSame('boot.modules.after', LoadModulesStage::AFTER);
