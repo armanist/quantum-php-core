@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Application;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;
+use Throwable;
 
 /**
  * Class ConsoleContext
@@ -34,18 +35,22 @@ class ConsoleContext
 
     private OutputInterface $output;
 
+    private ?Throwable $bootFailure;
+
     private int $exitCode = ExitCode::SUCCESS;
 
     public function __construct(
         AppContext $appContext,
         Application $application,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
+        ?Throwable $bootFailure = null
     ) {
         $this->appContext = $appContext;
         $this->application = $application;
         $this->input = $input;
         $this->output = $output;
+        $this->bootFailure = $bootFailure;
     }
 
     public function getAppContext(): AppContext
@@ -66,6 +71,14 @@ class ConsoleContext
     public function getOutput(): OutputInterface
     {
         return $this->output;
+    }
+
+    /**
+     * The failure of the boot that the console run continued after, if there was one
+     */
+    public function getBootFailure(): ?Throwable
+    {
+        return $this->bootFailure;
     }
 
     public function getExitCode(): int
