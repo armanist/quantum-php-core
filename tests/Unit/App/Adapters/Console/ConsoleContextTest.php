@@ -10,6 +10,7 @@ use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;
 use Quantum\App\App;
+use RuntimeException;
 
 class ConsoleContextTest extends AppTestCase
 {
@@ -45,6 +46,20 @@ class ConsoleContextTest extends AppTestCase
         $this->assertSame($this->application, $this->consoleContext->getApplication());
         $this->assertSame($this->input, $this->consoleContext->getInput());
         $this->assertSame($this->output, $this->consoleContext->getOutput());
+    }
+
+    public function testConsoleContextHasNoBootFailureByDefault(): void
+    {
+        $this->assertNull($this->consoleContext->getBootFailure());
+    }
+
+    public function testConsoleContextExposesTheBootFailure(): void
+    {
+        $failure = new RuntimeException('The boot failed');
+
+        $consoleContext = new ConsoleContext($this->appContext, $this->application, $this->input, $this->output, $failure);
+
+        $this->assertSame($failure, $consoleContext->getBootFailure());
     }
 
     public function testConsoleContextDefaultsExitCodeToSuccess(): void

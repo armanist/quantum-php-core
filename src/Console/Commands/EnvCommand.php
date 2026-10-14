@@ -47,6 +47,11 @@ class EnvCommand extends CliCommand
     ];
 
     /**
+     * The command creates the environment file, so it must run when there is none
+     */
+    protected bool $requiresEnvironment = false;
+
+    /**
      * Executes the command and creates new .env file
      * @throws BaseException
      * @throws ConfigException
@@ -61,7 +66,7 @@ class EnvCommand extends CliCommand
             $this->error('.env.example file not found');
         }
 
-        if ($fs->exists('.env') && !$this->getOption('yes') && !$this->confirm('The operation will overwrite values of the existing .env and will create new one from .env.example. Continue?')) {
+        if ($fs->exists(App::getBaseDir() . DS . '.env') && !$this->getOption('yes') && !$this->confirm('The operation will overwrite values of the existing .env and will create new one from .env.example. Continue?')) {
             $this->info('Operation was canceled!');
             return;
         }
