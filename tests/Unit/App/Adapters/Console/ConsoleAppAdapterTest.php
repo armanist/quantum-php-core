@@ -8,6 +8,7 @@ use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
 use Quantum\Di\Di;
+use ReflectionProperty;
 use Exception;
 use Mockery;
 
@@ -210,6 +211,72 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertFalse(Di::has(Environment::class));
         $this->assertFalse(Di::isRegistered(ErrorHandler::class));
         $this->assertFalse(config()->has('app'));
+    }
+
+    public function testConsoleAppAdapterBootsAllStagesForUnknownCommand(): void
+    {
+        $_SERVER['argv'] = ['qt', 'unknown:command', '--quiet'];
+
+        $this->consoleAppAdapter->__construct($this->createContext());
+
+        $this->assertTrue(Di::has(Environment::class));
+        $this->assertTrue(Di::isRegistered(ErrorHandler::class));
+        $this->assertTrue(config()->has('app'));
+    }
+
+    public function testConsoleAppAdapterBootsReducedStagesForCoreEnvCommandWithOptions(): void
+    {
+        $_SERVER['argv'] = ['qt', 'core:env', '--yes'];
+
+        $this->consoleAppAdapter->__construct($this->createContext());
+
+        $this->assertFalse(Di::has(Environment::class));
+        $this->assertFalse(Di::isRegistered(ErrorHandler::class));
+        $this->assertFalse(config()->has('app'));
+    }
+
+    public function testConsoleAppAdapterMakesEnvironmentMutableForRegularCommands(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $this->consoleAppAdapter->__construct($this->createContext());
+
+        $property = new ReflectionProperty(Environment::class, 'isMutable');
+        $property->setAccessible(true);
+
+        $this->assertTrue($property->getValue(environment()));
+    }
+
+    public function testConsoleAppAdapterNamesTheApplicationFromTheAppConfigAfterTheFullBoot(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $adapter = new ConsoleAppAdapter($this->createContext());
+
+        $this->assertSame(config()->get('app.name'), $this->applicationOf($adapter)->getName());
+        $this->assertSame(config()->get('app.version'), $this->applicationOf($adapter)->getVersion());
+        $this->assertNotSame('UNKNOWN', $this->applicationOf($adapter)->getName());
+    }
+
+    public function testConsoleAppAdapterNamesTheApplicationUnknownAfterTheReducedBoot(): void
+    {
+        $_SERVER['argv'] = ['qt', 'core:env'];
+
+        $adapter = new ConsoleAppAdapter($this->createContext());
+
+        $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getName());
+        $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getVersion());
+    }
+
+    /**
+     * The Symfony Application the adapter built while booting
+     */
+    private function applicationOf(ConsoleAppAdapter $adapter): Application
+    {
+        $property = new ReflectionProperty(ConsoleAppAdapter::class, 'application');
+        $property->setAccessible(true);
+
+        return $property->getValue($adapter);
     }
 
     /**
