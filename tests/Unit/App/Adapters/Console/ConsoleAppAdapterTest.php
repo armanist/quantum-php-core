@@ -4,11 +4,13 @@ namespace Quantum\Tests\Unit\App\Adapters\Console;
 
 use Quantum\App\Adapters\Console\ConsoleAppAdapter;
 use Quantum\Environment\Exceptions\EnvException;
+use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Symfony\Component\Console\Application;
 use Dotenv\Exception\InvalidFileException;
 use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
+use Quantum\App\BootPipeline;
 use Quantum\Di\Di;
 use ReflectionProperty;
 use RuntimeException;
@@ -254,6 +256,8 @@ class ConsoleAppAdapterTest extends AppTestCase
 
         $context = $this->createContext();
 
+        (new BootPipeline([new LoadHelpersStage()]))->run($context);
+
         config()->set('app', ['name' => null, 'version' => null]);
 
         $adapter = new ConsoleAppAdapter($context);
@@ -261,6 +265,23 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertNull($this->bootFailureOf($adapter));
         $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getName());
         $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getVersion());
+    }
+
+    public function testConsoleAppAdapterKeepsAnEmptyAppNameAndVersionFromTheConfig(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $context = $this->createContext();
+
+        (new BootPipeline([new LoadHelpersStage()]))->run($context);
+
+        config()->set('app', ['name' => '', 'version' => '0']);
+
+        $adapter = new ConsoleAppAdapter($context);
+
+        $this->assertNull($this->bootFailureOf($adapter));
+        $this->assertSame('', $this->applicationOf($adapter)->getName());
+        $this->assertSame('0', $this->applicationOf($adapter)->getVersion());
     }
 
     public function testConsoleAppAdapterBootsAllStagesForUnknownCommand(): void

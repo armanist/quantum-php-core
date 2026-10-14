@@ -70,8 +70,8 @@ class ConsoleAppAdapter implements AppInterface
 
             environment()->setMutable(true);
 
-            $this->application->setName(config()->get('app.name') ?: self::UNKNOWN);
-            $this->application->setVersion(config()->get('app.version') ?: self::UNKNOWN);
+            $this->application->setName(config()->get('app.name') ?? self::UNKNOWN);
+            $this->application->setVersion(config()->get('app.version') ?? self::UNKNOWN);
         } catch (Throwable $exception) {
             $this->bootFailure = $exception;
         }
