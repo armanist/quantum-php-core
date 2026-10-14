@@ -295,7 +295,7 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertTrue(config()->has('app'));
     }
 
-    public function testConsoleAppAdapterMakesEnvironmentMutableForRegularCommands(): void
+    public function testConsoleAppAdapterDoesNotMakeTheEnvironmentMutableAfterTheFullBoot(): void
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
@@ -304,7 +304,7 @@ class ConsoleAppAdapterTest extends AppTestCase
         $property = new ReflectionProperty(Environment::class, 'isMutable');
         $property->setAccessible(true);
 
-        $this->assertTrue($property->getValue(environment()));
+        $this->assertFalse($property->getValue(environment()));
     }
 
     public function testConsoleAppAdapterNamesTheApplicationFromTheAppConfigAfterTheFullBoot(): void

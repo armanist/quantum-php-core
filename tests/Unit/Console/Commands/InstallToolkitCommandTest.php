@@ -58,6 +58,9 @@ class InstallToolkitCommandTest extends AppTestCase
             }
         };
 
+        // AppTestCase makes the environment mutable; the command must not depend on that
+        environment()->setMutable(false);
+
         $tester = new CommandTester($command);
         $tester->execute([
             'username' => 'test-user',
