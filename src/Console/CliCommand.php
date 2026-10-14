@@ -54,6 +54,11 @@ abstract class CliCommand extends Command implements CommandInterface
      */
     protected array $options = [];
 
+    /**
+     * Whether the command needs the environment file to run
+     */
+    protected bool $requiresEnvironment = true;
+
     protected ?InputInterface $input = null;
 
     protected ?OutputInterface $output = null;
@@ -72,6 +77,14 @@ abstract class CliCommand extends Command implements CommandInterface
         if ($this->help !== null) {
             $this->setHelp($this->help);
         }
+    }
+
+    /**
+     * Tells whether the command needs the environment file to run
+     */
+    public function requiresEnvironment(): bool
+    {
+        return $this->requiresEnvironment;
     }
 
     /**

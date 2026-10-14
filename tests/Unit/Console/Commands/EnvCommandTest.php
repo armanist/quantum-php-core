@@ -27,6 +27,11 @@ class EnvCommandTest extends AppTestCase
         $this->assertSame('The command will generate new .env file from .env.example', $this->command->getHelp());
     }
 
+    public function testCommandDoesNotRequireTheEnvironment(): void
+    {
+        $this->assertFalse($this->command->requiresEnvironment());
+    }
+
     public function testExecShowsErrorWhenEnvExampleMissing(): void
     {
         $envExample = base_dir() . DS . '.env.example';

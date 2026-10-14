@@ -47,6 +47,11 @@ class EnvCommand extends CliCommand
     ];
 
     /**
+     * The command creates the environment file, so it must run when there is none
+     */
+    protected bool $requiresEnvironment = false;
+
+    /**
      * Executes the command and creates new .env file
      * @throws BaseException
      * @throws ConfigException

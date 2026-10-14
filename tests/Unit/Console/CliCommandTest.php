@@ -36,6 +36,11 @@ class CliCommandTest extends AppTestCase
         $this->assertSame('Used only for core command discovery tests', $this->command->getHelp());
     }
 
+    public function testCliCommandRequiresTheEnvironmentByDefault(): void
+    {
+        $this->assertTrue($this->command->requiresEnvironment());
+    }
+
     public function testCliCommandArgumentsAndOptionsAreRegistered(): void
     {
         $definition = $this->command->getDefinition();
