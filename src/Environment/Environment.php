@@ -63,6 +63,21 @@ class Environment
     }
 
     /**
+     * Checks whether the environment file the app is configured for exists.
+     * It does not throw and needs no helpers, so it can be asked before the boot.
+     */
+    public function fileExists(): bool
+    {
+        $envConfigFile = $this->envConfigFile();
+
+        if (!file_exists($envConfigFile)) {
+            return false;
+        }
+
+        return file_exists(App::getBaseDir() . DS . $this->getEnvFileName($this->readAppEnv($envConfigFile)));
+    }
+
+    /**
      * Gets the app current environment
      */
     public function getAppEnv(): string
@@ -172,14 +187,13 @@ class Environment
      */
     private function resolveEnvironmentFile(): array
     {
-        $filePath = base_dir() . DS . 'shared' . DS . 'config' . DS . 'env.php';
+        $envConfigFile = $this->envConfigFile();
 
-        if (!file_exists($filePath)) {
-            throw EnvException::fileNotFound($filePath);
+        if (!file_exists($envConfigFile)) {
+            throw EnvException::fileNotFound($envConfigFile);
         }
 
-        $envConfig = require $filePath;
-        $appEnv = $envConfig['app_env'] ?? Env::PRODUCTION;
+        $appEnv = $this->readAppEnv($envConfigFile);
         $envFile = $this->getEnvFileName($appEnv);
 
         if (!file_exists(App::getBaseDir() . DS . $envFile)) {
@@ -187,6 +201,18 @@ class Environment
         }
 
         return [$appEnv, $envFile];
+    }
+
+    private function envConfigFile(): string
+    {
+        return App::getBaseDir() . DS . 'shared' . DS . 'config' . DS . 'env.php';
+    }
+
+    private function readAppEnv(string $envConfigFile): string
+    {
+        $envConfig = require $envConfigFile;
+
+        return $envConfig['app_env'] ?? Env::PRODUCTION;
     }
 
     /**
