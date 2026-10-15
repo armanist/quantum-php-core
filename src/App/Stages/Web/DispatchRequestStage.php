@@ -14,8 +14,9 @@ use Quantum\Middleware\Exceptions\MiddlewareException;
 use Quantum\App\Contracts\WebStageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Middleware\MiddlewareManager;
-use Quantum\Router\RouteDispatcher;
 use Quantum\App\Adapters\Web\WebContext;
+use Quantum\Di\Exceptions\DiException;
+use Quantum\Router\RouteDispatcher;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 use RuntimeException;
@@ -31,7 +32,7 @@ use RuntimeException;
 class DispatchRequestStage implements WebStageInterface
 {
     /**
-     * @throws MiddlewareException|BaseException
+     * @throws MiddlewareException|BaseException|DiException
      */
     public function process(WebContext $context): void
     {

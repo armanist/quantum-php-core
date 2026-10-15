@@ -11,8 +11,9 @@ declare(strict_types=1);
 namespace Quantum\App\Stages\Web;
 
 use Quantum\App\Contracts\WebStageInterface;
-use Quantum\Http\Enums\StatusCode;
 use Quantum\App\Adapters\Web\WebContext;
+use Quantum\Di\Exceptions\DiException;
+use Quantum\Http\Enums\StatusCode;
 
 /**
  * Class HandlePreflightStage
@@ -22,6 +23,7 @@ class HandlePreflightStage implements WebStageInterface
 {
     /**
      * Answers an OPTIONS request with an empty response and stops the remaining stages
+     * @throws DiException
      */
     public function process(WebContext $context): void
     {

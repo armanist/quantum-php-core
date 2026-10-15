@@ -10,11 +10,11 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Web;
 
-use Quantum\App\Contracts\WebStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\App\Exceptions\BaseException;
-use Quantum\Di\Exceptions\DiException;
 use Quantum\App\Adapters\Web\WebContext;
+use Quantum\Di\Exceptions\DiException;
 use ReflectionException;
 
 /**

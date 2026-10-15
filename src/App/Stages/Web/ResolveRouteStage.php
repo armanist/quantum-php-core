@@ -10,10 +10,11 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Web;
 
-use Quantum\App\Contracts\WebStageInterface;
 use Quantum\Router\Exceptions\RouteException;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\App\Adapters\Web\WebContext;
+use Quantum\Di\Exceptions\DiException;
 use Quantum\Router\RouteFinder;
 
 /**
@@ -23,8 +24,8 @@ use Quantum\Router\RouteFinder;
 class ResolveRouteStage implements WebStageInterface
 {
     /**
-     * Finds the route for the current request and stores it on the request
-     * @throws RouteException|BaseException
+     * Finds the route for the current request and stores it on the request, or null when nothing matches
+     * @throws RouteException|BaseException|DiException
      */
     public function process(WebContext $context): void
     {
@@ -34,12 +35,6 @@ class ResolveRouteStage implements WebStageInterface
 
         $request = $context->getRequest();
 
-        $matchedRoute = (new RouteFinder($context->getRoutes()))->find($request);
-
-        if ($matchedRoute === null) {
-            return;
-        }
-
-        $request->setMatchedRoute($matchedRoute);
+        $request->setMatchedRoute((new RouteFinder($context->getRoutes()))->find($request));
     }
 }

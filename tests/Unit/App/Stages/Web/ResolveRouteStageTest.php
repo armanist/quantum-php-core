@@ -6,6 +6,7 @@ use Quantum\App\Stages\Web\ResolveRouteStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\RouteCollection;
+use Quantum\Router\MatchedRoute;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Http\Request;
@@ -44,6 +45,17 @@ class ResolveRouteStageTest extends AppTestCase
         $this->assertNull($this->webContext->getMatchedRoute());
         $this->assertNull(request()->getMatchedRoute());
         $this->assertFalse($this->webContext->isStopped());
+    }
+
+    public function testResolveRouteStageClearsARouteSetBeforeItWhenNoRouteMatches(): void
+    {
+        request()->create('GET', '/non-existing-uri');
+        request()->setMatchedRoute(new MatchedRoute(new Route(['GET'], '/test/am/tests', 'TestController', 'tests'), []));
+
+        (new ResolveRouteStage())->process($this->webContext);
+
+        $this->assertNull($this->webContext->getMatchedRoute());
+        $this->assertNull(request()->getMatchedRoute());
     }
 
     public function testResolveRouteStageSkipsWhenContextIsStopped(): void
