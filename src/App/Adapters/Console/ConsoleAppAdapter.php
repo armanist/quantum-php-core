@@ -46,8 +46,8 @@ class ConsoleAppAdapter implements AppInterface
 
         try {
             $pipeline = new BootPipeline([
-                new LoadHelpersStage(),
                 new InitConsoleStage(),
+                new LoadHelpersStage(),
                 new LoadEnvironmentStage(),
                 new LoadAppConfigStage(),
                 new SetupErrorHandlerStage(),

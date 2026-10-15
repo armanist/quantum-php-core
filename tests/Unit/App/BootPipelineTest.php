@@ -221,16 +221,13 @@ class BootPipelineTest extends AppTestCase
         $this->assertSame('boot.http.before', InitHttpStage::BEFORE);
         $this->assertSame('boot.http.after', InitHttpStage::AFTER);
 
-        $this->assertSame('boot.console.before', InitConsoleStage::BEFORE);
-        $this->assertSame('boot.console.after', InitConsoleStage::AFTER);
-
         $this->assertSame('boot.modules.before', LoadModulesStage::BEFORE);
         $this->assertSame('boot.modules.after', LoadModulesStage::AFTER);
     }
 
-    public function testLoadHelpersInitDebuggerAndSetupConsoleApplicationStagesDeclareNoEvents(): void
+    public function testLoadHelpersInitConsoleInitDebuggerAndSetupConsoleApplicationStagesDeclareNoEvents(): void
     {
-        foreach ([LoadHelpersStage::class, InitDebuggerStage::class, SetupConsoleApplicationStage::class] as $stage) {
+        foreach ([LoadHelpersStage::class, InitConsoleStage::class, InitDebuggerStage::class, SetupConsoleApplicationStage::class] as $stage) {
             $this->assertFalse(defined($stage . '::BEFORE'), $stage . ' must not declare BEFORE');
             $this->assertFalse(defined($stage . '::AFTER'), $stage . ' must not declare AFTER');
         }

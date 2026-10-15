@@ -21,14 +21,14 @@ use Quantum\Di\Di;
 
 /**
  * Class InitConsoleStage
+ *
+ * Runs before the helpers are loaded, so that the console application, input and output exist
+ * even when a helper file fails; for the same reason it declares no boot events.
+ *
  * @package Quantum\App
  */
 class InitConsoleStage implements BootStageInterface
 {
-    public const BEFORE = 'boot.console.before';
-
-    public const AFTER = 'boot.console.after';
-
     public function process(AppContext $context): void
     {
         if (!Di::isRegistered(Application::class)) {

@@ -490,10 +490,54 @@ class ConsoleAppAdapterTest extends AppTestCase
         });
     }
 
-    public function testConsoleAppAdapterStartReportsTheBootFailureWhenAHelperFileCannotBeLoaded(): void
+    public function testConsoleAppAdapterStartRunsListWhenAnAppHelperFileCannotBeLoaded(): void
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
+        $this->withBrokenAppHelper(function (): void {
+            $adapter = $this->createAdapter();
+
+            $this->assertSame(0, $adapter->start());
+            $this->assertInstanceOf(ParseError::class, $this->bootFailureOf($adapter));
+        });
+    }
+
+    public function testConsoleAppAdapterStartRunsACommandThatDoesNotRequireTheEnvironmentWhenAnAppHelperFileCannotBeLoaded(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
+
+            $this->withBrokenAppHelper(function () use ($commandName): void {
+                $this->assertSame(0, $this->createAdapter()->start());
+                $this->assertSame($commandName, $GLOBALS['tmpCommandRan'] ?? null);
+            });
+        }, null, false);
+    }
+
+    public function testConsoleAppAdapterStartRejectsACommandThatRequiresTheEnvironmentWhenAnAppHelperFileCannotBeLoaded(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
+
+            $this->withBrokenAppHelper(function (): void {
+                $adapter = $this->createAdapter();
+
+                $this->expectException(ParseError::class);
+
+                $adapter->start();
+            });
+        });
+    }
+
+    /**
+     * Puts an app helper file with a syntax error into the test app for the duration of the callback
+     */
+    private function withBrokenAppHelper(callable $test): void
+    {
         $directory = PROJECT_ROOT . DS . 'helpers';
         $createdDirectory = !is_dir($directory);
         $file = $directory . DS . 'tmp_broken_helper_' . substr(md5(uniqid('', true)), 0, 8) . '.php';
@@ -505,11 +549,7 @@ class ConsoleAppAdapterTest extends AppTestCase
 
             $this->assertNotFalse(file_put_contents($file, "<?php\n\nfunction broken( {\n"));
 
-            $adapter = $this->createAdapter();
-
-            $this->expectException(ParseError::class);
-
-            $adapter->start();
+            $test();
         } finally {
             if (is_file($file)) {
                 unlink($file);
