@@ -19,7 +19,6 @@ use Quantum\Di\Exceptions\DiException;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Debugger\Debugger;
 use ReflectionException;
-use Quantum\Di\Di;
 
 /**
  * Class PrepareRequestStage
@@ -44,7 +43,7 @@ class PrepareRequestStage implements WebStageInterface
 
         $this->logDebugInfo();
 
-        $this->setupViewCache();
+        $this->setupViewCache($context);
     }
 
     /**
@@ -62,13 +61,15 @@ class PrepareRequestStage implements WebStageInterface
     /**
      * @throws ConfigException|DiException|ReflectionException
      */
-    private function setupViewCache(): void
+    private function setupViewCache(WebContext $context): void
     {
-        if (!Di::isRegistered(ViewCache::class)) {
-            Di::register(ViewCache::class);
+        $container = $context->getContainer();
+
+        if (!$container->isRegistered(ViewCache::class)) {
+            $container->register(ViewCache::class);
         }
 
-        $viewCache = Di::get(ViewCache::class);
+        $viewCache = $context->getViewCache();
 
         if ($viewCache->isEnabled()) {
             $viewCache->setup();

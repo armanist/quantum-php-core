@@ -8,6 +8,8 @@ use Quantum\ResourceCache\ViewCache;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
 use Quantum\Debugger\Debugger;
+use Quantum\Di\DiContainer;
+use Quantum\App\AppContext;
 use Quantum\Router\Route;
 use Quantum\App\App;
 use Quantum\Di\Di;
@@ -121,6 +123,41 @@ class PrepareRequestStageTest extends AppTestCase
         (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertFalse(config()->has('view_cache'));
+    }
+
+    public function testPrepareRequestStageRegistersViewCacheInTheContextContainer(): void
+    {
+        $container = new DiContainer();
+
+        (new PrepareRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container)));
+
+        $this->assertTrue($container->isRegistered(ViewCache::class));
+        $this->assertFalse(Di::isRegistered(ViewCache::class));
+    }
+
+    public function testPrepareRequestStageSetsUpTheViewCacheOfTheContextContainer(): void
+    {
+        $viewsDir = base_dir() . DS . 'cache' . DS . 'views';
+        $moduleDir = $viewsDir . DS . 'test';
+        $viewsDirExisted = is_dir($viewsDir);
+
+        $container = new DiContainer();
+        $container->register(ViewCache::class);
+        $container->get(ViewCache::class)->enableCaching(true);
+
+        try {
+            (new PrepareRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container)));
+
+            $this->assertDirectoryExists($moduleDir);
+        } finally {
+            if (is_dir($moduleDir)) {
+                rmdir($moduleDir);
+            }
+
+            if (!$viewsDirExisted && is_dir($viewsDir)) {
+                rmdir($viewsDir);
+            }
+        }
     }
 
     public function testPrepareRequestStageSkipsWhenContextIsStopped(): void
