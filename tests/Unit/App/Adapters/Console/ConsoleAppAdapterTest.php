@@ -335,6 +335,21 @@ class ConsoleAppAdapterTest extends AppTestCase
         });
     }
 
+    public function testConsoleAppAdapterKeepsTheApplicationUnknownWhenTheErrorHandlerCannotBeSetUp(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $this->withFileContent(PROJECT_ROOT . DS . 'shared' . DS . 'config' . DS . 'logging.php', "<?php\n\nreturn [\n", function (): void {
+            $adapter = $this->createAdapter();
+            $adapter->start();
+
+            $this->assertNotNull($this->bootFailureOf($adapter));
+            $this->assertTrue(config()->has('app'));
+            $this->assertSame('UNKNOWN', Di::get(Application::class)->getName());
+            $this->assertSame('UNKNOWN', Di::get(Application::class)->getVersion());
+        });
+    }
+
     public function testConsoleAppAdapterStartRejectsACommandThatRequiresTheEnvironmentWhenTheEnvFileIsMissing(): void
     {
         $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
@@ -511,7 +526,14 @@ class ConsoleAppAdapterTest extends AppTestCase
      */
     private function withEnvironmentFileContent(string $content, callable $test): void
     {
-        $file = PROJECT_ROOT . DS . '.env.testing';
+        $this->withFileContent(PROJECT_ROOT . DS . '.env.testing', $content, $test);
+    }
+
+    /**
+     * Replaces the content of a file of the test app for the duration of the callback
+     */
+    private function withFileContent(string $file, string $content, callable $test): void
+    {
         $backup = $file . '.backup';
 
         $this->assertTrue(rename($file, $backup));

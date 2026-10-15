@@ -50,8 +50,8 @@ class ConsoleAppAdapter implements AppInterface
                 new InitConsoleStage(),
                 new LoadEnvironmentStage(),
                 new LoadAppConfigStage(),
-                new SetupConsoleApplicationStage(),
                 new SetupErrorHandlerStage(),
+                new SetupConsoleApplicationStage(),
             ]);
 
             $pipeline->run($this->context);
