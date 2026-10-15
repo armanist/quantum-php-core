@@ -44,7 +44,7 @@ class PrepareRequestStage implements WebStageInterface
 
         $this->logDebugInfo();
 
-        $context->setViewCache($this->setupViewCache());
+        $this->setupViewCache();
     }
 
     /**
@@ -62,7 +62,7 @@ class PrepareRequestStage implements WebStageInterface
     /**
      * @throws ConfigException|DiException|ReflectionException
      */
-    private function setupViewCache(): ViewCache
+    private function setupViewCache(): void
     {
         if (!Di::isRegistered(ViewCache::class)) {
             Di::register(ViewCache::class);
@@ -73,7 +73,5 @@ class PrepareRequestStage implements WebStageInterface
         if ($viewCache->isEnabled()) {
             $viewCache->setup();
         }
-
-        return $viewCache;
     }
 }

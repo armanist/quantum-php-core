@@ -32,6 +32,7 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
     use Quantum\App\Stages\Web\DispatchRequestStage;
     use Quantum\App\Stages\Web\ResolveRouteStage;
     use Quantum\Router\Exceptions\RouteException;
+    use Quantum\Di\Exceptions\DiException;
     use Quantum\Tests\Unit\AppTestCase;
     use Quantum\ResourceCache\ViewCache;
     use Quantum\App\Adapters\Web\WebContext;
@@ -141,7 +142,7 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
 
         public function testDispatchRequestStageFailsWithoutMatchedRoute(): void
         {
-            $this->webContext->setViewCache($this->viewCache());
+            $this->registerViewCache();
 
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Matched route is not set.');
@@ -153,8 +154,8 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
         {
             request()->setMatchedRoute(new MatchedRoute($this->createRoute('tests'), []));
 
-            $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessage('View cache is not set.');
+            $this->expectException(DiException::class);
+            $this->expectExceptionMessage('The dependency `' . ViewCache::class . '` is not registered.');
 
             (new DispatchRequestStage())->process($this->webContext);
         }
@@ -176,16 +177,14 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
 
             (new ResolveRouteStage())->process($this->webContext);
 
-            $this->webContext->setViewCache($this->viewCache());
+            $this->registerViewCache();
         }
 
-        private function viewCache(): ViewCache
+        private function registerViewCache(): void
         {
             if (!Di::isRegistered(ViewCache::class)) {
                 Di::register(ViewCache::class);
             }
-
-            return Di::get(ViewCache::class);
         }
 
         /**

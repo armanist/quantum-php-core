@@ -79,9 +79,9 @@ class PrepareRequestStageTest extends AppTestCase
         $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
     }
 
-    public function testPrepareRequestStageStoresViewCacheOnContext(): void
+    public function testPrepareRequestStageRegistersViewCache(): void
     {
-        $this->assertNull($this->webContext->getViewCache());
+        $this->assertFalse(Di::isRegistered(ViewCache::class));
 
         (new PrepareRequestStage())->process($this->webContext);
 
@@ -130,6 +130,6 @@ class PrepareRequestStageTest extends AppTestCase
         (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertFalse(config()->has('lang'));
-        $this->assertNull($this->webContext->getViewCache());
+        $this->assertFalse(Di::isRegistered(ViewCache::class));
     }
 }

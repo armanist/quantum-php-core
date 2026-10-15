@@ -23,15 +23,13 @@ use Quantum\Http\Request;
  * Carries the state of a single web request through the web stages.
  * It is an AppContext (same base directory and container) that the stages mutate, and it holds
  * the response of the request: the one the stages set, which is what is sent.
- * The request and the routes are read from the container, and the matched route from the request.
+ * The request, the routes and the view cache are read from the container, and the matched route from the request.
  *
  * @package Quantum\App
  */
 class WebContext extends AppContext
 {
     private ?Response $response = null;
-
-    private ?ViewCache $viewCache = null;
 
     private bool $stopped = false;
 
@@ -65,14 +63,9 @@ class WebContext extends AppContext
         $this->response = $response;
     }
 
-    public function getViewCache(): ?ViewCache
+    public function getViewCache(): ViewCache
     {
-        return $this->viewCache;
-    }
-
-    public function setViewCache(ViewCache $viewCache): void
-    {
-        $this->viewCache = $viewCache;
+        return $this->resolveFromContainer(ViewCache::class);
     }
 
     /**

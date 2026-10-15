@@ -12,7 +12,6 @@ use Quantum\App\AppContext;
 use Quantum\Http\Request;
 use Quantum\Router\Route;
 use Quantum\App\App;
-use Quantum\Di\Di;
 use Mockery;
 
 class WebContextTest extends AppTestCase
@@ -75,19 +74,15 @@ class WebContextTest extends AppTestCase
         $this->assertSame(response(), $this->webContext->getResponse());
     }
 
-    public function testWebContextStoresViewCache(): void
+    public function testWebContextReadsViewCacheFromTheContainer(): void
     {
-        $this->assertNull($this->webContext->getViewCache());
+        $container = new DiContainer();
+        $viewCache = Mockery::mock(ViewCache::class);
+        $container->set(ViewCache::class, $viewCache);
 
-        if (!Di::isRegistered(ViewCache::class)) {
-            Di::register(ViewCache::class);
-        }
+        $webContext = new WebContext(new AppContext('/base/dir', $container));
 
-        $viewCache = Di::get(ViewCache::class);
-
-        $this->webContext->setViewCache($viewCache);
-
-        $this->assertSame($viewCache, $this->webContext->getViewCache());
+        $this->assertSame($viewCache, $webContext->getViewCache());
     }
 
     public function testWebContextIsNotStoppedByDefault(): void

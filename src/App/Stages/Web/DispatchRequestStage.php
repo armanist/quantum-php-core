@@ -40,15 +40,12 @@ class DispatchRequestStage implements WebStageInterface
         }
 
         $matchedRoute = $context->getMatchedRoute();
-        $viewCache = $context->getViewCache();
 
         if ($matchedRoute === null) {
             throw new RuntimeException('Matched route is not set.');
         }
 
-        if ($viewCache === null) {
-            throw new RuntimeException('View cache is not set.');
-        }
+        $viewCache = $context->getViewCache();
 
         $terminal = fn (Request $request): Response => $viewCache->getCachedResponse($request->getUri() ?? '')
             ?? (new RouteDispatcher())->dispatch($matchedRoute, $request);
