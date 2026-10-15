@@ -48,7 +48,7 @@ class HandleRouteNotFoundStageTest extends AppTestCase
 
     public function testHandleRouteNotFoundStageIgnoresMatchedRoute(): void
     {
-        $this->webContext->setMatchedRoute(
+        request()->setMatchedRoute(
             new MatchedRoute(new Route(['GET'], '/test/am/tests', 'TestController', 'tests'), [])
         );
 

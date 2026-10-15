@@ -23,14 +23,12 @@ use Quantum\Http\Request;
  * Carries the state of a single web request through the web stages.
  * It is an AppContext (same base directory and container) that the stages mutate, and it holds
  * the response of the request: the one the stages set, which is what is sent.
- * The request and the routes are read from the container.
+ * The request and the routes are read from the container, and the matched route from the request.
  *
  * @package Quantum\App
  */
 class WebContext extends AppContext
 {
-    private ?MatchedRoute $matchedRoute = null;
-
     private ?Response $response = null;
 
     private ?ViewCache $viewCache = null;
@@ -54,12 +52,7 @@ class WebContext extends AppContext
 
     public function getMatchedRoute(): ?MatchedRoute
     {
-        return $this->matchedRoute;
-    }
-
-    public function setMatchedRoute(?MatchedRoute $matchedRoute): void
-    {
-        $this->matchedRoute = $matchedRoute;
+        return $this->getRequest()->getMatchedRoute();
     }
 
     public function getResponse(): ?Response

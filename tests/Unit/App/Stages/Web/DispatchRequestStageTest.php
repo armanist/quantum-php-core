@@ -118,7 +118,6 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
             // The controller does not exist, so reaching the dispatcher would throw.
             $matchedRoute = new MatchedRoute($this->createRoute('tests', ['DispatchStageMwBlocker'], 'MissingController'), []);
 
-            $this->webContext->setMatchedRoute($matchedRoute);
             request()->setMatchedRoute($matchedRoute);
 
             (new DispatchRequestStage())->process($this->webContext);
@@ -152,7 +151,7 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
 
         public function testDispatchRequestStageFailsWithoutViewCache(): void
         {
-            $this->webContext->setMatchedRoute(new MatchedRoute($this->createRoute('tests'), []));
+            request()->setMatchedRoute(new MatchedRoute($this->createRoute('tests'), []));
 
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('View cache is not set.');

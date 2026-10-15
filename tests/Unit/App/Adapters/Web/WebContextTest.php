@@ -55,13 +55,13 @@ class WebContextTest extends AppTestCase
         $this->assertSame($routes, $webContext->getRoutes());
     }
 
-    public function testWebContextStoresMatchedRoute(): void
+    public function testWebContextReadsMatchedRouteFromTheRequest(): void
     {
         $this->assertNull($this->webContext->getMatchedRoute());
 
         $matchedRoute = new MatchedRoute(new Route(['GET'], '/test/am/tests', 'TestController', 'tests'), []);
 
-        $this->webContext->setMatchedRoute($matchedRoute);
+        request()->setMatchedRoute($matchedRoute);
 
         $this->assertSame($matchedRoute, $this->webContext->getMatchedRoute());
     }

@@ -25,7 +25,7 @@ use Quantum\Di\Di;
 class ResolveRouteStage implements WebStageInterface
 {
     /**
-     * Finds the route for the current request and stores it on the context and the request
+     * Finds the route for the current request and stores it on the request
      * @throws RouteException|BaseException
      */
     public function process(WebContext $context): void
@@ -41,6 +41,5 @@ class ResolveRouteStage implements WebStageInterface
         }
 
         request()->setMatchedRoute($matchedRoute);
-        $context->setMatchedRoute($matchedRoute);
     }
 }
