@@ -479,18 +479,30 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $file = PROJECT_ROOT . DS . 'helpers' . DS . 'tmp_broken_helper_' . substr(md5(uniqid('', true)), 0, 8) . '.php';
-
-        $this->assertNotFalse(file_put_contents($file, "<?php\n\nfunction broken( {\n"));
+        $directory = PROJECT_ROOT . DS . 'helpers';
+        $createdDirectory = !is_dir($directory);
+        $file = $directory . DS . 'tmp_broken_helper_' . substr(md5(uniqid('', true)), 0, 8) . '.php';
 
         try {
+            if ($createdDirectory) {
+                $this->assertTrue(mkdir($directory));
+            }
+
+            $this->assertNotFalse(file_put_contents($file, "<?php\n\nfunction broken( {\n"));
+
             $adapter = $this->createAdapter();
 
             $this->expectException(ParseError::class);
 
             $adapter->start();
         } finally {
-            unlink($file);
+            if (is_file($file)) {
+                unlink($file);
+            }
+
+            if ($createdDirectory && is_dir($directory)) {
+                rmdir($directory);
+            }
         }
     }
 
