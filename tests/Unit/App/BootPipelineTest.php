@@ -2,6 +2,7 @@
 
 namespace Quantum\Tests\Unit\App;
 
+use Quantum\App\Stages\Boot\SetupConsoleApplicationStage;
 use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
 use Quantum\App\Contracts\BootStageInterface;
 use Quantum\App\Stages\Boot\LoadEnvironmentStage;
@@ -227,9 +228,9 @@ class BootPipelineTest extends AppTestCase
         $this->assertSame('boot.modules.after', LoadModulesStage::AFTER);
     }
 
-    public function testLoadHelpersAndInitDebuggerStagesDeclareNoEvents(): void
+    public function testLoadHelpersInitDebuggerAndSetupConsoleApplicationStagesDeclareNoEvents(): void
     {
-        foreach ([LoadHelpersStage::class, InitDebuggerStage::class] as $stage) {
+        foreach ([LoadHelpersStage::class, InitDebuggerStage::class, SetupConsoleApplicationStage::class] as $stage) {
             $this->assertFalse(defined($stage . '::BEFORE'), $stage . ' must not declare BEFORE');
             $this->assertFalse(defined($stage . '::AFTER'), $stage . ' must not declare AFTER');
         }

@@ -2,15 +2,18 @@
 
 namespace Quantum\Tests\Unit\App\Adapters\Console;
 
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Application;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;
-use Quantum\App\App;
 use RuntimeException;
+use Quantum\App\App;
+use Quantum\Di\Di;
 
 class ConsoleContextTest extends AppTestCase
 {
@@ -33,19 +36,29 @@ class ConsoleContextTest extends AppTestCase
         $this->input = new ArrayInput([]);
         $this->output = new BufferedOutput();
 
-        $this->consoleContext = new ConsoleContext($this->appContext, $this->application, $this->input, $this->output);
+        Di::set(Application::class, $this->application);
+        Di::set(InputInterface::class, $this->input);
+        Di::set(OutputInterface::class, $this->output);
+
+        $this->consoleContext = new ConsoleContext($this->appContext);
     }
 
-    public function testConsoleContextExposesAppContext(): void
-    {
-        $this->assertSame($this->appContext, $this->consoleContext->getAppContext());
-    }
-
-    public function testConsoleContextExposesApplicationInputAndOutput(): void
+    public function testConsoleContextExposesApplicationInputAndOutputFromTheContainer(): void
     {
         $this->assertSame($this->application, $this->consoleContext->getApplication());
         $this->assertSame($this->input, $this->consoleContext->getInput());
         $this->assertSame($this->output, $this->consoleContext->getOutput());
+    }
+
+    public function testConsoleContextReadsTheConsoleObjectsFromTheContainerWhenAsked(): void
+    {
+        $context = new AppContext(PROJECT_ROOT, new \Quantum\Di\DiContainer());
+        $consoleContext = new ConsoleContext($context);
+
+        $application = new Application('Late', '1.0');
+        $context->getContainer()->set(Application::class, $application);
+
+        $this->assertSame($application, $consoleContext->getApplication());
     }
 
     public function testConsoleContextHasNoBootFailureByDefault(): void
@@ -57,7 +70,7 @@ class ConsoleContextTest extends AppTestCase
     {
         $failure = new RuntimeException('The boot failed');
 
-        $consoleContext = new ConsoleContext($this->appContext, $this->application, $this->input, $this->output, $failure);
+        $consoleContext = new ConsoleContext($this->appContext, $failure);
 
         $this->assertSame($failure, $consoleContext->getBootFailure());
     }
