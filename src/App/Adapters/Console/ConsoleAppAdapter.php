@@ -20,7 +20,6 @@ use Quantum\App\Stages\Boot\LoadAppConfigStage;
 use Quantum\App\Stages\Boot\InitConsoleStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Quantum\App\Contracts\AppInterface;
-use Quantum\App\Enums\ExitCode;
 use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;
 use Throwable;
@@ -79,6 +78,6 @@ class ConsoleAppAdapter implements AppInterface
             throw $this->bootFailure ?? $exception;
         }
 
-        return $context->getExitCode() ?: ExitCode::SUCCESS;
+        return $context->getExitCode();
     }
 }
