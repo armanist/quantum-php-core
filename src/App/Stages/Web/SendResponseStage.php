@@ -14,7 +14,9 @@ use Quantum\App\Contracts\WebStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\App\Adapters\Web\WebContext;
+use Quantum\Config\Config;
 use Quantum\Http\Response;
+use Quantum\Http\Request;
 use Quantum\Config\Setup;
 use ReflectionException;
 use RuntimeException;
@@ -42,23 +44,23 @@ class SendResponseStage implements WebStageInterface
                 throw new RuntimeException('The request has no response to send.');
             }
 
-            $this->handleCors($response);
+            $this->handleCors($response, $context->getConfig());
             $response->send();
         } finally {
-            $this->cleanupRequestState();
+            $this->cleanupRequestState($context->getRequest());
         }
     }
 
     /**
      * @throws ConfigException|DiException|ReflectionException
      */
-    private function handleCors(Response $response): void
+    private function handleCors(Response $response, Config $config): void
     {
-        if (!config()->has('cors')) {
-            config()->import(new Setup('config', 'cors'));
+        if (!$config->has('cors')) {
+            $config->import(new Setup('config', 'cors'));
         }
 
-        foreach (config()->get('cors') as $key => $value) {
+        foreach ($config->get('cors') as $key => $value) {
             $response->setHeader($key, (string) $value);
         }
     }
@@ -66,9 +68,9 @@ class SendResponseStage implements WebStageInterface
     /**
      * Clears request-scoped state after the response has been sent.
      */
-    private function cleanupRequestState(): void
+    private function cleanupRequestState(Request $request): void
     {
-        request()->setMatchedRoute(null);
-        request()->flush();
+        $request->setMatchedRoute(null);
+        $request->flush();
     }
 }

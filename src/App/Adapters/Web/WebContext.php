@@ -21,8 +21,8 @@ use Quantum\Http\Request;
  * Class WebContext
  *
  * Carries the state of a single web request through the web stages.
- * It is an AppContext (same base directory and container) that the stages mutate, and it holds
- * the response of the request: the one the stages set, which is what is sent.
+ * It is an AppContext (same base directory and container) whose response and stopped flag are set by the stages;
+ * the response the stages set is the one that is sent.
  * The request, the routes and the view cache are read from the container, and the matched route from the request.
  *
  * @package Quantum\App

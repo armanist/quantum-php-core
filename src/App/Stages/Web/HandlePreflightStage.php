@@ -25,7 +25,7 @@ class HandlePreflightStage implements WebStageInterface
      */
     public function process(WebContext $context): void
     {
-        if (!request()->isMethod('OPTIONS')) {
+        if (!$context->getRequest()->isMethod('OPTIONS')) {
             return;
         }
 

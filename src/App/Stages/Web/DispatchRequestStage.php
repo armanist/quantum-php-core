@@ -50,6 +50,6 @@ class DispatchRequestStage implements WebStageInterface
         $terminal = fn (Request $request): Response => $viewCache->getCachedResponse($request->getUri() ?? '')
             ?? (new RouteDispatcher())->dispatch($matchedRoute, $request);
 
-        $context->setResponse((new MiddlewareManager($matchedRoute))->applyMiddlewares(request(), $terminal));
+        $context->setResponse((new MiddlewareManager($matchedRoute))->applyMiddlewares($context->getRequest(), $terminal));
     }
 }

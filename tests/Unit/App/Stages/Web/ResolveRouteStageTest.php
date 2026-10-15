@@ -5,6 +5,11 @@ namespace Quantum\Tests\Unit\App\Stages\Web;
 use Quantum\App\Stages\Web\ResolveRouteStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Web\WebContext;
+use Quantum\Router\RouteCollection;
+use Quantum\Di\DiContainer;
+use Quantum\App\AppContext;
+use Quantum\Http\Request;
+use Quantum\Router\Route;
 use Quantum\App\App;
 
 class ResolveRouteStageTest extends AppTestCase
@@ -50,6 +55,26 @@ class ResolveRouteStageTest extends AppTestCase
         (new ResolveRouteStage())->process($this->webContext);
 
         $this->assertNull($this->webContext->getMatchedRoute());
+        $this->assertNull(request()->getMatchedRoute());
+    }
+
+    public function testResolveRouteStageReadsTheRequestAndRoutesFromTheContext(): void
+    {
+        request()->create('GET', '/test/am/tests');
+
+        $request = new Request();
+        $request->create('GET', '/context/route');
+
+        $routes = new RouteCollection();
+        $routes->add(new Route(['GET'], '/context/route', 'TestController', 'contextAction'));
+
+        $container = new DiContainer();
+        $container->set(Request::class, $request);
+        $container->set(RouteCollection::class, $routes);
+
+        (new ResolveRouteStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container)));
+
+        $this->assertSame('contextAction', $request->getMatchedRoute()->getRoute()->getAction());
         $this->assertNull(request()->getMatchedRoute());
     }
 }

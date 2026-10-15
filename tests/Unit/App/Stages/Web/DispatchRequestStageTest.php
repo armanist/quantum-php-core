@@ -18,6 +18,18 @@ namespace Quantum\Tests\_root\modules\Test\Middlewares {
         }
     }
 
+    class DispatchStageMwRecorder extends Middleware
+    {
+        public static ?Request $request = null;
+
+        public function apply(Request $request, Closure $next): Response
+        {
+            self::$request = $request;
+
+            return response()->json(['status' => 'recorded']);
+        }
+    }
+
     class DispatchStageMwBlocker extends Middleware
     {
         public function apply(Request $request, Closure $next): Response
@@ -29,6 +41,7 @@ namespace Quantum\Tests\_root\modules\Test\Middlewares {
 
 namespace Quantum\Tests\Unit\App\Stages\Web {
     use Quantum\Tests\_root\modules\Test\Middlewares\DispatchStageMwPassThrough;
+    use Quantum\Tests\_root\modules\Test\Middlewares\DispatchStageMwRecorder;
     use Quantum\App\Stages\Web\DispatchRequestStage;
     use Quantum\App\Stages\Web\ResolveRouteStage;
     use Quantum\Router\Exceptions\RouteException;
@@ -37,6 +50,9 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
     use Quantum\ResourceCache\ViewCache;
     use Quantum\App\Adapters\Web\WebContext;
     use Quantum\Router\MatchedRoute;
+    use Quantum\Di\DiContainer;
+    use Quantum\App\AppContext;
+    use Quantum\Http\Request;
     use Quantum\Http\Enums\StatusCode;
     use Quantum\Router\Route;
     use Quantum\App\App;
@@ -169,6 +185,25 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
             (new DispatchRequestStage())->process($this->webContext);
 
             $this->assertNull($this->webContext->getResponse());
+        }
+
+        public function testDispatchRequestStagePassesTheContextRequestToTheMiddlewares(): void
+        {
+            $this->prepareRequest('/test/am/tests');
+
+            $request = new Request();
+            $request->create('GET', '/test/am/tests');
+            $request->setMatchedRoute(new MatchedRoute($this->createRoute('tests', ['DispatchStageMwRecorder']), []));
+
+            $container = new DiContainer();
+            $container->set(Request::class, $request);
+            $container->register(ViewCache::class);
+
+            DispatchStageMwRecorder::$request = null;
+
+            (new DispatchRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container)));
+
+            $this->assertSame($request, DispatchStageMwRecorder::$request);
         }
 
         private function prepareRequest(string $uri): void
