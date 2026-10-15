@@ -2,8 +2,12 @@
 
 namespace Quantum\Tests\Unit\App\Adapters\Console;
 
+use Symfony\Component\Console\Output\OutputInterface;
 use Quantum\App\Adapters\Console\ConsoleAppAdapter;
+use Symfony\Component\Console\Input\InputInterface;
 use Quantum\Environment\Exceptions\EnvException;
+use Quantum\Tests\Helpers\NonExitingApplication;
+use Symfony\Component\Console\Input\ArgvInput;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Symfony\Component\Console\Application;
 use Dotenv\Exception\InvalidFileException;
@@ -11,30 +15,20 @@ use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
 use Quantum\App\BootPipeline;
+use Quantum\App\AppContext;
 use Quantum\Di\Di;
 use ReflectionProperty;
 use RuntimeException;
 use Throwable;
+use ParseError;
 use Exception;
 use Mockery;
 
 class ConsoleAppAdapterTest extends AppTestCase
 {
-    private $consoleAppAdapter;
-
     public function setUp(): void
     {
-        $applicationMock = Mockery::mock(Application::class)->makePartial();
-        $applicationMock->shouldReceive('getName')->andReturn('Qt Console Application');
-        $applicationMock->shouldReceive('run')->andReturn(0);
-
-        $this->consoleAppAdapter = Mockery::mock(ConsoleAppAdapter::class)
-            ->shouldAllowMockingProtectedMethods()
-            ->makePartial();
-
-        $this->consoleAppAdapter
-            ->shouldReceive('createApplication')
-            ->andReturn($applicationMock);
+        // AppTestCase::setUp() boots a web app, which these tests must not have
     }
 
     public function tearDown(): void
@@ -47,9 +41,9 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $adapter = $this->createAdapter();
 
-        $result = $this->consoleAppAdapter->start();
+        $result = $adapter->start();
 
         $this->assertEquals(0, $result);
     }
@@ -62,17 +56,9 @@ class ConsoleAppAdapterTest extends AppTestCase
         $applicationMock->shouldReceive('getName')->andReturn('Qt Console Application');
         $applicationMock->shouldReceive('run')->andReturn(2);
 
-        $consoleAppAdapter = Mockery::mock(ConsoleAppAdapter::class)
-            ->shouldAllowMockingProtectedMethods()
-            ->makePartial();
+        $adapter = $this->createAdapter($applicationMock);
 
-        $consoleAppAdapter
-            ->shouldReceive('createApplication')
-            ->andReturn($applicationMock);
-
-        $consoleAppAdapter->__construct($this->createContext());
-
-        $result = $consoleAppAdapter->start();
+        $result = $adapter->start();
 
         $this->assertEquals(2, $result);
     }
@@ -81,23 +67,23 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'unknown', '--quiet'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $adapter = $this->createAdapter();
 
         $this->expectException(Exception::class);
 
-        $this->consoleAppAdapter->start();
+        $adapter->start();
     }
 
     public function testConsoleAppAdapterStartFailsWithoutCommandName(): void
     {
         $_SERVER['argv'] = ['qt'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $adapter = $this->createAdapter();
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Command `` is not defined');
 
-        $this->consoleAppAdapter->start();
+        $adapter->start();
     }
 
     public function testConsoleAppAdapterStartRegistersCoreCommands(): void
@@ -127,20 +113,11 @@ class ConsoleAppAdapterTest extends AppTestCase
 
         $this->withTemporaryCommand($coreDirectory, 'Quantum\Console\Commands', function (string $coreCommand) use ($appDirectory): void {
             $this->withTemporaryCommand($appDirectory, 'Shared\Commands', function (string $appCommand) use ($coreCommand): void {
-                $application = new Application('Qt Console Application', 'test');
-                $application->setAutoExit(false);
-                $application->setCatchExceptions(false);
-
-                $adapter = Mockery::mock(ConsoleAppAdapter::class)
-                    ->shouldAllowMockingProtectedMethods()
-                    ->makePartial();
-
-                $adapter->shouldReceive('createApplication')->andReturn($application);
+                $application = new NonExitingApplication('Qt Console Application', 'test');
 
                 $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-                $adapter->__construct($this->createContext());
-                $adapter->start();
+                $this->createAdapter($application)->start();
 
                 $names = array_keys($application->all());
 
@@ -201,7 +178,7 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $this->createAdapter();
 
         $this->assertTrue(Di::has(Environment::class));
         $this->assertTrue(Di::isRegistered(ErrorHandler::class));
@@ -212,20 +189,46 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'core:env'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $this->createAdapter();
 
         $this->assertTrue(Di::has(Environment::class));
         $this->assertTrue(Di::isRegistered(ErrorHandler::class));
         $this->assertTrue(config()->has('app'));
     }
 
+    public function testConsoleAppAdapterRegistersTheConsoleObjectsInTheContainerAfterASuccessfulBoot(): void
+    {
+        $_SERVER['argv'] = ['qt', 'core:env', '--yes'];
+
+        new ConsoleAppAdapter($this->createContext());
+
+        $this->assertTrue(Di::isRegistered(Application::class));
+        $this->assertTrue(Di::isRegistered(OutputInterface::class));
+        $this->assertInstanceOf(ArgvInput::class, Di::get(InputInterface::class));
+        $this->assertSame('core:env', Di::get(InputInterface::class)->getFirstArgument());
+    }
+
+    public function testConsoleAppAdapterRegistersTheConsoleObjectsInTheContainerAfterAFailedBoot(): void
+    {
+        $_SERVER['argv'] = ['qt', 'core:env', '--yes'];
+
+        $this->withoutEnvironmentFile(function (): void {
+            new ConsoleAppAdapter($this->createContext());
+
+            $this->assertTrue(Di::isRegistered(Application::class));
+            $this->assertTrue(Di::isRegistered(OutputInterface::class));
+            $this->assertInstanceOf(ArgvInput::class, Di::get(InputInterface::class));
+            $this->assertSame('core:env', Di::get(InputInterface::class)->getFirstArgument());
+        });
+    }
+
     public function testConsoleAppAdapterRecordsNoBootFailureAfterASuccessfulBoot(): void
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $adapter = $this->createAdapter();
 
-        $this->assertNull($this->bootFailureOf($this->consoleAppAdapter));
+        $this->assertNull($this->bootFailureOf($adapter));
     }
 
     public function testConsoleAppAdapterRecordsTheBootFailureInsteadOfThrowingWhenTheEnvFileIsMissing(): void
@@ -233,9 +236,9 @@ class ConsoleAppAdapterTest extends AppTestCase
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
         $this->withoutEnvironmentFile(function (): void {
-            $this->consoleAppAdapter->__construct($this->createContext());
+            $adapter = $this->createAdapter();
 
-            $this->assertInstanceOf(EnvException::class, $this->bootFailureOf($this->consoleAppAdapter));
+            $this->assertInstanceOf(EnvException::class, $this->bootFailureOf($adapter));
         });
     }
 
@@ -244,7 +247,7 @@ class ConsoleAppAdapterTest extends AppTestCase
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
         $this->withoutEnvironmentFile(function (): void {
-            $this->consoleAppAdapter->__construct($this->createContext());
+            $this->createAdapter();
 
             $this->assertFalse(Di::has(Environment::class));
         });
@@ -260,11 +263,12 @@ class ConsoleAppAdapterTest extends AppTestCase
 
         config()->set('app', ['name' => null, 'version' => null]);
 
-        $adapter = new ConsoleAppAdapter($context);
+        $adapter = $this->createAdapter(null, $context);
+        $adapter->start();
 
         $this->assertNull($this->bootFailureOf($adapter));
-        $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getName());
-        $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getVersion());
+        $this->assertSame('UNKNOWN', Di::get(Application::class)->getName());
+        $this->assertSame('UNKNOWN', Di::get(Application::class)->getVersion());
     }
 
     public function testConsoleAppAdapterKeepsAnEmptyAppNameAndVersionFromTheConfig(): void
@@ -277,56 +281,72 @@ class ConsoleAppAdapterTest extends AppTestCase
 
         config()->set('app', ['name' => '', 'version' => '0']);
 
-        $adapter = new ConsoleAppAdapter($context);
+        $adapter = $this->createAdapter(null, $context);
+        $adapter->start();
 
         $this->assertNull($this->bootFailureOf($adapter));
-        $this->assertSame('', $this->applicationOf($adapter)->getName());
-        $this->assertSame('0', $this->applicationOf($adapter)->getVersion());
+        $this->assertSame('', Di::get(Application::class)->getName());
+        $this->assertSame('0', Di::get(Application::class)->getVersion());
     }
 
     public function testConsoleAppAdapterBootsAllStagesForUnknownCommand(): void
     {
         $_SERVER['argv'] = ['qt', 'unknown:command', '--quiet'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $this->createAdapter();
 
         $this->assertTrue(Di::has(Environment::class));
         $this->assertTrue(Di::isRegistered(ErrorHandler::class));
         $this->assertTrue(config()->has('app'));
     }
 
-    public function testConsoleAppAdapterMakesEnvironmentMutableForRegularCommands(): void
+    public function testConsoleAppAdapterDoesNotMakeTheEnvironmentMutableAfterTheFullBoot(): void
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $this->consoleAppAdapter->__construct($this->createContext());
+        $this->createAdapter();
 
         $property = new ReflectionProperty(Environment::class, 'isMutable');
         $property->setAccessible(true);
 
-        $this->assertTrue($property->getValue(environment()));
+        $this->assertFalse($property->getValue(environment()));
     }
 
     public function testConsoleAppAdapterNamesTheApplicationFromTheAppConfigAfterTheFullBoot(): void
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $adapter = new ConsoleAppAdapter($this->createContext());
+        $this->createAdapter()->start();
 
-        $this->assertSame(config()->get('app.name'), $this->applicationOf($adapter)->getName());
-        $this->assertSame(config()->get('app.version'), $this->applicationOf($adapter)->getVersion());
-        $this->assertNotSame('UNKNOWN', $this->applicationOf($adapter)->getName());
+        $this->assertSame(config()->get('app.name'), Di::get(Application::class)->getName());
+        $this->assertSame(config()->get('app.version'), Di::get(Application::class)->getVersion());
+        $this->assertNotSame('UNKNOWN', Di::get(Application::class)->getName());
     }
 
     public function testConsoleAppAdapterNamesTheApplicationUnknownAfterAFailedBoot(): void
     {
-        $_SERVER['argv'] = ['qt', 'core:env'];
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
         $this->withoutEnvironmentFile(function (): void {
-            $adapter = new ConsoleAppAdapter($this->createContext());
+            $this->createAdapter()->start();
 
-            $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getName());
-            $this->assertSame('UNKNOWN', $this->applicationOf($adapter)->getVersion());
+            $this->assertSame('UNKNOWN', Di::get(Application::class)->getName());
+            $this->assertSame('UNKNOWN', Di::get(Application::class)->getVersion());
+        });
+    }
+
+    public function testConsoleAppAdapterKeepsTheApplicationUnknownWhenTheErrorHandlerCannotBeSetUp(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $this->withFileContent(PROJECT_ROOT . DS . 'shared' . DS . 'config' . DS . 'logging.php', "<?php\n\nreturn [\n", function (): void {
+            $adapter = $this->createAdapter();
+            $adapter->start();
+
+            $this->assertNotNull($this->bootFailureOf($adapter));
+            $this->assertTrue(config()->has('app'));
+            $this->assertSame('UNKNOWN', Di::get(Application::class)->getName());
+            $this->assertSame('UNKNOWN', Di::get(Application::class)->getVersion());
         });
     }
 
@@ -338,11 +358,11 @@ class ConsoleAppAdapterTest extends AppTestCase
             $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
 
             $this->withoutEnvironmentFile(function (): void {
-                $this->consoleAppAdapter->__construct($this->createContext());
+                $adapter = $this->createAdapter();
 
                 $this->expectException(EnvException::class);
 
-                $this->consoleAppAdapter->start();
+                $adapter->start();
             });
         });
     }
@@ -470,12 +490,90 @@ class ConsoleAppAdapterTest extends AppTestCase
         });
     }
 
+    public function testConsoleAppAdapterStartRunsListWhenAnAppHelperFileCannotBeLoaded(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $this->withBrokenAppHelper(function (): void {
+            $adapter = $this->createAdapter();
+
+            $this->assertSame(0, $adapter->start());
+            $this->assertInstanceOf(ParseError::class, $this->bootFailureOf($adapter));
+        });
+    }
+
+    public function testConsoleAppAdapterStartRunsACommandThatDoesNotRequireTheEnvironmentWhenAnAppHelperFileCannotBeLoaded(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
+
+            $this->withBrokenAppHelper(function () use ($commandName): void {
+                $this->assertSame(0, $this->createAdapter()->start());
+                $this->assertSame($commandName, $GLOBALS['tmpCommandRan'] ?? null);
+            });
+        }, null, false);
+    }
+
+    public function testConsoleAppAdapterStartRejectsACommandThatRequiresTheEnvironmentWhenAnAppHelperFileCannotBeLoaded(): void
+    {
+        $directory = PROJECT_ROOT . DS . 'shared' . DS . 'Commands';
+
+        $this->withTemporaryCommand($directory, 'Shared\Commands', function (string $commandName): void {
+            $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
+
+            $this->withBrokenAppHelper(function (): void {
+                $adapter = $this->createAdapter();
+
+                $this->expectException(ParseError::class);
+
+                $adapter->start();
+            });
+        });
+    }
+
+    /**
+     * Puts an app helper file with a syntax error into the test app for the duration of the callback
+     */
+    private function withBrokenAppHelper(callable $test): void
+    {
+        $directory = PROJECT_ROOT . DS . 'helpers';
+        $createdDirectory = !is_dir($directory);
+        $file = $directory . DS . 'tmp_broken_helper_' . substr(md5(uniqid('', true)), 0, 8) . '.php';
+
+        try {
+            if ($createdDirectory) {
+                $this->assertTrue(mkdir($directory));
+            }
+
+            $this->assertNotFalse(file_put_contents($file, "<?php\n\nfunction broken( {\n"));
+
+            $test();
+        } finally {
+            if (is_file($file)) {
+                unlink($file);
+            }
+
+            if ($createdDirectory && is_dir($directory)) {
+                rmdir($directory);
+            }
+        }
+    }
+
     /**
      * Replaces the content of the environment file of the test app for the duration of the callback
      */
     private function withEnvironmentFileContent(string $content, callable $test): void
     {
-        $file = PROJECT_ROOT . DS . '.env.testing';
+        $this->withFileContent(PROJECT_ROOT . DS . '.env.testing', $content, $test);
+    }
+
+    /**
+     * Replaces the content of a file of the test app for the duration of the callback
+     */
+    private function withFileContent(string $file, string $content, callable $test): void
+    {
         $backup = $file . '.backup';
 
         $this->assertTrue(rename($file, $backup));
@@ -494,20 +592,30 @@ class ConsoleAppAdapterTest extends AppTestCase
     }
 
     /**
-     * Boots the real adapter, with its own createApplication(), for the command and keeps
-     * the Symfony Application from exiting and from catching exceptions, so start() can be asserted on
+     * Creates the adapter on a fresh context (or the given one) with a test Application in the container:
+     * the given one, or one that does not exit and is built, and named, when start() first fetches it
+     */
+    private function createAdapter(?Application $application = null, ?AppContext $context = null): ConsoleAppAdapter
+    {
+        $context ??= $this->createContext();
+
+        if ($application !== null) {
+            Di::set(Application::class, $application);
+        } else {
+            Di::register(NonExitingApplication::class, Application::class);
+        }
+
+        return new ConsoleAppAdapter($context);
+    }
+
+    /**
+     * Boots the adapter for the command, so start() can be asserted on
      */
     private function bootRealAdapter(string $commandName): ConsoleAppAdapter
     {
         $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
 
-        $adapter = new ConsoleAppAdapter($this->createContext());
-
-        $application = $this->applicationOf($adapter);
-        $application->setAutoExit(false);
-        $application->setCatchExceptions(false);
-
-        return $adapter;
+        return $this->createAdapter();
     }
 
     /**
@@ -572,37 +680,16 @@ PHP;
         return $property->getValue($adapter);
     }
     /**
-     * The Symfony Application the adapter built while booting
-     */
-    private function applicationOf(ConsoleAppAdapter $adapter): Application
-    {
-        $property = new ReflectionProperty(ConsoleAppAdapter::class, 'application');
-        $property->setAccessible(true);
-
-        return $property->getValue($adapter);
-    }
-
-    /**
      * Starts the adapter with a real Symfony Application (no auto exit, no exception catching),
      * so the registered command is really executed and its exit code comes from Symfony.
      */
     private function startWithRealApplication(string $commandName): ?int
     {
-        $application = new Application('Qt Console Application', 'test');
-        $application->setAutoExit(false);
-        $application->setCatchExceptions(false);
-
-        $adapter = Mockery::mock(ConsoleAppAdapter::class)
-            ->shouldAllowMockingProtectedMethods()
-            ->makePartial();
-
-        $adapter->shouldReceive('createApplication')->andReturn($application);
+        $application = new NonExitingApplication('Qt Console Application', 'test');
 
         $_SERVER['argv'] = ['qt', $commandName, '--quiet'];
 
-        $adapter->__construct($this->createContext());
-
-        return $adapter->start();
+        return $this->createAdapter($application)->start();
     }
 
     /**
@@ -611,20 +698,11 @@ PHP;
      */
     private function registeredCommandNames(): array
     {
-        $application = new Application('Qt Console Application', 'test');
-        $application->setAutoExit(false);
-        $application->setCatchExceptions(false);
-
-        $adapter = Mockery::mock(ConsoleAppAdapter::class)
-            ->shouldAllowMockingProtectedMethods()
-            ->makePartial();
-
-        $adapter->shouldReceive('createApplication')->andReturn($application);
+        $application = new NonExitingApplication('Qt Console Application', 'test');
 
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $adapter->__construct($this->createContext());
-        $adapter->start();
+        $this->createAdapter($application)->start();
 
         return array_keys($application->all());
     }

@@ -2,12 +2,15 @@
 
 namespace Quantum\Tests\Unit\App\Stages\Console;
 
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Application;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\App;
+use Quantum\Di\Di;
 use Throwable;
 
 abstract class ConsoleStageTestCase extends AppTestCase
@@ -22,7 +25,11 @@ abstract class ConsoleStageTestCase extends AppTestCase
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
 
-        return new ConsoleContext(App::getContext(), $application, new ArrayInput($input), new BufferedOutput(), $bootFailure);
+        Di::set(Application::class, $application);
+        Di::set(InputInterface::class, new ArrayInput($input));
+        Di::set(OutputInterface::class, new BufferedOutput());
+
+        return new ConsoleContext(App::getContext(), $bootFailure);
     }
 
     /**

@@ -6,7 +6,9 @@ use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
 use Quantum\Console\Commands\KeyGenerateCommand;
+use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
+use ReflectionProperty;
 use Quantum\App\App;
 
 class KeyGenerateCommandTest extends AppTestCase
@@ -65,6 +67,25 @@ class KeyGenerateCommandTest extends AppTestCase
         $output = $this->tester->getDisplay();
         $this->assertStringContainsString('Application key successfully generated', $output);
         $this->assertNotEmpty(env('APP_KEY'));
+    }
+
+    public function testExecStoresANewKeyWithoutTheEnvironmentBeingMutableBeforehand(): void
+    {
+        // AppTestCase makes the environment mutable; the command must not depend on that
+        environment()->setMutable(false);
+
+        $isMutable = new ReflectionProperty(Environment::class, 'isMutable');
+        $isMutable->setAccessible(true);
+
+        $this->assertFalse($isMutable->getValue(environment()));
+
+        $originalKey = env('APP_KEY');
+
+        $this->tester->execute(['--yes' => true, '--length' => 16]);
+
+        $this->assertNotSame($originalKey, env('APP_KEY'));
+        $this->assertSame(32, strlen((string) env('APP_KEY')));
+        $this->assertStringContainsString('APP_KEY=' . env('APP_KEY'), (string) $this->fs->get($this->envFilePath));
     }
 
     public function testExecCancelsWhenNotConfirmed(): void
