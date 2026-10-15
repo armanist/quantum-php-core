@@ -11,22 +11,24 @@ declare(strict_types=1);
 namespace Quantum\App\Adapters\Web;
 
 use Quantum\ResourceCache\ViewCache;
+use Quantum\Router\RouteCollection;
 use Quantum\Router\MatchedRoute;
 use Quantum\App\AppContext;
 use Quantum\Http\Response;
+use Quantum\Http\Request;
 
 /**
  * Class WebContext
  *
  * Carries the state of a single web request through the web stages.
- * Unlike AppContext, which is immutable, this object is mutated by the stages.
+ * It is an AppContext (same base directory and container) that the stages mutate, and it holds
+ * the response of the request: the one the stages set, which is what is sent.
+ * The request and the routes are read from the container.
  *
  * @package Quantum\App
  */
-class WebContext
+class WebContext extends AppContext
 {
-    private AppContext $appContext;
-
     private ?MatchedRoute $matchedRoute = null;
 
     private ?Response $response = null;
@@ -37,12 +39,17 @@ class WebContext
 
     public function __construct(AppContext $appContext)
     {
-        $this->appContext = $appContext;
+        parent::__construct($appContext->getBaseDir(), $appContext->getContainer());
     }
 
-    public function getAppContext(): AppContext
+    public function getRequest(): Request
     {
-        return $this->appContext;
+        return $this->resolveFromContainer(Request::class);
+    }
+
+    public function getRoutes(): RouteCollection
+    {
+        return $this->resolveFromContainer(RouteCollection::class);
     }
 
     public function getMatchedRoute(): ?MatchedRoute

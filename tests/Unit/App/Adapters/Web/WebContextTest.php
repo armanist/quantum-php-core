@@ -2,14 +2,18 @@
 
 namespace Quantum\Tests\Unit\App\Adapters\Web;
 
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\ResourceCache\ViewCache;
+use Quantum\Router\RouteCollection;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Router\MatchedRoute;
-use Quantum\App\Adapters\Web\WebContext;
+use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
+use Quantum\Http\Request;
 use Quantum\Router\Route;
 use Quantum\App\App;
 use Quantum\Di\Di;
+use Mockery;
 
 class WebContextTest extends AppTestCase
 {
@@ -25,9 +29,30 @@ class WebContextTest extends AppTestCase
         $this->webContext = new WebContext($this->appContext);
     }
 
-    public function testWebContextExposesAppContext(): void
+    public function testWebContextIsAnAppContextBuiltFromTheOneItIsGiven(): void
     {
-        $this->assertSame($this->appContext, $this->webContext->getAppContext());
+        $container = new DiContainer();
+
+        $webContext = new WebContext(new AppContext('/base/dir', $container));
+
+        $this->assertInstanceOf(AppContext::class, $webContext);
+        $this->assertSame('/base/dir', $webContext->getBaseDir());
+        $this->assertSame($container, $webContext->getContainer());
+    }
+
+    public function testWebContextExposesRequestAndRoutesFromTheContainer(): void
+    {
+        $container = new DiContainer();
+        $request = Mockery::mock(Request::class);
+        $routes = new RouteCollection();
+
+        $container->set(Request::class, $request);
+        $container->set(RouteCollection::class, $routes);
+
+        $webContext = new WebContext(new AppContext('/base/dir', $container));
+
+        $this->assertSame($request, $webContext->getRequest());
+        $this->assertSame($routes, $webContext->getRoutes());
     }
 
     public function testWebContextStoresMatchedRoute(): void

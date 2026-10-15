@@ -21,38 +21,37 @@ use Throwable;
  * Class ConsoleContext
  *
  * Carries the state of a single console run through the console stages.
- * Unlike AppContext, which is immutable, the exit code is set by the stages.
- * The Symfony application, input and output are read from the container of the AppContext.
+ * It is an AppContext (same base directory and container) whose exit code is set by the stages.
+ * The Symfony application, input and output are read from the container.
  *
  * @package Quantum\App
  */
-class ConsoleContext
+class ConsoleContext extends AppContext
 {
-    private AppContext $appContext;
-
     private ?Throwable $bootFailure;
 
     private int $exitCode = ExitCode::SUCCESS;
 
     public function __construct(AppContext $appContext, ?Throwable $bootFailure = null)
     {
-        $this->appContext = $appContext;
+        parent::__construct($appContext->getBaseDir(), $appContext->getContainer());
+
         $this->bootFailure = $bootFailure;
     }
 
     public function getApplication(): Application
     {
-        return $this->appContext->getContainer()->get(Application::class);
+        return $this->resolveFromContainer(Application::class);
     }
 
     public function getInput(): InputInterface
     {
-        return $this->appContext->getContainer()->get(InputInterface::class);
+        return $this->resolveFromContainer(InputInterface::class);
     }
 
     public function getOutput(): OutputInterface
     {
-        return $this->appContext->getContainer()->get(OutputInterface::class);
+        return $this->resolveFromContainer(OutputInterface::class);
     }
 
     /**
