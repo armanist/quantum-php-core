@@ -11,6 +11,9 @@ The format is based on Keep a Changelog.
 - Added adapter-based Lang provider support with `DeepL` and `Google Translate` adapters plus shared remote request/caching infrastructure (#533)
 
 ### Changed
+- **BREAKING:** The console adapter constructor is now only the boot pipeline, like the web adapter (#576):
+  - The Symfony `Application`, the input and the output are provided by the new `InitConsoleStage` through the container, and the new `SetupConsoleApplicationStage` names the application from `app.name` and `app.version` once the config is loaded (it stays `UNKNOWN` after a failed boot). `ConsoleContext` is built from the `AppContext` and the boot failure, and reads those objects from the container. Removed `ConsoleAppAdapter::createApplication()` and `ConsoleContext::getAppContext()`.
+  - The adapter no longer makes the environment mutable for every command. `core:key` and the toolkit installer already do it themselves; a command outside the framework that calls `environment()->updateRow()` must call `setMutable(true)` first, or it gets `EnvException::environmentImmutable()`.
 - The console boot no longer decides by the `core:env` command name (#575):
   - `ConsoleAppAdapter` always runs the full boot and, when it fails, keeps the failure instead of stopping. `RunCommandStage` re-throws that original failure only for a command that requires the environment, so `core:env`, `list`, and `help` still run and `core:env --yes` can repair a missing, empty, or malformed `.env`. The reduced boot for `core:env` is gone, and the Symfony `Application` is named `UNKNOWN` until a successful boot names it from the app config.
   - Added `CliCommand::$requiresEnvironment` (default `true`) with `CliCommand::requiresEnvironment()`; a command that works without the environment, like `EnvCommand`, sets it to `false`. `ConsoleContext` takes an optional boot failure and exposes it with `getBootFailure()`.
