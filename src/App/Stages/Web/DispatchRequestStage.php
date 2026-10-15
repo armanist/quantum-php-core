@@ -8,14 +8,14 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Request;
+namespace Quantum\App\Stages\Web;
 
 use Quantum\Middleware\Exceptions\MiddlewareException;
-use Quantum\App\Contracts\RequestStageInterface;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Middleware\MiddlewareManager;
 use Quantum\Router\RouteDispatcher;
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 use RuntimeException;
@@ -28,12 +28,12 @@ use RuntimeException;
  *
  * @package Quantum\App
  */
-class DispatchRequestStage implements RequestStageInterface
+class DispatchRequestStage implements WebStageInterface
 {
     /**
      * @throws MiddlewareException|BaseException
      */
-    public function process(RequestContext $context): void
+    public function process(WebContext $context): void
     {
         if ($context->isStopped()) {
             return;

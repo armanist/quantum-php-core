@@ -8,15 +8,15 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Request;
+namespace Quantum\App\Stages\Web;
 
-use Quantum\App\Contracts\RequestStageInterface;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Lang\Exceptions\LangException;
 use Quantum\Lang\Factories\LangFactory;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\ResourceCache\ViewCache;
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Debugger\Debugger;
 use ReflectionException;
 use Quantum\Di\Di;
@@ -29,12 +29,12 @@ use Quantum\Di\Di;
  *
  * @package Quantum\App
  */
-class PrepareRequestStage implements RequestStageInterface
+class PrepareRequestStage implements WebStageInterface
 {
     /**
      * @throws LangException|ConfigException|DiException|ReflectionException
      */
-    public function process(RequestContext $context): void
+    public function process(WebContext $context): void
     {
         if ($context->isStopped()) {
             return;

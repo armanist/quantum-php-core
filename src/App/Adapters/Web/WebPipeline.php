@@ -10,34 +10,34 @@ declare(strict_types=1);
 
 namespace Quantum\App\Adapters\Web;
 
-use Quantum\App\Contracts\RequestStageInterface;
+use Quantum\App\Contracts\WebStageInterface;
 use InvalidArgumentException;
 
 /**
- * Class RequestPipeline
+ * Class WebPipeline
  *
- * Runs the web request stages in order. The pipeline does not skip stages by itself;
- * a stage checks RequestContext::isStopped() when it must be skipped.
+ * Runs the web stages in order. The pipeline does not skip stages by itself;
+ * a stage checks WebContext::isStopped() when it must be skipped.
  * Stage lifecycle events are not dispatched here yet.
  *
  * @package Quantum\App
  */
-class RequestPipeline
+class WebPipeline
 {
     /**
-     * @var RequestStageInterface[]
+     * @var WebStageInterface[]
      */
     private array $stages;
 
     /**
-     * @param RequestStageInterface[] $stages
+     * @param WebStageInterface[] $stages
      */
     public function __construct(array $stages = [])
     {
         foreach ($stages as $stage) {
-            if (!$stage instanceof RequestStageInterface) {
+            if (!$stage instanceof WebStageInterface) {
                 throw new InvalidArgumentException(
-                    'All stages must implement ' . RequestStageInterface::class
+                    'All stages must implement ' . WebStageInterface::class
                 );
             }
         }
@@ -45,7 +45,7 @@ class RequestPipeline
         $this->stages = $stages;
     }
 
-    public function run(RequestContext $context): void
+    public function run(WebContext $context): void
     {
         foreach ($this->stages as $stage) {
             $stage->process($context);

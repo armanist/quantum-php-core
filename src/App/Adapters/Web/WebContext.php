@@ -16,14 +16,14 @@ use Quantum\App\AppContext;
 use Quantum\Http\Response;
 
 /**
- * Class RequestContext
+ * Class WebContext
  *
- * Carries the state of a single web request through the request stages.
+ * Carries the state of a single web request through the web stages.
  * Unlike AppContext, which is immutable, this object is mutated by the stages.
  *
  * @package Quantum\App
  */
-class RequestContext
+class WebContext
 {
     private AppContext $appContext;
 

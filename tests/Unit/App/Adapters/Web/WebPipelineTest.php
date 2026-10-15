@@ -2,22 +2,22 @@
 
 namespace Quantum\Tests\Unit\App\Adapters\Web;
 
-use Quantum\App\Contracts\RequestStageInterface;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\App\Contracts\BootStageInterface;
-use Quantum\App\Adapters\Web\RequestPipeline;
+use Quantum\App\Adapters\Web\WebPipeline;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\App\Adapters\Web\WebContext;
 use InvalidArgumentException;
 use Quantum\App\AppContext;
 use RuntimeException;
 
-class RequestPipelineTest extends AppTestCase
+class WebPipelineTest extends AppTestCase
 {
-    private RequestContext $requestContext;
+    private WebContext $webContext;
 
     public function setUp(): void
     {
-        $this->requestContext = new RequestContext($this->createContext());
+        $this->webContext = new WebContext($this->createContext());
     }
 
     public function tearDown(): void
@@ -29,7 +29,7 @@ class RequestPipelineTest extends AppTestCase
     {
         $log = [];
 
-        $pipeline = new RequestPipeline([
+        $pipeline = new WebPipeline([
             $this->createStage(function () use (&$log): void {
                 $log[] = 'first';
             }),
@@ -41,38 +41,38 @@ class RequestPipelineTest extends AppTestCase
             }),
         ]);
 
-        $pipeline->run($this->requestContext);
+        $pipeline->run($this->webContext);
 
         $this->assertSame(['first', 'second', 'third'], $log);
     }
 
     public function testEmptyPipelineRunsWithoutError(): void
     {
-        $pipeline = new RequestPipeline([]);
+        $pipeline = new WebPipeline([]);
 
-        $pipeline->run($this->requestContext);
+        $pipeline->run($this->webContext);
 
-        $this->assertFalse($this->requestContext->isStopped());
+        $this->assertFalse($this->webContext->isStopped());
     }
 
     public function testPipelinePassesContextToStages(): void
     {
         $received = null;
 
-        $pipeline = new RequestPipeline([
-            $this->createStage(function (RequestContext $context) use (&$received): void {
+        $pipeline = new WebPipeline([
+            $this->createStage(function (WebContext $context) use (&$received): void {
                 $received = $context;
             }),
         ]);
 
-        $pipeline->run($this->requestContext);
+        $pipeline->run($this->webContext);
 
-        $this->assertSame($this->requestContext, $received);
+        $this->assertSame($this->webContext, $received);
     }
 
     public function testPipelinePropagatesException(): void
     {
-        $pipeline = new RequestPipeline([
+        $pipeline = new WebPipeline([
             $this->createStage(function (): void {
                 throw new RuntimeException('Stage failed');
             }),
@@ -81,15 +81,15 @@ class RequestPipelineTest extends AppTestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Stage failed');
 
-        $pipeline->run($this->requestContext);
+        $pipeline->run($this->webContext);
     }
 
     public function testPipelineKeepsRunningStagesAfterContextIsStopped(): void
     {
         $log = [];
 
-        $pipeline = new RequestPipeline([
-            $this->createStage(function (RequestContext $context) use (&$log): void {
+        $pipeline = new WebPipeline([
+            $this->createStage(function (WebContext $context) use (&$log): void {
                 $log[] = 'first';
                 $context->stop();
             }),
@@ -98,10 +98,10 @@ class RequestPipelineTest extends AppTestCase
             }),
         ]);
 
-        $pipeline->run($this->requestContext);
+        $pipeline->run($this->webContext);
 
         $this->assertSame(['first', 'second'], $log);
-        $this->assertTrue($this->requestContext->isStopped());
+        $this->assertTrue($this->webContext->isStopped());
     }
 
     public function testPipelineRejectsInvalidStage(): void
@@ -109,7 +109,7 @@ class RequestPipelineTest extends AppTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('All stages must implement');
 
-        new RequestPipeline([new \stdClass()]);
+        new WebPipeline([new \stdClass()]);
     }
 
     public function testPipelineRejectsBootStage(): void
@@ -123,12 +123,12 @@ class RequestPipelineTest extends AppTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('All stages must implement');
 
-        new RequestPipeline([$bootStage]);
+        new WebPipeline([$bootStage]);
     }
 
-    private function createStage(callable $callback): RequestStageInterface
+    private function createStage(callable $callback): WebStageInterface
     {
-        return new class ($callback) implements RequestStageInterface {
+        return new class ($callback) implements WebStageInterface {
             private $callback;
 
             public function __construct(callable $callback)
@@ -136,7 +136,7 @@ class RequestPipelineTest extends AppTestCase
                 $this->callback = $callback;
             }
 
-            public function process(RequestContext $context): void
+            public function process(WebContext $context): void
             {
                 ($this->callback)($context);
             }

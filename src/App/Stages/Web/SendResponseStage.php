@@ -8,12 +8,12 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Request;
+namespace Quantum\App\Stages\Web;
 
-use Quantum\App\Contracts\RequestStageInterface;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Di\Exceptions\DiException;
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Http\Response;
 use Quantum\Config\Setup;
 use ReflectionException;
@@ -24,16 +24,16 @@ use Exception;
  * Class SendResponseStage
  *
  * Sends the response of the request and always clears the request state afterwards,
- * even when sending fails. This stage never checks RequestContext::isStopped().
+ * even when sending fails. This stage never checks WebContext::isStopped().
  *
  * @package Quantum\App
  */
-class SendResponseStage implements RequestStageInterface
+class SendResponseStage implements WebStageInterface
 {
     /**
      * @throws ConfigException|DiException|ReflectionException|Exception
      */
-    public function process(RequestContext $context): void
+    public function process(WebContext $context): void
     {
         try {
             $response = $context->getResponse();
@@ -45,7 +45,7 @@ class SendResponseStage implements RequestStageInterface
             $this->handleCors($response);
             $response->send();
         } finally {
-            $this->cleanupRequestContext();
+            $this->cleanupRequestState();
         }
     }
 
@@ -66,7 +66,7 @@ class SendResponseStage implements RequestStageInterface
     /**
      * Clears request-scoped state after the response has been sent.
      */
-    private function cleanupRequestContext(): void
+    private function cleanupRequestState(): void
     {
         request()->setMatchedRoute(null);
         request()->flush();

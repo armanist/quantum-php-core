@@ -27,14 +27,14 @@ namespace Quantum\Tests\_root\modules\Test\Middlewares {
     }
 }
 
-namespace Quantum\Tests\Unit\App\Stages\Request {
+namespace Quantum\Tests\Unit\App\Stages\Web {
     use Quantum\Tests\_root\modules\Test\Middlewares\DispatchStageMwPassThrough;
-    use Quantum\App\Stages\Request\DispatchRequestStage;
-    use Quantum\App\Stages\Request\ResolveRouteStage;
+    use Quantum\App\Stages\Web\DispatchRequestStage;
+    use Quantum\App\Stages\Web\ResolveRouteStage;
     use Quantum\Router\Exceptions\RouteException;
     use Quantum\Tests\Unit\AppTestCase;
     use Quantum\ResourceCache\ViewCache;
-    use Quantum\App\Adapters\Web\RequestContext;
+    use Quantum\App\Adapters\Web\WebContext;
     use Quantum\Router\MatchedRoute;
     use Quantum\Http\Enums\StatusCode;
     use Quantum\Router\Route;
@@ -44,13 +44,13 @@ namespace Quantum\Tests\Unit\App\Stages\Request {
 
     class DispatchRequestStageTest extends AppTestCase
     {
-        private RequestContext $requestContext;
+        private WebContext $webContext;
 
         public function setUp(): void
         {
             parent::setUp();
 
-            $this->requestContext = new RequestContext(App::getContext());
+            $this->webContext = new WebContext(App::getContext());
 
             DispatchStageMwPassThrough::$calls = [];
         }
@@ -59,11 +59,11 @@ namespace Quantum\Tests\Unit\App\Stages\Request {
         {
             $this->prepareRequest('/test/am/tests');
 
-            (new DispatchRequestStage())->process($this->requestContext);
+            (new DispatchRequestStage())->process($this->webContext);
 
-            $this->assertSame(response(), $this->requestContext->getResponse());
-            $this->assertSame(StatusCode::OK, $this->requestContext->getResponse()->getStatusCode());
-            $this->assertSame('', $this->requestContext->getResponse()->getContent());
+            $this->assertSame(response(), $this->webContext->getResponse());
+            $this->assertSame(StatusCode::OK, $this->webContext->getResponse()->getStatusCode());
+            $this->assertSame('', $this->webContext->getResponse()->getContent());
         }
 
         public function testDispatchRequestStageServesViewCacheHit(): void
@@ -76,15 +76,15 @@ namespace Quantum\Tests\Unit\App\Stages\Request {
             $viewsDirExisted = is_dir($viewsDir);
             $moduleDirExisted = is_dir($moduleDir);
 
-            $viewCache = $this->requestContext->getViewCache();
+            $viewCache = $this->webContext->getViewCache();
             $viewCache->setup();
             $viewCache->enableCaching(true);
             $viewCache->set($uri, '<p>cached page</p>');
 
             try {
-                (new DispatchRequestStage())->process($this->requestContext);
+                (new DispatchRequestStage())->process($this->webContext);
 
-                $this->assertSame('<p>cached page</p>', $this->requestContext->getResponse()->getContent());
+                $this->assertSame('<p>cached page</p>', $this->webContext->getResponse()->getContent());
             } finally {
                 $viewCache->delete($uri);
                 $viewCache->enableCaching(false);
@@ -103,12 +103,12 @@ namespace Quantum\Tests\Unit\App\Stages\Request {
         {
             $this->prepareRequest('/test/am/tests');
 
-            $this->requestContext->getMatchedRoute()->getRoute()->addMiddlewares(['DispatchStageMwPassThrough']);
+            $this->webContext->getMatchedRoute()->getRoute()->addMiddlewares(['DispatchStageMwPassThrough']);
 
-            (new DispatchRequestStage())->process($this->requestContext);
+            (new DispatchRequestStage())->process($this->webContext);
 
             $this->assertSame(['DispatchStageMwPassThrough'], DispatchStageMwPassThrough::$calls);
-            $this->assertSame(StatusCode::OK, $this->requestContext->getResponse()->getStatusCode());
+            $this->assertSame(StatusCode::OK, $this->webContext->getResponse()->getStatusCode());
         }
 
         public function testDispatchRequestStageLetsMiddlewareShortCircuit(): void
@@ -118,12 +118,12 @@ namespace Quantum\Tests\Unit\App\Stages\Request {
             // The controller does not exist, so reaching the dispatcher would throw.
             $matchedRoute = new MatchedRoute($this->createRoute('tests', ['DispatchStageMwBlocker'], 'MissingController'), []);
 
-            $this->requestContext->setMatchedRoute($matchedRoute);
+            $this->webContext->setMatchedRoute($matchedRoute);
             request()->setMatchedRoute($matchedRoute);
 
-            (new DispatchRequestStage())->process($this->requestContext);
+            (new DispatchRequestStage())->process($this->webContext);
 
-            $this->assertStringContainsString('blocked', $this->requestContext->getResponse()->getContent());
+            $this->assertStringContainsString('blocked', $this->webContext->getResponse()->getContent());
         }
 
         public function testDispatchRequestStagePropagatesDispatchException(): void
@@ -131,53 +131,53 @@ namespace Quantum\Tests\Unit\App\Stages\Request {
             $this->prepareRequest('/test/Test/5');
 
             try {
-                (new DispatchRequestStage())->process($this->requestContext);
+                (new DispatchRequestStage())->process($this->webContext);
                 $this->fail('Expected the dispatcher to fail for a missing controller action.');
             } catch (RouteException $exception) {
                 $this->assertInstanceOf(RouteException::class, $exception);
             }
 
-            $this->assertNull($this->requestContext->getResponse());
+            $this->assertNull($this->webContext->getResponse());
         }
 
         public function testDispatchRequestStageFailsWithoutMatchedRoute(): void
         {
-            $this->requestContext->setViewCache($this->viewCache());
+            $this->webContext->setViewCache($this->viewCache());
 
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Matched route is not set.');
 
-            (new DispatchRequestStage())->process($this->requestContext);
+            (new DispatchRequestStage())->process($this->webContext);
         }
 
         public function testDispatchRequestStageFailsWithoutViewCache(): void
         {
-            $this->requestContext->setMatchedRoute(new MatchedRoute($this->createRoute('tests'), []));
+            $this->webContext->setMatchedRoute(new MatchedRoute($this->createRoute('tests'), []));
 
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('View cache is not set.');
 
-            (new DispatchRequestStage())->process($this->requestContext);
+            (new DispatchRequestStage())->process($this->webContext);
         }
 
         public function testDispatchRequestStageSkipsWhenContextIsStopped(): void
         {
             $this->prepareRequest('/test/am/tests');
 
-            $this->requestContext->stop();
+            $this->webContext->stop();
 
-            (new DispatchRequestStage())->process($this->requestContext);
+            (new DispatchRequestStage())->process($this->webContext);
 
-            $this->assertNull($this->requestContext->getResponse());
+            $this->assertNull($this->webContext->getResponse());
         }
 
         private function prepareRequest(string $uri): void
         {
             request()->create('GET', $uri);
 
-            (new ResolveRouteStage())->process($this->requestContext);
+            (new ResolveRouteStage())->process($this->webContext);
 
-            $this->requestContext->setViewCache($this->viewCache());
+            $this->webContext->setViewCache($this->viewCache());
         }
 
         private function viewCache(): ViewCache

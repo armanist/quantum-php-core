@@ -1,11 +1,11 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Request;
+namespace Quantum\Tests\Unit\App\Stages\Web;
 
-use Quantum\App\Stages\Request\PrepareRequestStage;
+use Quantum\App\Stages\Web\PrepareRequestStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\ResourceCache\ViewCache;
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
 use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;
@@ -14,13 +14,13 @@ use Quantum\Di\Di;
 
 class PrepareRequestStageTest extends AppTestCase
 {
-    private RequestContext $requestContext;
+    private WebContext $webContext;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->requestContext = new RequestContext(App::getContext());
+        $this->webContext = new WebContext(App::getContext());
 
         request()->create('GET', '/test/am/tests');
 
@@ -34,7 +34,7 @@ class PrepareRequestStageTest extends AppTestCase
     {
         $this->assertFalse(config()->has('lang'));
 
-        (new PrepareRequestStage())->process($this->requestContext);
+        (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertTrue(config()->has('lang'));
     }
@@ -48,7 +48,7 @@ class PrepareRequestStageTest extends AppTestCase
 
         event()->listen('test.event', $listener);
 
-        (new PrepareRequestStage())->process($this->requestContext);
+        (new PrepareRequestStage())->process($this->webContext);
 
         $cell = debugbar()->getStoreCell(Debugger::EVENTS);
 
@@ -62,7 +62,7 @@ class PrepareRequestStageTest extends AppTestCase
 
         $this->assertSame([], event()->getRegistered());
 
-        (new PrepareRequestStage())->process($this->requestContext);
+        (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
     }
@@ -74,19 +74,19 @@ class PrepareRequestStageTest extends AppTestCase
         event()->listen('test.event', function (): void {
         });
 
-        (new PrepareRequestStage())->process($this->requestContext);
+        (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
     }
 
     public function testPrepareRequestStageStoresViewCacheOnContext(): void
     {
-        $this->assertNull($this->requestContext->getViewCache());
+        $this->assertNull($this->webContext->getViewCache());
 
-        (new PrepareRequestStage())->process($this->requestContext);
+        (new PrepareRequestStage())->process($this->webContext);
 
-        $this->assertInstanceOf(ViewCache::class, $this->requestContext->getViewCache());
-        $this->assertSame(Di::get(ViewCache::class), $this->requestContext->getViewCache());
+        $this->assertInstanceOf(ViewCache::class, $this->webContext->getViewCache());
+        $this->assertSame(Di::get(ViewCache::class), $this->webContext->getViewCache());
     }
 
     public function testPrepareRequestStageSetsUpViewCacheWhenEnabled(): void
@@ -101,7 +101,7 @@ class PrepareRequestStageTest extends AppTestCase
         Di::get(ViewCache::class)->enableCaching(true);
 
         try {
-            (new PrepareRequestStage())->process($this->requestContext);
+            (new PrepareRequestStage())->process($this->webContext);
 
             $this->assertTrue(config()->has('view_cache'));
             $this->assertDirectoryExists($moduleDir);
@@ -118,18 +118,18 @@ class PrepareRequestStageTest extends AppTestCase
 
     public function testPrepareRequestStageDoesNotSetUpViewCacheWhenDisabled(): void
     {
-        (new PrepareRequestStage())->process($this->requestContext);
+        (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertFalse(config()->has('view_cache'));
     }
 
     public function testPrepareRequestStageSkipsWhenContextIsStopped(): void
     {
-        $this->requestContext->stop();
+        $this->webContext->stop();
 
-        (new PrepareRequestStage())->process($this->requestContext);
+        (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertFalse(config()->has('lang'));
-        $this->assertNull($this->requestContext->getViewCache());
+        $this->assertNull($this->webContext->getViewCache());
     }
 }
