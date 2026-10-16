@@ -10,8 +10,6 @@ declare(strict_types=1);
 
 namespace Quantum\Http\Traits\Request;
 
-use Quantum\Http\Enums\ContentType;
-
 /**
  * Trait Header
  * @package Quantum\Http
@@ -131,12 +129,22 @@ trait Header
     }
 
     /**
-     * Checks whether the Accept header lists JSON, ignoring media type parameters and q-values
+     * Checks whether the client expects JSON: the Accept header lists a JSON media type
+     * (application/json, a +json type), or it is an AJAX request that accepts anything
      */
     public function expectsJson(): bool
     {
-        foreach (explode(',', (string) $this->getHeader('Accept')) as $mediaType) {
-            if (strtolower(trim(explode(';', $mediaType)[0])) === ContentType::JSON) {
+        $mediaTypes = array_map(
+            fn (string $mediaType): string => strtolower(trim(explode(';', $mediaType)[0])),
+            explode(',', (string) $this->getHeader('Accept'))
+        );
+
+        if ($this->isAjax() && in_array($mediaTypes[0], ['', '*/*', '*'], true)) {
+            return true;
+        }
+
+        foreach ($mediaTypes as $mediaType) {
+            if (str_contains($mediaType, '/json') || str_contains($mediaType, '+json')) {
                 return true;
             }
         }
