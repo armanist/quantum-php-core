@@ -10,16 +10,16 @@ declare(strict_types=1);
 
 namespace Quantum\App\Contracts;
 
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\App\Adapters\Web\WebContext;
 
 /**
- * Interface RequestStageInterface
+ * Interface WebStageInterface
  * @package Quantum\App
  */
-interface RequestStageInterface
+interface WebStageInterface
 {
     /**
-     * Processes a single request stage
+     * Processes a single web stage
      */
-    public function process(RequestContext $context): void;
+    public function process(WebContext $context): void;
 }

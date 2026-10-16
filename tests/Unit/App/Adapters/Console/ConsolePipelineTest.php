@@ -3,12 +3,12 @@
 namespace Quantum\Tests\Unit\App\Adapters\Console;
 
 use Quantum\App\Contracts\ConsoleStageInterface;
-use Quantum\App\Contracts\RequestStageInterface;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\App\Contracts\BootStageInterface;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Adapters\Console\ConsolePipeline;
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\App\Adapters\Web\WebContext;
 use InvalidArgumentException;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;
@@ -130,8 +130,8 @@ class ConsolePipelineTest extends AppTestCase
 
     public function testPipelineRejectsRequestStage(): void
     {
-        $requestStage = new class () implements RequestStageInterface {
-            public function process(RequestContext $context): void
+        $requestStage = new class () implements WebStageInterface {
+            public function process(WebContext $context): void
             {
             }
         };

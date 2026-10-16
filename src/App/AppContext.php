@@ -11,11 +11,8 @@ declare(strict_types=1);
 namespace Quantum\App;
 
 use Quantum\Environment\Environment;
-use Quantum\Router\RouteCollection;
 use Quantum\Di\DiContainer;
 use Quantum\Config\Config;
-use Quantum\Http\Response;
-use Quantum\Http\Request;
 
 /**
  * Class AppContext
@@ -53,27 +50,12 @@ class AppContext
         return $this->resolveFromContainer(Config::class);
     }
 
-    public function getRequest(): Request
-    {
-        return $this->resolveFromContainer(Request::class);
-    }
-
-    public function getResponse(): Response
-    {
-        return $this->resolveFromContainer(Response::class);
-    }
-
-    public function getRoutes(): RouteCollection
-    {
-        return $this->resolveFromContainer(RouteCollection::class);
-    }
-
     /**
      * @template T of object
      * @param class-string<T> $class
      * @return T
      */
-    private function resolveFromContainer(string $class)
+    protected function resolveFromContainer(string $class)
     {
         return $this->container->get($class);
     }

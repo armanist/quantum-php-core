@@ -11,6 +11,7 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;
+use Quantum\Di\DiContainer;
 use RuntimeException;
 use Quantum\App\App;
 use Quantum\Di\Di;
@@ -41,6 +42,17 @@ class ConsoleContextTest extends AppTestCase
         Di::set(OutputInterface::class, $this->output);
 
         $this->consoleContext = new ConsoleContext($this->appContext);
+    }
+
+    public function testConsoleContextIsAnAppContextBuiltFromTheOneItIsGiven(): void
+    {
+        $container = new DiContainer();
+
+        $consoleContext = new ConsoleContext(new AppContext('/base/dir', $container));
+
+        $this->assertInstanceOf(AppContext::class, $consoleContext);
+        $this->assertSame('/base/dir', $consoleContext->getBaseDir());
+        $this->assertSame($container, $consoleContext->getContainer());
     }
 
     public function testConsoleContextExposesApplicationInputAndOutputFromTheContainer(): void

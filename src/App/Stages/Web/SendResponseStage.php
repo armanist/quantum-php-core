@@ -8,13 +8,15 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Request;
+namespace Quantum\App\Stages\Web;
 
-use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
+use Quantum\App\Contracts\WebStageInterface;
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Di\Exceptions\DiException;
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\Config\Config;
 use Quantum\Http\Response;
+use Quantum\Http\Request;
 use Quantum\Config\Setup;
 use ReflectionException;
 use RuntimeException;
@@ -24,16 +26,16 @@ use Exception;
  * Class SendResponseStage
  *
  * Sends the response of the request and always clears the request state afterwards,
- * even when sending fails. This stage never checks RequestContext::isStopped().
+ * even when sending fails. This stage never checks WebContext::isStopped().
  *
  * @package Quantum\App
  */
-class SendResponseStage implements RequestStageInterface
+class SendResponseStage implements WebStageInterface
 {
     /**
      * @throws ConfigException|DiException|ReflectionException|Exception
      */
-    public function process(RequestContext $context): void
+    public function process(WebContext $context): void
     {
         try {
             $response = $context->getResponse();
@@ -42,23 +44,23 @@ class SendResponseStage implements RequestStageInterface
                 throw new RuntimeException('The request has no response to send.');
             }
 
-            $this->handleCors($response);
+            $this->handleCors($response, $context->getConfig());
             $response->send();
         } finally {
-            $this->cleanupRequestContext();
+            $this->cleanupRequestState($context->getRequest());
         }
     }
 
     /**
      * @throws ConfigException|DiException|ReflectionException
      */
-    private function handleCors(Response $response): void
+    private function handleCors(Response $response, Config $config): void
     {
-        if (!config()->has('cors')) {
-            config()->import(new Setup('config', 'cors'));
+        if (!$config->has('cors')) {
+            $config->import(new Setup('config', 'cors'));
         }
 
-        foreach (config()->get('cors') as $key => $value) {
+        foreach ($config->get('cors') as $key => $value) {
             $response->setHeader($key, (string) $value);
         }
     }
@@ -66,9 +68,9 @@ class SendResponseStage implements RequestStageInterface
     /**
      * Clears request-scoped state after the response has been sent.
      */
-    private function cleanupRequestContext(): void
+    private function cleanupRequestState(Request $request): void
     {
-        request()->setMatchedRoute(null);
-        request()->flush();
+        $request->setMatchedRoute(null);
+        $request->flush();
     }
 }

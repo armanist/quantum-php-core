@@ -8,14 +8,15 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Request;
+namespace Quantum\App\Stages\Web;
 
 use Quantum\Middleware\Exceptions\MiddlewareException;
-use Quantum\App\Contracts\RequestStageInterface;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Middleware\MiddlewareManager;
+use Quantum\App\Adapters\Web\WebContext;
+use Quantum\Di\Exceptions\DiException;
 use Quantum\Router\RouteDispatcher;
-use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 use RuntimeException;
@@ -28,31 +29,28 @@ use RuntimeException;
  *
  * @package Quantum\App
  */
-class DispatchRequestStage implements RequestStageInterface
+class DispatchRequestStage implements WebStageInterface
 {
     /**
-     * @throws MiddlewareException|BaseException
+     * @throws MiddlewareException|BaseException|DiException
      */
-    public function process(RequestContext $context): void
+    public function process(WebContext $context): void
     {
         if ($context->isStopped()) {
             return;
         }
 
         $matchedRoute = $context->getMatchedRoute();
-        $viewCache = $context->getViewCache();
 
         if ($matchedRoute === null) {
             throw new RuntimeException('Matched route is not set.');
         }
 
-        if ($viewCache === null) {
-            throw new RuntimeException('View cache is not set.');
-        }
+        $viewCache = $context->getViewCache();
 
         $terminal = fn (Request $request): Response => $viewCache->getCachedResponse($request->getUri() ?? '')
             ?? (new RouteDispatcher())->dispatch($matchedRoute, $request);
 
-        $context->setResponse((new MiddlewareManager($matchedRoute))->applyMiddlewares(request(), $terminal));
+        $context->setResponse((new MiddlewareManager($matchedRoute))->applyMiddlewares($context->getRequest(), $terminal));
     }
 }

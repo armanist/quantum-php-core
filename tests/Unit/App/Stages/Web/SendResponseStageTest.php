@@ -1,34 +1,38 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Request;
+namespace Quantum\Tests\Unit\App\Stages\Web;
 
-use Quantum\App\Stages\Request\SendResponseStage;
+use Quantum\App\Stages\Web\SendResponseStage;
 use Quantum\Http\Exceptions\HttpException;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\App\Adapters\Web\RequestContext;
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
+use Quantum\Di\DiContainer;
+use Quantum\App\AppContext;
+use Quantum\Config\Config;
 use Quantum\Router\Route;
 use Quantum\Http\Response;
+use Quantum\Http\Request;
 use Quantum\App\App;
 use RuntimeException;
 
 class SendResponseStageTest extends AppTestCase
 {
-    private RequestContext $requestContext;
+    private WebContext $webContext;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->requestContext = new RequestContext(App::getContext());
+        $this->webContext = new WebContext(App::getContext());
     }
 
     public function testSendResponseStageSendsTheResponse(): void
     {
-        $this->requestContext->setResponse(response()->html('<p>hello</p>'));
+        $this->webContext->setResponse(response()->html('<p>hello</p>'));
 
         ob_start();
-        (new SendResponseStage())->process($this->requestContext);
+        (new SendResponseStage())->process($this->webContext);
         $output = ob_get_clean();
 
         $this->assertSame('<p>hello</p>', $output);
@@ -38,10 +42,10 @@ class SendResponseStageTest extends AppTestCase
     {
         $this->assertFalse(config()->has('cors'));
 
-        $this->requestContext->setResponse(response()->html(''));
+        $this->webContext->setResponse(response()->html(''));
 
         ob_start();
-        (new SendResponseStage())->process($this->requestContext);
+        (new SendResponseStage())->process($this->webContext);
         ob_end_clean();
 
         $this->assertTrue(config()->has('cors'));
@@ -53,10 +57,10 @@ class SendResponseStageTest extends AppTestCase
     {
         $this->prepareMatchedRequest();
 
-        $this->requestContext->setResponse(response()->html(''));
+        $this->webContext->setResponse(response()->html(''));
 
         ob_start();
-        (new SendResponseStage())->process($this->requestContext);
+        (new SendResponseStage())->process($this->webContext);
         ob_end_clean();
 
         $this->assertNull(request()->getMatchedRoute());
@@ -70,7 +74,7 @@ class SendResponseStageTest extends AppTestCase
         response()->setHeader('X-Test', '1');
         response()->json(['foo' => 'bar']);
 
-        $this->requestContext->setResponse(new class () extends Response {
+        $this->webContext->setResponse(new class () extends Response {
             public function send(): void
             {
                 throw new HttpException('boom');
@@ -78,7 +82,7 @@ class SendResponseStageTest extends AppTestCase
         });
 
         try {
-            (new SendResponseStage())->process($this->requestContext);
+            (new SendResponseStage())->process($this->webContext);
             $this->fail('Expected response sending to fail.');
         } catch (HttpException $exception) {
             $this->assertSame('boom', $exception->getMessage());
@@ -96,7 +100,7 @@ class SendResponseStageTest extends AppTestCase
         $this->prepareMatchedRequest();
 
         try {
-            (new SendResponseStage())->process($this->requestContext);
+            (new SendResponseStage())->process($this->webContext);
             $this->fail('Expected the stage to fail without a response.');
         } catch (RuntimeException $exception) {
             $this->assertSame('The request has no response to send.', $exception->getMessage());
@@ -104,6 +108,36 @@ class SendResponseStageTest extends AppTestCase
 
         $this->assertNull(request()->getMatchedRoute());
         $this->assertNull(request()->getUri());
+    }
+
+    public function testSendResponseStageReadsTheConfigAndRequestFromTheContext(): void
+    {
+        $this->prepareMatchedRequest();
+
+        $request = new Request();
+        $request->create('GET', '/context/route');
+        $request->setMatchedRoute(new MatchedRoute(new Route(['GET'], '/context/route', 'TestController', 'tests'), []));
+
+        $config = new Config();
+        $config->set('cors', ['X-Context-Cors' => 'yes']);
+
+        $container = new DiContainer();
+        $container->set(Request::class, $request);
+        $container->set(Config::class, $config);
+
+        $webContext = new WebContext(new AppContext(PROJECT_ROOT, $container));
+        $webContext->setResponse(response()->html(''));
+
+        ob_start();
+        (new SendResponseStage())->process($webContext);
+        ob_end_clean();
+
+        $this->assertSame('yes', response()->getHeader('X-Context-Cors'));
+        $this->assertFalse(config()->has('cors'));
+        $this->assertNull($request->getMatchedRoute());
+        $this->assertNull($request->getUri());
+        $this->assertNotNull(request()->getMatchedRoute());
+        $this->assertNotNull(request()->getUri());
     }
 
     private function prepareMatchedRequest(): void

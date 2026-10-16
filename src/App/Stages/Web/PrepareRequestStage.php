@@ -8,18 +8,17 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Request;
+namespace Quantum\App\Stages\Web;
 
-use Quantum\App\Contracts\RequestStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
+use Quantum\App\Contracts\WebStageInterface;
 use Quantum\Lang\Exceptions\LangException;
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Lang\Factories\LangFactory;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\ResourceCache\ViewCache;
-use Quantum\App\Adapters\Web\RequestContext;
 use Quantum\Debugger\Debugger;
 use ReflectionException;
-use Quantum\Di\Di;
 
 /**
  * Class PrepareRequestStage
@@ -29,12 +28,12 @@ use Quantum\Di\Di;
  *
  * @package Quantum\App
  */
-class PrepareRequestStage implements RequestStageInterface
+class PrepareRequestStage implements WebStageInterface
 {
     /**
      * @throws LangException|ConfigException|DiException|ReflectionException
      */
-    public function process(RequestContext $context): void
+    public function process(WebContext $context): void
     {
         if ($context->isStopped()) {
             return;
@@ -44,7 +43,7 @@ class PrepareRequestStage implements RequestStageInterface
 
         $this->logDebugInfo();
 
-        $context->setViewCache($this->setupViewCache());
+        $this->setupViewCache($context);
     }
 
     /**
@@ -62,18 +61,18 @@ class PrepareRequestStage implements RequestStageInterface
     /**
      * @throws ConfigException|DiException|ReflectionException
      */
-    private function setupViewCache(): ViewCache
+    private function setupViewCache(WebContext $context): void
     {
-        if (!Di::isRegistered(ViewCache::class)) {
-            Di::register(ViewCache::class);
+        $container = $context->getContainer();
+
+        if (!$container->isRegistered(ViewCache::class)) {
+            $container->register(ViewCache::class);
         }
 
-        $viewCache = Di::get(ViewCache::class);
+        $viewCache = $context->getViewCache();
 
         if ($viewCache->isEnabled()) {
             $viewCache->setup();
         }
-
-        return $viewCache;
     }
 }

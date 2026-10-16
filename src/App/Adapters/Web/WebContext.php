@@ -11,48 +11,46 @@ declare(strict_types=1);
 namespace Quantum\App\Adapters\Web;
 
 use Quantum\ResourceCache\ViewCache;
+use Quantum\Router\RouteCollection;
 use Quantum\Router\MatchedRoute;
 use Quantum\App\AppContext;
 use Quantum\Http\Response;
+use Quantum\Http\Request;
 
 /**
- * Class RequestContext
+ * Class WebContext
  *
- * Carries the state of a single web request through the request stages.
- * Unlike AppContext, which is immutable, this object is mutated by the stages.
+ * Carries the state of a single web request through the web stages.
+ * It is an AppContext (same base directory and container) whose response and stopped flag are set by the stages;
+ * the response the stages set is the one that is sent.
+ * The request, the routes and the view cache are read from the container, and the matched route from the request.
  *
  * @package Quantum\App
  */
-class RequestContext
+class WebContext extends AppContext
 {
-    private AppContext $appContext;
-
-    private ?MatchedRoute $matchedRoute = null;
-
     private ?Response $response = null;
-
-    private ?ViewCache $viewCache = null;
 
     private bool $stopped = false;
 
     public function __construct(AppContext $appContext)
     {
-        $this->appContext = $appContext;
+        parent::__construct($appContext->getBaseDir(), $appContext->getContainer());
     }
 
-    public function getAppContext(): AppContext
+    public function getRequest(): Request
     {
-        return $this->appContext;
+        return $this->resolveFromContainer(Request::class);
+    }
+
+    public function getRoutes(): RouteCollection
+    {
+        return $this->resolveFromContainer(RouteCollection::class);
     }
 
     public function getMatchedRoute(): ?MatchedRoute
     {
-        return $this->matchedRoute;
-    }
-
-    public function setMatchedRoute(?MatchedRoute $matchedRoute): void
-    {
-        $this->matchedRoute = $matchedRoute;
+        return $this->getRequest()->getMatchedRoute();
     }
 
     public function getResponse(): ?Response
@@ -65,14 +63,9 @@ class RequestContext
         $this->response = $response;
     }
 
-    public function getViewCache(): ?ViewCache
+    public function getViewCache(): ViewCache
     {
-        return $this->viewCache;
-    }
-
-    public function setViewCache(ViewCache $viewCache): void
-    {
-        $this->viewCache = $viewCache;
+        return $this->resolveFromContainer(ViewCache::class);
     }
 
     /**
