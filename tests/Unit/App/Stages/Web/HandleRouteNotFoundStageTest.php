@@ -8,7 +8,10 @@ use Quantum\Http\Enums\ContentType;
 use Quantum\Http\Enums\StatusCode;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
+use Quantum\Di\DiContainer;
+use Quantum\App\AppContext;
 use Quantum\Router\Route;
+use Quantum\Http\Request;
 use Quantum\App\App;
 
 class HandleRouteNotFoundStageTest extends AppTestCase
@@ -44,6 +47,34 @@ class HandleRouteNotFoundStageTest extends AppTestCase
         $this->assertSame(ContentType::JSON, $this->webContext->getResponse()->getContentType());
         $this->assertStringContainsString('Page not found', $this->webContext->getResponse()->getContent());
         $this->assertTrue($this->webContext->isStopped());
+    }
+
+    public function testHandleRouteNotFoundStageRespondsWithJsonWhenAcceptListsJson(): void
+    {
+        request()->create('GET', '/non-existing-uri', [], ['Accept' => 'application/json, text/plain, */*']);
+
+        (new HandleRouteNotFoundStage())->process($this->webContext);
+
+        $this->assertSame(StatusCode::NOT_FOUND, $this->webContext->getResponse()->getStatusCode());
+        $this->assertSame(ContentType::JSON, $this->webContext->getResponse()->getContentType());
+        $this->assertTrue($this->webContext->isStopped());
+    }
+
+    public function testHandleRouteNotFoundStageDecidesByTheContextRequest(): void
+    {
+        request()->create('GET', '/non-existing-uri', [], ['Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8']);
+
+        $request = new Request();
+        $request->setHeader('Accept', 'application/json, text/plain, */*');
+
+        $container = new DiContainer();
+        $container->set(Request::class, $request);
+
+        $webContext = new WebContext(new AppContext(PROJECT_ROOT, $container));
+
+        (new HandleRouteNotFoundStage())->process($webContext);
+
+        $this->assertSame(ContentType::JSON, $webContext->getResponse()->getContentType());
     }
 
     public function testHandleRouteNotFoundStageIgnoresMatchedRoute(): void

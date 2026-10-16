@@ -7,6 +7,8 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Router\RouteCollection;
 use Quantum\Router\RouteFinder;
 use Quantum\Router\Route;
+use Quantum\Http\Enums\ContentType;
+use Quantum\Http\Enums\StatusCode;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 
@@ -34,6 +36,37 @@ class HttpHelperTest extends AppTestCase
     {
         $this->assertInstanceOf(Response::class, response());
         $this->assertSame(response(), response());
+    }
+
+    public function testPageNotFoundResponseIsJsonWhenAcceptListsJson(): void
+    {
+        request()->create('GET', '/no-such-page', [], ['Accept' => 'application/json, text/plain, */*']);
+
+        $response = page_not_found_response();
+
+        $this->assertSame(StatusCode::NOT_FOUND, $response->getStatusCode());
+        $this->assertSame(ContentType::JSON, $response->getContentType());
+        $this->assertStringContainsString('Page not found', $response->getContent());
+    }
+
+    public function testPageNotFoundResponseIsHtmlForBrowsers(): void
+    {
+        request()->create('GET', '/no-such-page', [], ['Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8']);
+
+        $response = page_not_found_response();
+
+        $this->assertSame(StatusCode::NOT_FOUND, $response->getStatusCode());
+        $this->assertSame(ContentType::HTML, $response->getContentType());
+    }
+
+    public function testPageNotFoundResponseDecidesByTheGivenRequest(): void
+    {
+        request()->create('GET', '/no-such-page', [], ['Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8']);
+
+        $request = new Request();
+        $request->setHeader('Accept', 'application/json, text/plain, */*');
+
+        $this->assertSame(ContentType::JSON, page_not_found_response($request)->getContentType());
     }
 
     public function testBaseUrlWithoutModulePrefix(): void

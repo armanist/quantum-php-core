@@ -33,7 +33,7 @@ class HandleRouteNotFoundStage implements WebStageInterface
             return;
         }
 
-        $context->setResponse(page_not_found_response());
+        $context->setResponse(page_not_found_response($context->getRequest()));
         $context->stop();
     }
 }

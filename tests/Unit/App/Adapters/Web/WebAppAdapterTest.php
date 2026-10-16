@@ -132,6 +132,20 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertNull(request()->getUri());
     }
 
+    public function testWebAppAdapterStartRespondsWithJsonNotFoundWhenAcceptListsJson(): void
+    {
+        request()->create('GET', '/non-existing-uri', [], ['Accept' => 'application/json, text/plain, */*']);
+
+        ob_start();
+        $result = $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertSame(0, $result);
+        $this->assertSame(StatusCode::NOT_FOUND, response()->getStatusCode());
+        $this->assertSame(ContentType::JSON, response()->getContentType());
+        $this->assertStringContainsString('Page not found', response()->getContent());
+    }
+
     public function testWebAppAdapterStartRespondsWithHtmlNotFoundForOtherRequests(): void
     {
         request()->create('GET', '/non-existing-uri');
