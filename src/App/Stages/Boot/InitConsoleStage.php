@@ -14,8 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArgvInput;
-use Quantum\App\Contracts\BootStageInterface;
 use Symfony\Component\Console\Application;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\AppContext;
 use Quantum\Di\Di;
 
@@ -25,9 +25,10 @@ use Quantum\Di\Di;
  * Runs before the helpers are loaded, so that the console application, input and output exist
  * even when a helper file fails; for the same reason it declares no boot events.
  *
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class InitConsoleStage implements BootStageInterface
+class InitConsoleStage implements StageInterface
 {
     public function process(AppContext $context): void
     {

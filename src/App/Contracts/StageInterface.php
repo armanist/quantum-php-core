@@ -13,13 +13,19 @@ namespace Quantum\App\Contracts;
 use Quantum\App\AppContext;
 
 /**
- * Interface BootStageInterface
+ * Interface StageInterface
+ *
+ * A stage of a pipeline. A stage states the context it works with in its class docblock,
+ * for example `@implements StageInterface<WebContext>`.
+ *
+ * @template TContext of AppContext
  * @package Quantum\App
  */
-interface BootStageInterface
+interface StageInterface
 {
     /**
-     * Processes a single boot stage
+     * Processes a single stage
+     * @param TContext $context
      */
     public function process(AppContext $context): void;
 }

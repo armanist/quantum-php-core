@@ -10,16 +10,17 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Boot;
 
-use Quantum\App\Contracts\BootStageInterface;
 use Symfony\Component\Console\Application;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\AppContext;
 use Quantum\Di\Di;
 
 /**
  * Class SetupConsoleApplicationStage
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class SetupConsoleApplicationStage implements BootStageInterface
+class SetupConsoleApplicationStage implements StageInterface
 {
     public function process(AppContext $context): void
     {

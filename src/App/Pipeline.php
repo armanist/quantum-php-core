@@ -10,36 +10,42 @@ declare(strict_types=1);
 
 namespace Quantum\App;
 
-use Quantum\App\Contracts\BootStageInterface;
+use Quantum\App\Contracts\StageInterface;
 use InvalidArgumentException;
 
 /**
- * Class BootPipeline
+ * Class Pipeline
+ *
+ * Runs stages in order with a context. The event a stage declares in its BEFORE / AFTER
+ * constants is dispatched around it, with the context as the payload.
+ *
+ * @template TContext of AppContext
  * @package Quantum\App
  */
-class BootPipeline
+final class Pipeline
 {
     /**
-     * @var BootStageInterface[]
+     * @var array<StageInterface<TContext>>
      */
     private array $stages;
 
     /**
-     * @param BootStageInterface[] $stages
+     * @param array<StageInterface<TContext>> $stages
      */
     public function __construct(array $stages = [])
     {
         foreach ($stages as $stage) {
-            if (!$stage instanceof BootStageInterface) {
-                throw new InvalidArgumentException(
-                    'All stages must implement ' . BootStageInterface::class
-                );
+            if (!$stage instanceof StageInterface) {
+                throw new InvalidArgumentException('All stages must implement ' . StageInterface::class);
             }
         }
 
         $this->stages = $stages;
     }
 
+    /**
+     * @param TContext $context
+     */
     public function run(AppContext $context): void
     {
         foreach ($this->stages as $stage) {
@@ -54,8 +60,10 @@ class BootPipeline
     /**
      * Dispatches the event a stage declares for the given point, if any.
      * Skipped while the event() helper is not loaded yet, since nothing can listen then.
+     * @param StageInterface<TContext> $stage
+     * @param TContext $context
      */
-    private function dispatchStageEvent(BootStageInterface $stage, string $point, AppContext $context): void
+    private function dispatchStageEvent(StageInterface $stage, string $point, AppContext $context): void
     {
         $constant = $stage::class . '::' . $point;
 

@@ -14,13 +14,13 @@ use Dotenv\Exception\InvalidFileException;
 use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
-use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;
-use Quantum\Di\Di;
+use Quantum\App\Pipeline;
 use ReflectionProperty;
 use RuntimeException;
-use Throwable;
+use Quantum\Di\Di;
 use ParseError;
+use Throwable;
 use Exception;
 use Mockery;
 
@@ -259,7 +259,7 @@ class ConsoleAppAdapterTest extends AppTestCase
 
         $context = $this->createContext();
 
-        (new BootPipeline([new LoadHelpersStage()]))->run($context);
+        (new Pipeline([new LoadHelpersStage()]))->run($context);
 
         config()->set('app', ['name' => null, 'version' => null]);
 
@@ -277,7 +277,7 @@ class ConsoleAppAdapterTest extends AppTestCase
 
         $context = $this->createContext();
 
-        (new BootPipeline([new LoadHelpersStage()]))->run($context);
+        (new Pipeline([new LoadHelpersStage()]))->run($context);
 
         config()->set('app', ['name' => '', 'version' => '0']);
 

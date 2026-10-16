@@ -10,9 +10,10 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Console;
 
-use Quantum\App\Contracts\ConsoleStageInterface;
 use Quantum\App\Adapters\Console\ConsoleContext;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\Console\CliCommand;
+use Quantum\App\AppContext;
 use Exception;
 use Throwable;
 
@@ -22,14 +23,16 @@ use Throwable;
  * Runs the requested command; a missing or unknown command is rejected before anything runs,
  * and so is a command that needs the environment after the boot failed.
  *
+ * @implements StageInterface<ConsoleContext>
  * @package Quantum\App
  */
-class RunCommandStage implements ConsoleStageInterface
+class RunCommandStage implements StageInterface
 {
     /**
+     * @param ConsoleContext $context
      * @throws Exception|Throwable
      */
-    public function process(ConsoleContext $context): void
+    public function process(AppContext $context): void
     {
         $commandName = $context->getInput()->getFirstArgument();
 

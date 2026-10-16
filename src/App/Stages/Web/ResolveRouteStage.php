@@ -11,23 +11,26 @@ declare(strict_types=1);
 namespace Quantum\App\Stages\Web;
 
 use Quantum\Router\Exceptions\RouteException;
-use Quantum\App\Contracts\WebStageInterface;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Router\RouteFinder;
+use Quantum\App\AppContext;
 
 /**
  * Class ResolveRouteStage
+ * @implements StageInterface<WebContext>
  * @package Quantum\App
  */
-class ResolveRouteStage implements WebStageInterface
+class ResolveRouteStage implements StageInterface
 {
     /**
      * Finds the route for the current request and stores it on the request, or null when nothing matches
+     * @param WebContext $context
      * @throws RouteException|BaseException|DiException
      */
-    public function process(WebContext $context): void
+    public function process(AppContext $context): void
     {
         if ($context->isStopped()) {
             return;

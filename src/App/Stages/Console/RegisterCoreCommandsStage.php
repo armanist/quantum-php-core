@@ -10,22 +10,25 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Console;
 
-use Quantum\App\Contracts\ConsoleStageInterface;
 use Quantum\App\Adapters\Console\ConsoleContext;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\Console\CommandRegistrar;
+use Quantum\App\AppContext;
 use ReflectionException;
 
 /**
  * Class RegisterCoreCommandsStage
+ * @implements StageInterface<ConsoleContext>
  * @package Quantum\App
  */
-class RegisterCoreCommandsStage implements ConsoleStageInterface
+class RegisterCoreCommandsStage implements StageInterface
 {
     /**
      * Registers the commands that ship with the framework
+     * @param ConsoleContext $context
      * @throws ReflectionException
      */
-    public function process(ConsoleContext $context): void
+    public function process(AppContext $context): void
     {
         CommandRegistrar::register(
             $context->getApplication(),

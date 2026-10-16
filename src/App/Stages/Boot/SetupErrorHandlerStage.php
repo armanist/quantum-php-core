@@ -11,8 +11,8 @@ declare(strict_types=1);
 namespace Quantum\App\Stages\Boot;
 
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\App\Contracts\BootStageInterface;
 use Quantum\Logger\Factories\LoggerFactory;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Tracer\ErrorHandler;
@@ -22,9 +22,10 @@ use Quantum\Di\Di;
 
 /**
  * Class SetupErrorHandlerStage
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class SetupErrorHandlerStage implements BootStageInterface
+class SetupErrorHandlerStage implements StageInterface
 {
     public const BEFORE = 'boot.error_handler.before';
 

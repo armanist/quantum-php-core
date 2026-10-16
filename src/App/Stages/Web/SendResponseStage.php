@@ -11,9 +11,10 @@ declare(strict_types=1);
 namespace Quantum\App\Stages\Web;
 
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\App\Contracts\WebStageInterface;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Di\Exceptions\DiException;
+use Quantum\App\AppContext;
 use Quantum\Config\Config;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
@@ -28,14 +29,16 @@ use Exception;
  * Sends the response of the request and always clears the request state afterwards,
  * even when sending fails. This stage never checks WebContext::isStopped().
  *
+ * @implements StageInterface<WebContext>
  * @package Quantum\App
  */
-class SendResponseStage implements WebStageInterface
+class SendResponseStage implements StageInterface
 {
     /**
+     * @param WebContext $context
      * @throws ConfigException|DiException|ReflectionException|Exception
      */
-    public function process(WebContext $context): void
+    public function process(AppContext $context): void
     {
         try {
             $response = $context->getResponse();

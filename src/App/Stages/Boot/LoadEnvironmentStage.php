@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Quantum\App\Stages\Boot;
 
 use Quantum\Environment\Exceptions\EnvException;
-use Quantum\App\Contracts\BootStageInterface;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Environment\Environment;
@@ -20,9 +20,10 @@ use Quantum\Di\Di;
 
 /**
  * Class LoadEnvironmentStage
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class LoadEnvironmentStage implements BootStageInterface
+class LoadEnvironmentStage implements StageInterface
 {
     public const BEFORE = 'boot.environment.before';
 

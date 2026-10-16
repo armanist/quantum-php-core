@@ -11,13 +11,14 @@ declare(strict_types=1);
 namespace Quantum\App\Stages\Web;
 
 use Quantum\Config\Exceptions\ConfigException;
-use Quantum\App\Contracts\WebStageInterface;
 use Quantum\Lang\Exceptions\LangException;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Lang\Factories\LangFactory;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Debugger\Debugger;
+use Quantum\App\AppContext;
 use ReflectionException;
 
 /**
@@ -26,14 +27,16 @@ use ReflectionException;
  * Prepares a matched request: loads the language, logs debug info and sets up the view cache.
  * The order of these steps is kept from the former WebAppAdapter flow.
  *
+ * @implements StageInterface<WebContext>
  * @package Quantum\App
  */
-class PrepareRequestStage implements WebStageInterface
+class PrepareRequestStage implements StageInterface
 {
     /**
+     * @param WebContext $context
      * @throws LangException|ConfigException|DiException|ReflectionException
      */
-    public function process(WebContext $context): void
+    public function process(AppContext $context): void
     {
         if ($context->isStopped()) {
             return;

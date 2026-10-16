@@ -10,14 +10,15 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Boot;
 
-use Quantum\App\Contracts\BootStageInterface;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\AppContext;
 
 /**
  * Class InitDebuggerStage
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class InitDebuggerStage implements BootStageInterface
+class InitDebuggerStage implements StageInterface
 {
     public function process(AppContext $context): void
     {
