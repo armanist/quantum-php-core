@@ -147,7 +147,6 @@ class HttpRequestHeaderTest extends AppTestCase
             ' text/html , application/json ',
             'application/vnd.api+json',
             'application/problem+json',
-            'application/jsonp',
         ];
 
         foreach ($acceptHeaders as $accept) {
@@ -165,6 +164,10 @@ class HttpRequestHeaderTest extends AppTestCase
             'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             '*/*',
             'text/html',
+            'application/jsonp',
+            'text/json',
+            'application/json-seq',
+            'application/vnd.example+jsonish',
             '',
         ];
 
@@ -185,7 +188,14 @@ class HttpRequestHeaderTest extends AppTestCase
 
         $this->assertTrue(request()->expectsJson());
 
-        foreach (['text/html', 'text/html, */*; q=0.01'] as $accept) {
+        $acceptHeaders = [
+            'text/html',
+            'text/html, */*; q=0.01',
+            '*/*, text/html',
+            '*/*, Text/HTML;q=0.9',
+        ];
+
+        foreach ($acceptHeaders as $accept) {
             request()->setHeader('Accept', $accept);
 
             $this->assertFalse(request()->expectsJson(), $accept);
