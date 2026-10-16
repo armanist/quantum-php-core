@@ -7,6 +7,7 @@ The format is based on Keep a Changelog.
 ## [3.1.0] - TBD
 
 ### Added
+- Added `Request::expectsJson()`: true when the `Accept` header lists a JSON media type (`application/json` or a `+json` type, parameters and case ignored), or for an AJAX request that accepts any content type (#581)
 - Added boot stage lifecycle events: stages may declare `BEFORE`/`AFTER` event names and `BootPipeline` dispatches them with the `AppContext` as a named payload. The environment, config, error handler, HTTP, and modules stages declare `boot.<stage>.before` and `boot.<stage>.after` (#536)
 - Added adapter-based Lang provider support with `DeepL` and `Google Translate` adapters plus shared remote request/caching infrastructure (#533)
 
@@ -45,6 +46,7 @@ The format is based on Keep a Changelog.
 - **BREAKING:** Removed `Lang::isEnabled()` from the public Lang API because it no longer affected runtime behavior (#533)
 
 ### Fixed
+- The page not found response is JSON for every client that asks for JSON, not only when the `Accept` header is exactly `application/json`: clients such as axios (`application/json, text/plain, */*`), a `charset` parameter, `+json` types and AJAX requests used to get the HTML page. `page_not_found_response()` decides with `Request::expectsJson()` and takes an optional request (#581)
 - `core:env` now looks for the existing `.env` in the application base directory, so running it from another working directory asks for the confirmation instead of silently overwriting the file (#575)
 
 ## [3.0.3] - 2026-07-10

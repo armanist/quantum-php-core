@@ -136,6 +136,72 @@ class HttpRequestHeaderTest extends AppTestCase
         $this->assertTrue($request->isAjax());
     }
 
+    public function testExpectsJsonWhenAcceptListsApplicationJson(): void
+    {
+        $acceptHeaders = [
+            'application/json',
+            'application/json, text/plain, */*',
+            'application/json, text/javascript, */*; q=0.01',
+            'application/json; charset=utf-8',
+            'Application/JSON',
+            ' text/html , application/json ',
+            'application/vnd.api+json',
+            'application/problem+json',
+        ];
+
+        foreach ($acceptHeaders as $accept) {
+            request()->setHeader('Accept', $accept);
+
+            $this->assertTrue(request()->expectsJson(), $accept);
+        }
+    }
+
+    public function testDoesNotExpectJsonWhenAcceptDoesNotListApplicationJson(): void
+    {
+        $this->assertFalse(request()->expectsJson());
+
+        $acceptHeaders = [
+            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            '*/*',
+            'text/html',
+            'application/jsonp',
+            'text/json',
+            'application/json-seq',
+            'application/vnd.example+jsonish',
+            '',
+        ];
+
+        foreach ($acceptHeaders as $accept) {
+            request()->setHeader('Accept', $accept);
+
+            $this->assertFalse(request()->expectsJson(), $accept);
+        }
+    }
+
+    public function testExpectsJsonForAjaxRequestsThatAcceptAnything(): void
+    {
+        request()->setHeader('X-Requested-With', 'XMLHttpRequest');
+
+        $this->assertTrue(request()->expectsJson());
+
+        request()->setHeader('Accept', '*/*');
+
+        $this->assertTrue(request()->expectsJson());
+
+        $acceptHeaders = [
+            'text/html',
+            'text/html, */*; q=0.01',
+            '*/*, text/html',
+            '*/*, Text/HTML;q=0.9',
+        ];
+
+        foreach ($acceptHeaders as $accept) {
+            request()->setHeader('Accept', $accept);
+
+            $this->assertFalse(request()->expectsJson(), $accept);
+        }
+    }
+
     public function testGetReferrer(): void
     {
         $this->assertNull(request()->getReferrer());

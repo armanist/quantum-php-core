@@ -10,7 +10,6 @@ use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\App\Enums\ReservedKeys;
-use Quantum\Http\Enums\ContentType;
 use Quantum\Http\Enums\StatusCode;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
@@ -114,16 +113,12 @@ function get_referrer(): ?string
 }
 
 /**
- * Handles page not found
+ * Handles page not found: JSON when the request's Accept header lists it, HTML otherwise
  * @throws ConfigException|DiException|BaseException|ReflectionException
  */
-function page_not_found_response(): Response
+function page_not_found_response(?Request $request = null): Response
 {
-    $acceptHeader = request()->getHeader('Accept');
-
-    $isJson = $acceptHeader === ContentType::JSON;
-
-    if ($isJson) {
+    if (($request ?? request())->expectsJson()) {
         return response()->json(
             ['status' => 'error', 'message' => 'Page not found',],
             StatusCode::NOT_FOUND

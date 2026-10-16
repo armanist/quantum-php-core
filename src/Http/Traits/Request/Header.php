@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Quantum\Http\Traits\Request;
 
+use Quantum\Http\Enums\ContentType;
+
 /**
  * Trait Header
  * @package Quantum\Http
@@ -129,11 +131,42 @@ trait Header
     }
 
     /**
+     * Checks whether the client expects JSON: the Accept header lists a JSON media type
+     * (application/json or a +json type), or it is an AJAX request that accepts anything and does not ask for HTML
+     */
+    public function expectsJson(): bool
+    {
+        $mediaTypes = $this->getAcceptedMediaTypes();
+
+        foreach ($mediaTypes as $mediaType) {
+            if ($mediaType === ContentType::JSON || str_ends_with($mediaType, '+json')) {
+                return true;
+            }
+        }
+
+        return $this->isAjax()
+            && in_array($mediaTypes[0], ['', '*/*', '*'], true)
+            && !in_array(ContentType::HTML, $mediaTypes, true);
+    }
+
+    /**
      * Gets the referrer
      */
     public function getReferrer(): ?string
     {
         return $this->server->referrer();
+    }
+
+    /**
+     * Gets the media types listed in the Accept header, without parameters, trimmed and lowercased
+     * @return array<string>
+     */
+    private function getAcceptedMediaTypes(): array
+    {
+        return array_map(
+            fn (string $mediaType): string => strtolower(trim(explode(';', $mediaType)[0])),
+            explode(',', (string) $this->getHeader('Accept'))
+        );
     }
 
     /**
