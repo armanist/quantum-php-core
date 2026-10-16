@@ -20,8 +20,8 @@ use Quantum\App\Stages\Boot\LoadAppConfigStage;
 use Quantum\App\Stages\Boot\InitConsoleStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Quantum\App\Contracts\AppInterface;
-use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;
+use Quantum\App\Pipeline;
 use Throwable;
 use Exception;
 
@@ -44,7 +44,7 @@ class ConsoleAppAdapter implements AppInterface
         $this->context = $context;
 
         try {
-            $pipeline = new BootPipeline([
+            $pipeline = new Pipeline([
                 new InitConsoleStage(),
                 new LoadHelpersStage(),
                 new LoadEnvironmentStage(),
@@ -64,7 +64,7 @@ class ConsoleAppAdapter implements AppInterface
     */
     public function start(): ?int
     {
-        $pipeline = new ConsolePipeline([
+        $pipeline = new Pipeline([
             new RegisterCoreCommandsStage(),
             new RegisterAppCommandsStage(),
             new RunCommandStage(),

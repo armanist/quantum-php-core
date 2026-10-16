@@ -11,12 +11,13 @@ declare(strict_types=1);
 namespace Quantum\App\Stages\Web;
 
 use Quantum\Middleware\Exceptions\MiddlewareException;
-use Quantum\App\Contracts\WebStageInterface;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Middleware\MiddlewareManager;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Router\RouteDispatcher;
+use Quantum\App\AppContext;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
 use RuntimeException;
@@ -27,14 +28,16 @@ use RuntimeException;
  * Produces the response of a matched request: the cached view if there is one, otherwise the
  * dispatched route, in both cases wrapped by the module and framework middlewares.
  *
+ * @implements StageInterface<WebContext>
  * @package Quantum\App
  */
-class DispatchRequestStage implements WebStageInterface
+class DispatchRequestStage implements StageInterface
 {
     /**
+     * @param WebContext $context
      * @throws MiddlewareException|BaseException|DiException
      */
-    public function process(WebContext $context): void
+    public function process(AppContext $context): void
     {
         if ($context->isStopped()) {
             return;

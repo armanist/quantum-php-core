@@ -25,8 +25,8 @@ use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Quantum\App\Stages\Boot\InitHttpStage;
 use Quantum\App\Contracts\AppInterface;
 use Quantum\App\Enums\ExitCode;
-use Quantum\App\BootPipeline;
 use Quantum\App\AppContext;
+use Quantum\App\Pipeline;
 
 /**
  * Class WebAppAdapter
@@ -40,7 +40,7 @@ class WebAppAdapter implements AppInterface
     {
         $this->context = $context;
 
-        $pipeline = new BootPipeline([
+        $pipeline = new Pipeline([
             new LoadHelpersStage(),
             new LoadEnvironmentStage(),
             new LoadAppConfigStage(),
@@ -55,7 +55,7 @@ class WebAppAdapter implements AppInterface
 
     public function start(): ?int
     {
-        $pipeline = new WebPipeline([
+        $pipeline = new Pipeline([
             new HandlePreflightStage(),
             new ResolveRouteStage(),
             new HandleRouteNotFoundStage(),

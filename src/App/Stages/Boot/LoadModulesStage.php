@@ -12,7 +12,7 @@ namespace Quantum\App\Stages\Boot;
 
 use Quantum\Module\Exceptions\ModuleException;
 use Quantum\Router\Exceptions\RouteException;
-use Quantum\App\Contracts\BootStageInterface;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Router\RouteCollection;
 use Quantum\Router\RouteBuilder;
@@ -23,9 +23,10 @@ use Quantum\Di\Di;
 
 /**
  * Class LoadModulesStage
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class LoadModulesStage implements BootStageInterface
+class LoadModulesStage implements StageInterface
 {
     public const BEFORE = 'boot.modules.before';
 

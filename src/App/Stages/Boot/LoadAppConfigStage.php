@@ -10,8 +10,8 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Boot;
 
-use Quantum\App\Contracts\BootStageInterface;
 use Quantum\Config\Exceptions\ConfigException;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\App\AppContext;
 use Quantum\Config\Setup;
@@ -19,9 +19,10 @@ use ReflectionException;
 
 /**
  * Class LoadAppConfigStage
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class LoadAppConfigStage implements BootStageInterface
+class LoadAppConfigStage implements StageInterface
 {
     public const BEFORE = 'boot.config.before';
 

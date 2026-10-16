@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Quantum\App\Stages\Boot;
 
-use Quantum\App\Contracts\BootStageInterface;
+use Quantum\App\Contracts\StageInterface;
 use Quantum\App\AppContext;
 use Quantum\Http\Response;
 use Quantum\Http\Request;
@@ -18,9 +18,10 @@ use Quantum\Di\Di;
 
 /**
  * Class InitHttpStage
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class InitHttpStage implements BootStageInterface
+class InitHttpStage implements StageInterface
 {
     public const BEFORE = 'boot.http.before';
 
