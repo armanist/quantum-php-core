@@ -2,13 +2,21 @@
 
 namespace Quantum\Tests\Unit\App;
 
+use Quantum\App\Stages\Boot\SetupConsoleApplicationStage;
+use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
+use Quantum\App\Stages\Boot\LoadEnvironmentStage;
 use Quantum\App\Adapters\Console\ConsoleContext;
+use Quantum\App\Stages\Boot\LoadAppConfigStage;
+use Quantum\App\Stages\Boot\InitDebuggerStage;
+use Quantum\App\Stages\Boot\LoadModulesStage;
+use Quantum\App\Stages\Boot\InitConsoleStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
+use Quantum\App\Stages\Boot\InitHttpStage;
 use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Tests\Unit\AppTestCase;
-use InvalidArgumentException;
 use Quantum\App\Enums\ExitCode;
+use InvalidArgumentException;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\App\Pipeline;
@@ -94,6 +102,37 @@ class PipelineTest extends AppTestCase
             ['test.first.before', ['context' => $this->context]],
             'process',
             ['test.first.after', ['context' => $this->context]],
+        ], $log);
+    }
+
+    public function testPipelineDispatchesEventsInStageOrder(): void
+    {
+        $this->loadHelpers();
+
+        $log = [];
+
+        foreach (['test.first.before', 'test.first.after', 'test.second.before', 'test.second.after'] as $name) {
+            event()->listen($name, function () use (&$log, $name): void {
+                $log[] = $name;
+            });
+        }
+
+        (new Pipeline([
+            $this->createFirstEventStage(function () use (&$log): void {
+                $log[] = 'process first';
+            }),
+            $this->createSecondEventStage(function () use (&$log): void {
+                $log[] = 'process second';
+            }),
+        ]))->run($this->context);
+
+        $this->assertSame([
+            'test.first.before',
+            'process first',
+            'test.first.after',
+            'test.second.before',
+            'process second',
+            'test.second.after',
         ], $log);
     }
 
@@ -205,6 +244,32 @@ class PipelineTest extends AppTestCase
         $this->assertSame(ExitCode::INVALID, $exitCodeSeenBySecondStage);
     }
 
+    public function testPipelineStagesDeclareBootEventNames(): void
+    {
+        $this->assertSame('boot.environment.before', LoadEnvironmentStage::BEFORE);
+        $this->assertSame('boot.environment.after', LoadEnvironmentStage::AFTER);
+
+        $this->assertSame('boot.config.before', LoadAppConfigStage::BEFORE);
+        $this->assertSame('boot.config.after', LoadAppConfigStage::AFTER);
+
+        $this->assertSame('boot.error_handler.before', SetupErrorHandlerStage::BEFORE);
+        $this->assertSame('boot.error_handler.after', SetupErrorHandlerStage::AFTER);
+
+        $this->assertSame('boot.http.before', InitHttpStage::BEFORE);
+        $this->assertSame('boot.http.after', InitHttpStage::AFTER);
+
+        $this->assertSame('boot.modules.before', LoadModulesStage::BEFORE);
+        $this->assertSame('boot.modules.after', LoadModulesStage::AFTER);
+    }
+
+    public function testLoadHelpersInitConsoleInitDebuggerAndSetupConsoleApplicationStagesDeclareNoEvents(): void
+    {
+        foreach ([LoadHelpersStage::class, InitConsoleStage::class, InitDebuggerStage::class, SetupConsoleApplicationStage::class] as $stage) {
+            $this->assertFalse(defined($stage . '::BEFORE'), $stage . ' must not declare BEFORE');
+            $this->assertFalse(defined($stage . '::AFTER'), $stage . ' must not declare AFTER');
+        }
+    }
+
     private function loadHelpers(): void
     {
         (new LoadHelpersStage())->process($this->context);
@@ -232,6 +297,26 @@ class PipelineTest extends AppTestCase
         return new class ($callback) implements StageInterface {
             public const BEFORE = 'test.first.before';
             public const AFTER = 'test.first.after';
+
+            private $callback;
+
+            public function __construct(callable $callback)
+            {
+                $this->callback = $callback;
+            }
+
+            public function process(AppContext $context): void
+            {
+                ($this->callback)($context);
+            }
+        };
+    }
+
+    private function createSecondEventStage(callable $callback): StageInterface
+    {
+        return new class ($callback) implements StageInterface {
+            public const BEFORE = 'test.second.before';
+            public const AFTER = 'test.second.after';
 
             private $callback;
 
