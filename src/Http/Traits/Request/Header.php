@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Quantum\Http\Traits\Request;
 
+use Quantum\Http\Enums\ContentType;
+
 /**
  * Trait Header
  * @package Quantum\Http
@@ -126,6 +128,20 @@ trait Header
     public function isAjax(): bool
     {
         return $this->hasHeader('X-REQUESTED-WITH') || $this->server->ajax();
+    }
+
+    /**
+     * Checks whether the Accept header lists JSON, ignoring media type parameters and q-values
+     */
+    public function expectsJson(): bool
+    {
+        foreach (explode(',', (string) $this->getHeader('Accept')) as $mediaType) {
+            if (strtolower(trim(explode(';', $mediaType)[0])) === ContentType::JSON) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
