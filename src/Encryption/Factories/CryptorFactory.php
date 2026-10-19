@@ -52,9 +52,7 @@ class CryptorFactory
      */
     public function resolve(string $type = CryptorType::SYMMETRIC): Cryptor
     {
-        $this->instances[$type] ??= $this->createInstance($type);
-
-        return $this->instances[$type];
+        return $this->instances[$type] ??= $this->createInstance($type);
     }
 
     /**

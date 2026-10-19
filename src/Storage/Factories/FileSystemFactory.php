@@ -78,9 +78,7 @@ class FileSystemFactory
 
         $adapterClass = $this->getAdapterClass($adapter);
 
-        $this->instances[$adapter] ??= $this->createInstance($adapterClass, $adapter);
-
-        return $this->instances[$adapter];
+        return $this->instances[$adapter] ??= $this->createInstance($adapterClass, $adapter);
     }
 
     /**

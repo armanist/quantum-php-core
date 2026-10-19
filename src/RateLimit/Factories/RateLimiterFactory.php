@@ -63,9 +63,7 @@ class RateLimiterFactory
         $adapter ??= (string) config()->get('rate_limit.default', RateLimitType::FILE);
         $adapterClass = $this->getAdapterClass($adapter);
 
-        $this->instances[$adapter] ??= $this->createInstance($adapterClass, $adapter);
-
-        return $this->instances[$adapter];
+        return $this->instances[$adapter] ??= $this->createInstance($adapterClass, $adapter);
     }
 
     /**
