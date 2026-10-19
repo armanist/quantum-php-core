@@ -48,6 +48,7 @@ The format is based on Keep a Changelog.
 - Refactored the Lang package to resolve adapter instances through `LangFactory` configuration and load file translations lazily on first use instead of preloading them during web boot (#533)
 - **BREAKING:** Reshaped Lang configuration so `lang.default` now selects the adapter, locale fallback moved to `lang.default_locale`, and the unused `lang.enabled` toggle was removed (#533)
 - **BREAKING:** Removed `Lang::isEnabled()` from the public Lang API because it no longer affected runtime behavior (#533)
+- Applied the pending Rector refactors across `src/` (null-coalescing assignment for lazy initialization, explicit `instanceof` checks instead of truthiness checks on nullable objects, native return types on `env()`, `CurlAdapter::getId()` and `CurlAdapter::getResponseCookies()`) and added `composer rector:check` to the CI workflow after PHPStan (#587)
 
 ### Fixed
 - The page not found response is JSON for every client that asks for JSON, not only when the `Accept` header is exactly `application/json`: clients such as axios (`application/json, text/plain, */*`), a `charset` parameter, `+json` types and AJAX requests used to get the HTML page. `page_not_found_response()` decides with `Request::expectsJson()` and takes an optional request (#581)

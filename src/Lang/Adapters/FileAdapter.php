@@ -91,7 +91,7 @@ class FileAdapter implements LangAdapterInterface
             $this->loadTranslations();
         }
 
-        if ($this->translations && $this->translations->has($key)) {
+        if ($this->translations instanceof Data && $this->translations->has($key)) {
             $message = $this->translations->get($key);
             return $params ? _message($message, $params) : $message;
         }

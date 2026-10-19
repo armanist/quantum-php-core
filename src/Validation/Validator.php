@@ -217,9 +217,7 @@ class Validator
      */
     protected function addError(string $field, string $rule, mixed $param = null): void
     {
-        if (!isset($this->errors[$field])) {
-            $this->errors[$field] = [];
-        }
+        $this->errors[$field] ??= [];
 
         $this->errors[$field][$rule] = $param;
     }
@@ -249,9 +247,7 @@ class Validator
 
     private function setOrUpdateRule(string $field, string $ruleName, mixed $ruleParam): void
     {
-        if (!isset($this->rules[$field])) {
-            $this->rules[$field] = [];
-        }
+        $this->rules[$field] ??= [];
 
         $this->rules[$field][$ruleName] = $ruleParam;
     }

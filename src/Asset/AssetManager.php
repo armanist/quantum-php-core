@@ -92,7 +92,7 @@ class AssetManager
      */
     public function registerAsset(Asset $asset): void
     {
-        if ($asset->getName() && $this->get($asset->getName())) {
+        if ($asset->getName() && $this->get($asset->getName()) instanceof Asset) {
             throw AssetException::nameInUse($asset->getName());
         }
 

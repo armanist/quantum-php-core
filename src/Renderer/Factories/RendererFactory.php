@@ -64,9 +64,7 @@ class RendererFactory
 
         $adapterClass = $this->getAdapterClass($adapter);
 
-        if (!isset($this->instances[$adapter])) {
-            $this->instances[$adapter] = $this->createInstance($adapterClass, $adapter);
-        }
+        $this->instances[$adapter] ??= $this->createInstance($adapterClass, $adapter);
 
         return $this->instances[$adapter];
     }

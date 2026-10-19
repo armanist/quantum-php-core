@@ -44,9 +44,7 @@ class AppFactory
     public static function create(string $type, string $baseDir): App
     {
 
-        if (!isset(self::$instances[$type])) {
-            self::$instances[$type] = self::createInstance($type, $baseDir);
-        }
+        self::$instances[$type] ??= self::createInstance($type, $baseDir);
 
         return self::$instances[$type];
     }
