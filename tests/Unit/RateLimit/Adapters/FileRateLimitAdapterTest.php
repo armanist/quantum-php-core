@@ -83,6 +83,26 @@ class FileRateLimitAdapterTest extends AppTestCase
         }
     }
 
+    public function testFileAdapterCreatesMissingParentDirectories(): void
+    {
+        $root = base_dir() . DS . 'cache' . DS . 'rate_limit_tests_nested';
+        $path = $root . DS . 'level_one' . DS . 'level_two';
+
+        deleteDirectoryWithFiles($root);
+
+        try {
+            new FileRateLimitAdapter([
+                'ttl' => 30,
+                'prefix' => 'test',
+                'path' => $path,
+            ]);
+
+            $this->assertTrue(fs()->isDirectory($path));
+        } finally {
+            deleteDirectoryWithFiles($root);
+        }
+    }
+
     public function testFileAdapterRetryAfterReturnsZeroForMissingOrInvalidState(): void
     {
         $adapter = new FileRateLimitAdapter([

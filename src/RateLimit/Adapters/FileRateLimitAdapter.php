@@ -43,7 +43,7 @@ class FileRateLimitAdapter implements RateLimitAdapterInterface
         $this->fs = fs();
 
         if (!$this->fs->isDirectory($this->path)) {
-            $this->fs->makeDirectory($this->path);
+            mkdir($this->path, 0777, true);
         }
     }
 

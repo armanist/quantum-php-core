@@ -52,6 +52,7 @@ The format is based on Keep a Changelog.
 ### Fixed
 - The page not found response is JSON for every client that asks for JSON, not only when the `Accept` header is exactly `application/json`: clients such as axios (`application/json, text/plain, */*`), a `charset` parameter, `+json` types and AJAX requests used to get the HTML page. `page_not_found_response()` decides with `Request::expectsJson()` and takes an optional request (#581)
 - `core:env` now looks for the existing `.env` in the application base directory, so running it from another working directory asks for the confirmation instead of silently overwriting the file (#575)
+- The file rate limiter creates the missing parent folders of its `path` (for example `cache/data` when `cache/` does not exist), instead of failing every request that goes through the rate limit middleware with `mkdir(): No such file or directory` (#585)
 
 ## [3.0.3] - 2026-07-10
 
