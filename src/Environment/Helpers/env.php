@@ -31,7 +31,7 @@ function environment(): Environment
  * @return mixed
  * @throws EnvException|DiException|\ReflectionException
  */
-function env(string $var, $default = null)
+function env(string $var, $default = null): mixed
 {
     return environment()->getValue($var, $default);
 }

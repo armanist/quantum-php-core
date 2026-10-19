@@ -209,9 +209,7 @@ class ZipAdapter implements ArchiveInterface
             throw ArchiveException::missingArchiveName();
         }
 
-        if ($this->archive === null) {
-            $this->archive = new ZipArchive();
-        }
+        $this->archive ??= new ZipArchive();
 
         if ($this->archive->filename) {
             $this->archive->close();

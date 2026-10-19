@@ -367,9 +367,7 @@ class SleekDbal implements DbalInterface
      */
     protected function getQueryBuilder(): QueryBuilder
     {
-        if ($this->queryBuilder === null) {
-            $this->queryBuilder = $this->getOrmModel()->createQueryBuilder();
-        }
+        $this->queryBuilder ??= $this->getOrmModel()->createQueryBuilder();
 
         return $this->queryBuilder;
     }

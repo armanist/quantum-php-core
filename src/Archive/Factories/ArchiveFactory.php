@@ -52,11 +52,7 @@ class ArchiveFactory
      */
     public function resolve(string $type = ArchiveType::PHAR): Archive
     {
-        if (!isset($this->instances[$type])) {
-            $this->instances[$type] = $this->createInstance($type);
-        }
-
-        return $this->instances[$type];
+        return $this->instances[$type] ??= $this->createInstance($type);
     }
 
     /**

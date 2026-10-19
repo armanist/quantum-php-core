@@ -29,9 +29,7 @@ class DebuggerStore implements DebuggerStoreInterface
     public function init(array $keys): void
     {
         foreach ($keys as $key) {
-            if (!isset(self::$store[$key])) {
-                self::$store[$key] = [];
-            }
+            self::$store[$key] ??= [];
         }
     }
 

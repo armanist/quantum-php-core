@@ -193,9 +193,7 @@ class DiContainer
             $concrete = $this->registry->getConcrete($abstract);
 
             if ($singleton) {
-                if (!isset($this->container[$abstract])) {
-                    $this->container[$abstract] = $this->instantiate($concrete, $args);
-                }
+                $this->container[$abstract] ??= $this->instantiate($concrete, $args);
                 return $this->container[$abstract];
             }
 

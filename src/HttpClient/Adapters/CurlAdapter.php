@@ -260,9 +260,9 @@ class CurlAdapter implements CurlAdapterInterface
     }
 
     /**
-     * @return int|string
+     * @return int
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
@@ -291,9 +291,9 @@ class CurlAdapter implements CurlAdapterInterface
     }
 
     /**
-     * @return mixed
+     * @return array<string, mixed>
      */
-    public function getResponseCookies()
+    public function getResponseCookies(): array
     {
         return $this->responseCookies;
     }

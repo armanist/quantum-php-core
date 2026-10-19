@@ -77,7 +77,7 @@ class Config implements ConfigInterface
      */
     public function get(string $key, $default = null)
     {
-        if ($this->configs && $this->configs->has($key)) {
+        if ($this->configs instanceof Data && $this->configs->has($key)) {
             return $this->configs->get($key);
         }
 
@@ -97,7 +97,7 @@ class Config implements ConfigInterface
      */
     public function has(string $key): bool
     {
-        return $this->configs && !empty($this->configs->has($key));
+        return $this->configs instanceof Data && !empty($this->configs->has($key));
     }
 
     /**
@@ -117,7 +117,7 @@ class Config implements ConfigInterface
      */
     public function delete(string $key): void
     {
-        $this->configs && $this->configs->remove($key);
+        $this->configs instanceof Data && $this->configs->remove($key);
     }
 
     /**
