@@ -18,6 +18,8 @@ use InvalidArgumentException;
  *
  * Runs stages in order with a context. The event a stage declares in its BEFORE / AFTER
  * constants is dispatched around it, with the context as the payload.
+ * A stage that stops the context ends the run: no later stage runs or dispatches events.
+ * The optional closing stage runs last, also after a stop, but not after a stage throws.
  *
  * @template TContext of AppContext
  * @package Quantum\App
@@ -30,9 +32,15 @@ final class Pipeline
     private array $stages;
 
     /**
-     * @param array<StageInterface<TContext>> $stages
+     * @var StageInterface<TContext>|null
      */
-    public function __construct(array $stages = [])
+    private ?StageInterface $closingStage;
+
+    /**
+     * @param array<StageInterface<TContext>> $stages
+     * @param StageInterface<TContext>|null $closingStage
+     */
+    public function __construct(array $stages = [], ?StageInterface $closingStage = null)
     {
         foreach ($stages as $stage) {
             if (!$stage instanceof StageInterface) {
@@ -41,6 +49,7 @@ final class Pipeline
         }
 
         $this->stages = $stages;
+        $this->closingStage = $closingStage;
     }
 
     /**
@@ -49,12 +58,29 @@ final class Pipeline
     public function run(AppContext $context): void
     {
         foreach ($this->stages as $stage) {
-            $this->dispatchStageEvent($stage, 'BEFORE', $context);
+            $this->runStage($stage, $context);
 
-            $stage->process($context);
-
-            $this->dispatchStageEvent($stage, 'AFTER', $context);
+            if ($context->isStopped()) {
+                break;
+            }
         }
+
+        if ($this->closingStage !== null) {
+            $this->runStage($this->closingStage, $context);
+        }
+    }
+
+    /**
+     * @param StageInterface<TContext> $stage
+     * @param TContext $context
+     */
+    private function runStage(StageInterface $stage, AppContext $context): void
+    {
+        $this->dispatchStageEvent($stage, 'BEFORE', $context);
+
+        $stage->process($context);
+
+        $this->dispatchStageEvent($stage, 'AFTER', $context);
     }
 
     /**

@@ -61,8 +61,7 @@ class WebAppAdapter implements AppInterface
             new HandleRouteNotFoundStage(),
             new PrepareRequestStage(),
             new DispatchRequestStage(),
-            new SendResponseStage(),
-        ]);
+        ], new SendResponseStage());
 
         $pipeline->run(new WebContext($this->context));
 

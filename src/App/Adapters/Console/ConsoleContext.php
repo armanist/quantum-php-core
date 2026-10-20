@@ -13,7 +13,6 @@ namespace Quantum\App\Adapters\Console;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Application;
-use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;
 use Throwable;
 
@@ -29,8 +28,6 @@ use Throwable;
 class ConsoleContext extends AppContext
 {
     private ?Throwable $bootFailure;
-
-    private int $exitCode = ExitCode::SUCCESS;
 
     public function __construct(AppContext $appContext, ?Throwable $bootFailure = null)
     {
@@ -60,15 +57,5 @@ class ConsoleContext extends AppContext
     public function getBootFailure(): ?Throwable
     {
         return $this->bootFailure;
-    }
-
-    public function getExitCode(): int
-    {
-        return $this->exitCode;
-    }
-
-    public function setExitCode(int $exitCode): void
-    {
-        $this->exitCode = $exitCode;
     }
 }
