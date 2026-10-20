@@ -67,19 +67,13 @@ class ResourceCacheClearCommand extends CliCommand
 
     protected string $cacheDir = '';
 
-    protected FileSystem $fs;
-
     /**
-     * @throws BaseException|ReflectionException
+     * @throws ConfigException|DiException|BaseException|ReflectionException
      */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->fs = FileSystemFactory::get();
-    }
-
     public function exec(): void
     {
+        $fs = FileSystemFactory::get();
+
         try {
             $this->importConfig();
             $this->initModule($this->getOption('module'));
@@ -89,15 +83,15 @@ class ResourceCacheClearCommand extends CliCommand
             return;
         }
 
-        if (!$this->fs->isDirectory($this->cacheDir)) {
+        if (!$fs->isDirectory($this->cacheDir)) {
             $this->error('Cache directory does not exist or is not accessible.');
             return;
         }
 
         if ($this->module || $this->type) {
-            $this->clearResourceModuleAndType($this->module, $this->type);
+            $this->clearResourceModuleAndType($fs, $this->module, $this->type);
         } elseif (!empty($this->getOption('all'))) {
-            $this->removeFilesFromDirectory($this->cacheDir);
+            $this->removeFilesFromDirectory($fs, $this->cacheDir);
         } else {
             $this->error('Please specify at least one of the following options: --all, --module=moduleName or --type=typeName!');
             return;
@@ -167,7 +161,7 @@ class ResourceCacheClearCommand extends CliCommand
         }
     }
 
-    private function clearResourceModuleAndType(?string $moduleName = null, ?string $type = null): void
+    private function clearResourceModuleAndType(FileSystem $fs, ?string $moduleName = null, ?string $type = null): void
     {
         $dir = $this->cacheDir;
 
@@ -183,24 +177,24 @@ class ResourceCacheClearCommand extends CliCommand
             $dir = $dir . DS . strtolower($moduleName);
         }
 
-        $this->removeFilesFromDirectory($dir);
+        $this->removeFilesFromDirectory($fs, $dir);
     }
 
-    private function removeFilesFromDirectory(string $dir): void
+    private function removeFilesFromDirectory(FileSystem $fs, string $dir): void
     {
-        $entries = $this->fs->glob($dir . DS . '*');
+        $entries = $fs->glob($dir . DS . '*');
 
         foreach ($entries as $entry) {
-            if ($this->fs->isDirectory($entry)) {
-                $this->removeFilesFromDirectory($entry);
+            if ($fs->isDirectory($entry)) {
+                $this->removeFilesFromDirectory($fs, $entry);
 
-                if ($this->fs->fileName($entry) !== config()->get('view_cache.cache_dir', 'cache') &&
-                    count($this->fs->glob($entry . DS . '*')) === 0
+                if ($fs->fileName($entry) !== config()->get('view_cache.cache_dir', 'cache') &&
+                    count($fs->glob($entry . DS . '*')) === 0
                 ) {
-                    $this->fs->removeDirectory($entry);
+                    $fs->removeDirectory($entry);
                 }
             } else {
-                $this->fs->remove($entry);
+                $fs->remove($entry);
             }
         }
     }

@@ -5,7 +5,6 @@ namespace Quantum\Tests\Unit\Console\Commands;
 use Quantum\Console\Commands\ResourceCacheClearCommand;
 use Symfony\Component\Console\Tester\CommandTester;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\Storage\FileSystem;
 use ReflectionMethod;
 
 class ResourceCacheClearCommandTest extends AppTestCase
@@ -36,12 +35,6 @@ class ResourceCacheClearCommandTest extends AppTestCase
         $this->assertTrue($definition->hasOption('all'));
         $this->assertTrue($definition->hasOption('type'));
         $this->assertTrue($definition->hasOption('module'));
-    }
-
-    public function testConstructorInitializesFileSystem(): void
-    {
-        $fs = $this->getPrivateProperty($this->command, 'fs');
-        $this->assertInstanceOf(FileSystem::class, $fs);
     }
 
     public function testExecShowsErrorWhenNoOptionsProvided(): void
@@ -104,7 +97,7 @@ class ResourceCacheClearCommandTest extends AppTestCase
 
         $method = new ReflectionMethod($this->command, 'clearResourceModuleAndType');
         $method->setAccessible(true);
-        $method->invoke($this->command, 'blog', 'views');
+        $method->invoke($this->command, $this->fs, 'blog', 'views');
 
         $this->assertFileDoesNotExist($moduleDir . DS . 'view.php');
 

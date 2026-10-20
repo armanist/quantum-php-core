@@ -5,7 +5,6 @@ namespace Quantum\Tests\Unit\Console\Commands;
 use Symfony\Component\Console\Tester\CommandTester;
 use Quantum\Console\Commands\DebugBarCommand;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\Storage\FileSystem;
 use ReflectionMethod;
 
 class DebugBarCommandTest extends AppTestCase
@@ -27,12 +26,6 @@ class DebugBarCommandTest extends AppTestCase
         $this->assertSame('install:debugbar', $this->command->getName());
         $this->assertSame('Publishes debugbar assets', $this->command->getDescription());
         $this->assertSame('The command will publish debugbar assets', $this->command->getHelp());
-    }
-
-    public function testConstructorInitializesFileSystem(): void
-    {
-        $fs = $this->getPrivateProperty($this->command, 'fs');
-        $this->assertInstanceOf(FileSystem::class, $fs);
     }
 
     public function testExecShowsErrorWhenAlreadyInstalled(): void
@@ -67,7 +60,7 @@ class DebugBarCommandTest extends AppTestCase
 
         $method = new ReflectionMethod($this->command, 'copyResources');
         $method->setAccessible(true);
-        $method->invoke($this->command, $sourceDir, $targetDir);
+        $method->invoke($this->command, $this->fs, $sourceDir, $targetDir);
 
         $this->assertFileExists($targetDir . DS . 'root.css');
         $this->assertFileExists($targetDir . DS . 'nested' . DS . 'nested.js');

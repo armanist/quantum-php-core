@@ -6,7 +6,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Quantum\Console\Commands\OpenApiCommand;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Router\RouteCollection;
-use Quantum\Storage\FileSystem;
 use ReflectionMethod;
 use Quantum\Di\Di;
 
@@ -34,12 +33,6 @@ class OpenApiCommandTest extends AppTestCase
 
         $this->assertTrue($definition->hasArgument('module'));
         $this->assertTrue($definition->getArgument('module')->isRequired());
-    }
-
-    public function testConstructorInitializesFileSystem(): void
-    {
-        $fs = $this->getPrivateProperty($this->command, 'fs');
-        $this->assertInstanceOf(FileSystem::class, $fs);
     }
 
     public function testExecShowsErrorWhenModuleIsMissing(): void
@@ -191,7 +184,7 @@ class OpenApiCommandTest extends AppTestCase
         try {
             $method = new ReflectionMethod($command, 'generateOpenapiSpecification');
             $method->setAccessible(true);
-            $method->invoke($command, $moduleName);
+            $method->invoke($command, $this->fs, $moduleName);
 
             $this->assertFileExists($specPath);
             $this->assertNotSame('', trim((string) file_get_contents($specPath)));
