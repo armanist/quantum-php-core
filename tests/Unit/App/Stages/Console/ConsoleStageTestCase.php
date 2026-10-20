@@ -11,7 +11,6 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\App;
 use Quantum\Di\Di;
-use Throwable;
 
 abstract class ConsoleStageTestCase extends AppTestCase
 {
@@ -19,7 +18,7 @@ abstract class ConsoleStageTestCase extends AppTestCase
      * Creates a console context around a real Symfony application that neither exits nor catches exceptions.
      * @param array<string, string> $input
      */
-    protected function createConsoleContext(array $input = [], ?Application $application = null, ?Throwable $bootFailure = null): ConsoleContext
+    protected function createConsoleContext(array $input = [], ?Application $application = null): ConsoleContext
     {
         $application ??= new Application();
         $application->setAutoExit(false);
@@ -29,7 +28,7 @@ abstract class ConsoleStageTestCase extends AppTestCase
         Di::set(InputInterface::class, new ArrayInput($input));
         Di::set(OutputInterface::class, new BufferedOutput());
 
-        return new ConsoleContext(App::getContext(), $bootFailure);
+        return new ConsoleContext(App::getContext());
     }
 
     /**

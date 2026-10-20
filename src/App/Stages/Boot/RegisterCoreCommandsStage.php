@@ -8,30 +8,36 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Console;
+namespace Quantum\App\Stages\Boot;
 
-use Quantum\App\Adapters\Console\ConsoleContext;
+use Symfony\Component\Console\Application;
 use Quantum\App\Contracts\StageInterface;
+use Quantum\Di\Exceptions\DiException;
 use Quantum\Console\CommandRegistrar;
 use Quantum\App\AppContext;
 use ReflectionException;
+use Quantum\Di\Di;
 
 /**
  * Class RegisterCoreCommandsStage
- * @implements StageInterface<ConsoleContext>
+ *
+ * Runs right after the helpers, before the environment, so that ResolveEnvironmentStage can find
+ * core:env when the .env file cannot be loaded. A core command constructor therefore uses
+ * no environment and no config.
+ *
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
 class RegisterCoreCommandsStage implements StageInterface
 {
     /**
      * Registers the commands that ship with the framework
-     * @param ConsoleContext $context
-     * @throws ReflectionException
+     * @throws DiException|ReflectionException
      */
     public function process(AppContext $context): void
     {
         CommandRegistrar::register(
-            $context->getApplication(),
+            Di::get(Application::class),
             $this->directory(),
             $this->namespace(),
         );

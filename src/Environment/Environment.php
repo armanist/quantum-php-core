@@ -12,6 +12,7 @@ namespace Quantum\Environment;
 
 use Quantum\Environment\Exceptions\EnvException;
 use Quantum\Config\Exceptions\ConfigException;
+use Dotenv\Exception\InvalidFileException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Environment\Enums\Env;
@@ -46,7 +47,7 @@ class Environment
 
     /**
      * Loads environment variables from file
-     * @throws EnvException|DiException|BaseException
+     * @throws EnvException|InvalidFileException|DiException|BaseException
      */
     public function load(): void
     {
@@ -191,6 +192,7 @@ class Environment
 
     /**
      * @return array<string, mixed>
+     * @throws InvalidFileException
      */
     private function loadDotenvFile(string $envFile): array
     {

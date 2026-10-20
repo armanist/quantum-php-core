@@ -14,7 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Application;
 use Quantum\App\AppContext;
-use Throwable;
 
 /**
  * Class ConsoleContext
@@ -27,13 +26,9 @@ use Throwable;
  */
 class ConsoleContext extends AppContext
 {
-    private ?Throwable $bootFailure;
-
-    public function __construct(AppContext $appContext, ?Throwable $bootFailure = null)
+    public function __construct(AppContext $appContext)
     {
         parent::__construct($appContext->getBaseDir(), $appContext->getContainer());
-
-        $this->bootFailure = $bootFailure;
     }
 
     public function getApplication(): Application
@@ -49,13 +44,5 @@ class ConsoleContext extends AppContext
     public function getOutput(): OutputInterface
     {
         return $this->resolveFromContainer(OutputInterface::class);
-    }
-
-    /**
-     * The failure of the boot that the console run continued after, if there was one
-     */
-    public function getBootFailure(): ?Throwable
-    {
-        return $this->bootFailure;
     }
 }

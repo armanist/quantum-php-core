@@ -1,8 +1,9 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Console;
+namespace Quantum\Tests\Unit\App\Stages\Boot;
 
-use Quantum\App\Stages\Console\RegisterAppCommandsStage;
+use Quantum\Tests\Unit\App\Stages\Console\ConsoleStageTestCase;
+use Quantum\App\Stages\Boot\RegisterAppCommandsStage;
 
 class RegisterAppCommandsStageTest extends ConsoleStageTestCase
 {
