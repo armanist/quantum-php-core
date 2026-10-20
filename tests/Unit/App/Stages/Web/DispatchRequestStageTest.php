@@ -176,17 +176,6 @@ namespace Quantum\Tests\Unit\App\Stages\Web {
             (new DispatchRequestStage())->process($this->webContext);
         }
 
-        public function testDispatchRequestStageSkipsWhenContextIsStopped(): void
-        {
-            $this->prepareRequest('/test/am/tests');
-
-            $this->webContext->stop();
-
-            (new DispatchRequestStage())->process($this->webContext);
-
-            $this->assertNull($this->webContext->getResponse());
-        }
-
         public function testDispatchRequestStagePassesTheContextRequestToTheMiddlewares(): void
         {
             $this->prepareRequest('/test/am/tests');

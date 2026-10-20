@@ -58,18 +58,6 @@ class ResolveRouteStageTest extends AppTestCase
         $this->assertNull(request()->getMatchedRoute());
     }
 
-    public function testResolveRouteStageSkipsWhenContextIsStopped(): void
-    {
-        request()->create('GET', '/test/am/tests');
-
-        $this->webContext->stop();
-
-        (new ResolveRouteStage())->process($this->webContext);
-
-        $this->assertNull($this->webContext->getMatchedRoute());
-        $this->assertNull(request()->getMatchedRoute());
-    }
-
     public function testResolveRouteStageReadsTheRequestAndRoutesFromTheContext(): void
     {
         request()->create('GET', '/test/am/tests');

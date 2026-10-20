@@ -39,10 +39,6 @@ class DispatchRequestStage implements StageInterface
      */
     public function process(AppContext $context): void
     {
-        if ($context->isStopped()) {
-            return;
-        }
-
         $matchedRoute = $context->getMatchedRoute();
 
         if ($matchedRoute === null) {

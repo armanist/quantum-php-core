@@ -38,10 +38,6 @@ class PrepareRequestStage implements StageInterface
      */
     public function process(AppContext $context): void
     {
-        if ($context->isStopped()) {
-            return;
-        }
-
         LangFactory::get();
 
         $this->logDebugInfo();

@@ -32,7 +32,7 @@ class HandleRouteNotFoundStage implements StageInterface
      */
     public function process(AppContext $context): void
     {
-        if ($context->isStopped() || $context->getMatchedRoute() !== null) {
+        if ($context->getMatchedRoute() !== null) {
             return;
         }
 
