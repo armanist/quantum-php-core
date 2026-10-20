@@ -39,7 +39,10 @@ class WebAppAdapter implements AppInterface
     public function __construct(AppContext $context)
     {
         $this->context = $context;
+    }
 
+    public function boot(): void
+    {
         $pipeline = new Pipeline([
             new LoadHelpersStage(),
             new LoadEnvironmentStage(),

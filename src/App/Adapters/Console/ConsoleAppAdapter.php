@@ -42,7 +42,10 @@ class ConsoleAppAdapter implements AppInterface
     public function __construct(AppContext $context)
     {
         $this->context = $context;
+    }
 
+    public function boot(): void
+    {
         try {
             $pipeline = new Pipeline([
                 new InitConsoleStage(),

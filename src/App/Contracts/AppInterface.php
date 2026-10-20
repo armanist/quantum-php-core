@@ -17,6 +17,11 @@ namespace Quantum\App\Contracts;
 interface AppInterface
 {
     /**
+     * Boots the app
+     */
+    public function boot(): void;
+
+    /**
      * Starts the app
      */
     public function start(): ?int;

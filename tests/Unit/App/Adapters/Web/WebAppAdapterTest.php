@@ -4,6 +4,7 @@ namespace Quantum\Tests\Unit\App\Adapters\Web;
 
 use Quantum\Router\Exceptions\RouteException;
 use Quantum\App\Adapters\Web\WebAppAdapter;
+use Quantum\Environment\Environment;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Http\Enums\ContentType;
@@ -20,6 +21,7 @@ class WebAppAdapterTest extends AppTestCase
     public function setUp(): void
     {
         $this->webAppAdapter = new WebAppAdapter($this->createContext());
+        $this->webAppAdapter->boot();
     }
 
     public function tearDown(): void
@@ -246,12 +248,32 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertNotNull(request()->getUri());
     }
 
+    public function testWebAppAdapterConstructorDoesNotBoot(): void
+    {
+        $this->clearAppContext();
+
+        new WebAppAdapter($this->createContext());
+
+        $this->assertFalse(Di::has(Environment::class));
+    }
+
+    public function testWebAppAdapterBootRunsTheBootStages(): void
+    {
+        $this->clearAppContext();
+
+        $adapter = new WebAppAdapter($this->createContext());
+        $adapter->boot();
+
+        $this->assertTrue(Di::has(Environment::class));
+        $this->assertTrue(config()->has('app'));
+    }
+
     public function testWebAppAdapterBootFiresAppHelperListenerAtModulesBeforeEvent(): void
     {
         $this->withTemporaryAppHelper(function (): void {
             $context = $this->createContext();
 
-            new WebAppAdapter($context);
+            (new WebAppAdapter($context))->boot();
 
             $this->assertCount(1, $GLOBALS['bootEventPayloads']);
             $this->assertSame($context, $GLOBALS['bootEventPayloads'][0]['context']);
@@ -261,7 +283,7 @@ class WebAppAdapterTest extends AppTestCase
     public function testWebAppAdapterBootRegistersAppHelperListenerBeforeAppConfigIsLoaded(): void
     {
         $this->withTemporaryAppHelper(function (): void {
-            new WebAppAdapter($this->createContext());
+            (new WebAppAdapter($this->createContext()))->boot();
 
             $this->assertFalse($GLOBALS['bootEventConfigLoadedAtRegistration']);
             $this->assertTrue(config()->has('app'));
@@ -271,11 +293,11 @@ class WebAppAdapterTest extends AppTestCase
     public function testWebAppAdapterSecondBootDoesNotRegisterAppHelperListenerAgain(): void
     {
         $this->withTemporaryAppHelper(function (): void {
-            new WebAppAdapter($this->createContext());
+            (new WebAppAdapter($this->createContext()))->boot();
             $this->assertCount(1, $GLOBALS['bootEventPayloads']);
 
             // Helper files load with require_once, so a new container does not get the listener again.
-            new WebAppAdapter($this->createContext());
+            (new WebAppAdapter($this->createContext()))->boot();
             $this->assertCount(1, $GLOBALS['bootEventPayloads']);
         });
     }

@@ -28,7 +28,10 @@ class AppTest extends AppTestCase
 
     public function testAppGetAdapter(): void
     {
-        $app = new App(new WebAppAdapter($this->createContext()));
+        $adapter = new WebAppAdapter($this->createContext());
+        $adapter->boot();
+
+        $app = new App($adapter);
 
         $this->assertInstanceOf(WebAppAdapter::class, $app->getAdapter());
 
@@ -36,7 +39,10 @@ class AppTest extends AppTestCase
 
         config()->flush();
 
-        $app = new App(new ConsoleAppAdapter($this->createContext()));
+        $adapter = new ConsoleAppAdapter($this->createContext());
+        $adapter->boot();
+
+        $app = new App($adapter);
 
         $this->assertInstanceOf(ConsoleAppAdapter::class, $app->getAdapter());
 
@@ -45,7 +51,10 @@ class AppTest extends AppTestCase
 
     public function testAppCallingValidMethod(): void
     {
-        $app = new App(new WebAppAdapter($this->createContext()));
+        $adapter = new WebAppAdapter($this->createContext());
+        $adapter->boot();
+
+        $app = new App($adapter);
 
         request()->create('GET', '/test/am/tests');
 
@@ -56,7 +65,10 @@ class AppTest extends AppTestCase
 
     public function testAppCallingInvalidMethod(): void
     {
-        $app = new App(new WebAppAdapter($this->createContext()));
+        $adapter = new WebAppAdapter($this->createContext());
+        $adapter->boot();
+
+        $app = new App($adapter);
 
         $this->expectException(AppException::class);
 

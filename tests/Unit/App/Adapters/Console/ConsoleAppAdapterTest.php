@@ -196,11 +196,33 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertTrue(config()->has('app'));
     }
 
+    public function testConsoleAppAdapterConstructorDoesNotBoot(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        new ConsoleAppAdapter($this->createContext());
+
+        $this->assertFalse(Di::isRegistered(Application::class));
+        $this->assertFalse(Di::has(Environment::class));
+    }
+
+    public function testConsoleAppAdapterBootRunsTheBootStages(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $adapter = new ConsoleAppAdapter($this->createContext());
+        $adapter->boot();
+
+        $this->assertTrue(Di::isRegistered(Application::class));
+        $this->assertTrue(Di::has(Environment::class));
+        $this->assertTrue(config()->has('app'));
+    }
+
     public function testConsoleAppAdapterRegistersTheConsoleObjectsInTheContainerAfterASuccessfulBoot(): void
     {
         $_SERVER['argv'] = ['qt', 'core:env', '--yes'];
 
-        new ConsoleAppAdapter($this->createContext());
+        (new ConsoleAppAdapter($this->createContext()))->boot();
 
         $this->assertTrue(Di::isRegistered(Application::class));
         $this->assertTrue(Di::isRegistered(OutputInterface::class));
@@ -213,7 +235,7 @@ class ConsoleAppAdapterTest extends AppTestCase
         $_SERVER['argv'] = ['qt', 'core:env', '--yes'];
 
         $this->withoutEnvironmentFile(function (): void {
-            new ConsoleAppAdapter($this->createContext());
+            (new ConsoleAppAdapter($this->createContext()))->boot();
 
             $this->assertTrue(Di::isRegistered(Application::class));
             $this->assertTrue(Di::isRegistered(OutputInterface::class));
@@ -592,7 +614,7 @@ class ConsoleAppAdapterTest extends AppTestCase
     }
 
     /**
-     * Creates the adapter on a fresh context (or the given one) with a test Application in the container:
+     * Creates and boots the adapter on a fresh context (or the given one) with a test Application in the container:
      * the given one, or one that does not exit and is built, and named, when start() first fetches it
      */
     private function createAdapter(?Application $application = null, ?AppContext $context = null): ConsoleAppAdapter
@@ -605,7 +627,10 @@ class ConsoleAppAdapterTest extends AppTestCase
             Di::register(NonExitingApplication::class, Application::class);
         }
 
-        return new ConsoleAppAdapter($context);
+        $adapter = new ConsoleAppAdapter($context);
+        $adapter->boot();
+
+        return $adapter;
     }
 
     /**

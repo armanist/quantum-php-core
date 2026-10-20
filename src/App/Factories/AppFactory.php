@@ -68,6 +68,9 @@ class AppFactory
 
         $adapterClass = self::ADAPTERS[$type];
 
-        return new App(new $adapterClass($context));
+        $adapter = new $adapterClass($context);
+        $adapter->boot();
+
+        return new App($adapter);
     }
 }
