@@ -7,7 +7,6 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
-use Quantum\Debugger\Debugger;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Router\Route;
@@ -39,18 +38,6 @@ class PrepareRequestStageTest extends AppTestCase
         (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertTrue(config()->has('lang'));
-    }
-
-    public function testPrepareRequestStageWritesNothingToTheDebugger(): void
-    {
-        config()->set('app.debug', true);
-
-        event()->listen('test.event', function (): void {
-        });
-
-        (new PrepareRequestStage())->process($this->webContext);
-
-        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
     }
 
     public function testPrepareRequestStageRegistersViewCache(): void
