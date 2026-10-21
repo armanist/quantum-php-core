@@ -14,7 +14,6 @@ use Quantum\Mailer\Contracts\MailerInterface;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Mailer\Traits\MailerTrait;
 use PHPMailer\PHPMailer\PHPMailer;
-use Quantum\Debugger\Debugger;
 use PHPMailer\PHPMailer\SMTP;
 use ReflectionException;
 use Exception;
@@ -44,11 +43,11 @@ class SmtpAdapter implements MailerInterface
 
         $this->setupSmtp($params);
 
-        if (config()->get('debug')) {
+        if (is_debug_mode()) {
             $this->mailer->SMTPDebug = SMTP::DEBUG_SERVER;
 
             $this->mailer->Debugoutput = function (string $message): void {
-                warning($message, ['tab' => Debugger::MAILS]);
+                $this->transportLog[] = $message;
             };
         }
     }

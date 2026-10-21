@@ -74,4 +74,10 @@ interface MailerInterface
      * Sends an email
      */
     public function send(): bool;
+
+    /**
+     * Gets the transport log: the errors of failed sends and, where the transport reports it, its exchange with the server
+     * @return array<string>
+     */
+    public function getTransportLog(): array;
 }

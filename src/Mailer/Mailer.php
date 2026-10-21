@@ -28,6 +28,7 @@ use Quantum\App\Exceptions\BaseException;
  * @method MailerInterface setBody($message)
  * @method array<string, mixed>|string getBody()
  * @method bool send()
+ * @method array<string> getTransportLog()
  */
 class Mailer
 {

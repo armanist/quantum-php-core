@@ -5,6 +5,7 @@ namespace Quantum\Tests\Unit\Debugger;
 use Quantum\Database\Adapters\Sleekdb\SleekDbal;
 use Quantum\Database\Adapters\Idiorm\IdiormDbal;
 use DebugBar\DataCollector\MessagesCollector;
+use Quantum\Mailer\Factories\MailerFactory;
 use DebugBar\DataCollector\PhpInfoCollector;
 use Quantum\View\Factories\ViewFactory;
 use Quantum\Debugger\DebuggerStore;
@@ -366,6 +367,27 @@ class DebuggerTest extends AppTestCase
         $tabs = $this->renderTabs();
 
         $this->assertSame([['info' => 'First message'], ['warning' => 'Second message']], $tabs[Debugger::MESSAGES]);
+    }
+
+    public function testDebugbarRenderListsTheTransportLogOfTheMailerInTheMailsTab(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->setPrivateProperty(mailer()->getAdapter(), 'transportLog', ['SERVER -> CLIENT: 220 ready', 'SERVER -> CLIENT: 535 Authentication failed']);
+
+        $tabs = $this->renderTabs();
+
+        $this->assertSame([['warning' => 'SERVER -> CLIENT: 220 ready'], ['warning' => 'SERVER -> CLIENT: 535 Authentication failed']], $tabs[Debugger::MAILS]);
+    }
+
+    public function testDebugbarRenderLeavesTheMailerUnbuiltWhenTheRequestDidNotUseIt(): void
+    {
+        config()->set('app.debug', true);
+
+        $tabs = $this->renderTabs();
+
+        $this->assertFalse(Di::isRegistered(MailerFactory::class));
+        $this->assertArrayNotHasKey(Debugger::MAILS, $tabs);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Quantum\Tests\Unit\Mailer\Adapters;
 use Quantum\Tests\Unit\Mailer\MailerTestCase;
 use Quantum\Mailer\Contracts\MailerInterface;
 use Quantum\Mailer\Adapters\SmtpAdapter;
+use PHPMailer\PHPMailer\SMTP;
 use Quantum\Config\Setup;
 
 class SmtpAdapterTest extends MailerTestCase
@@ -98,6 +99,28 @@ class SmtpAdapterTest extends MailerTestCase
         $this->assertEquals('content of the document', current($attachments)['content']);
 
         $this->assertEquals('document.txt', current($attachments)['filename']);
+    }
+
+    public function testSmtpAdapterKeepsTheSmtpExchangeInDebugMode(): void
+    {
+        config()->set('app.debug', true);
+
+        $adapter = new SmtpAdapter(config()->get('mailer.smtp'));
+
+        $debugOutput = $this->getPrivateProperty($adapter, 'mailer')->Debugoutput;
+
+        $debugOutput('CLIENT -> SERVER: EHLO localhost', 2);
+
+        $this->assertSame(['CLIENT -> SERVER: EHLO localhost'], $adapter->getTransportLog());
+    }
+
+    public function testSmtpAdapterKeepsNoSmtpExchangeOutsideDebugMode(): void
+    {
+        config()->set('app.debug', false);
+
+        $adapter = new SmtpAdapter(config()->get('mailer.smtp'));
+
+        $this->assertSame(SMTP::DEBUG_OFF, $this->getPrivateProperty($adapter, 'mailer')->SMTPDebug);
     }
 
     public function testSmtpAdapterSend(): void

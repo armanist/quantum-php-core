@@ -18,6 +18,7 @@ use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\MemoryCollector;
 use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Logger\Adapters\MessageAdapter;
+use Quantum\Mailer\Factories\MailerFactory;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\View\Factories\ViewFactory;
 use Quantum\Di\Exceptions\DiException;
@@ -183,8 +184,22 @@ class Debugger
             self::QUERIES => array_map(fn ($query): array => ['info' => $query], $this->queryLog()),
             self::ROUTES => $routeInfo !== [] ? [['info' => $routeInfo]] : [],
             self::EVENTS => $listeners !== [] ? [['info' => $listeners]] : [],
-            self::MAILS => [],
+            self::MAILS => $this->mailLog(),
         ];
+    }
+
+    /**
+     * The transport log of the mailer, only when the request used it
+     * @return array<int, array<string, string>>
+     * @throws DiException|ReflectionException|ConfigException|BaseException
+     */
+    protected function mailLog(): array
+    {
+        if (!Di::isRegistered(MailerFactory::class)) {
+            return [];
+        }
+
+        return array_map(fn (string $line): array => ['warning' => $line], mailer()->getAdapter()->getTransportLog());
     }
 
     /**
