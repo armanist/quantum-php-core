@@ -4,6 +4,7 @@ namespace Quantum\Tests\Unit\App\Adapters\Web;
 
 use Quantum\Router\Exceptions\RouteException;
 use Quantum\App\Adapters\Web\WebAppAdapter;
+use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Environment\Environment;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Tests\Unit\AppTestCase;
@@ -13,6 +14,7 @@ use Quantum\Router\MatchedRoute;
 use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;
 use Quantum\Di\Di;
+use ArrayObject;
 
 class WebAppAdapterTest extends AppTestCase
 {
@@ -248,6 +250,122 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertNotNull(request()->getUri());
     }
 
+    public function testWebAppAdapterStartDispatchesTheEventsOfEveryRuntimeStageForAMatchedRoute(): void
+    {
+        request()->create('GET', '/test/am/tests');
+
+        $events = $this->recordRuntimeEvents();
+
+        ob_start();
+        $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertSame([
+            'web.preflight.before', 'web.preflight.after',
+            'web.route.before', 'web.route.after',
+            'web.not_found.before', 'web.not_found.after',
+            'web.prepare.before', 'web.prepare.after',
+            'web.dispatch.before', 'web.dispatch.after',
+            'web.send.before', 'web.send.after',
+        ], $events->getArrayCopy());
+    }
+
+    public function testWebAppAdapterStartDispatchesOnlyThePreflightAndSendEventsForAnOptionsRequest(): void
+    {
+        request()->create('OPTIONS', '/test/am/tests');
+
+        $events = $this->recordRuntimeEvents();
+
+        ob_start();
+        $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertSame([
+            'web.preflight.before', 'web.preflight.after',
+            'web.send.before', 'web.send.after',
+        ], $events->getArrayCopy());
+    }
+
+    public function testWebAppAdapterStartDispatchesNoPrepareOrDispatchEventsWhenNoRouteMatches(): void
+    {
+        request()->create('GET', '/non-existing-uri');
+
+        $events = $this->recordRuntimeEvents();
+
+        ob_start();
+        $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertSame([
+            'web.preflight.before', 'web.preflight.after',
+            'web.route.before', 'web.route.after',
+            'web.not_found.before', 'web.not_found.after',
+            'web.send.before', 'web.send.after',
+        ], $events->getArrayCopy());
+    }
+
+    public function testWebAppAdapterStartDispatchesNoAfterEventAndNoSendEventsWhenAStageThrows(): void
+    {
+        request()->create('GET', '/test/Test/5');
+
+        $events = $this->recordRuntimeEvents();
+
+        ob_start();
+
+        try {
+            $this->webAppAdapter->start();
+            $this->fail('Expected the dispatcher to fail for a missing controller action.');
+        } catch (RouteException $exception) {
+            $this->assertSame([
+                'web.preflight.before', 'web.preflight.after',
+                'web.route.before', 'web.route.after',
+                'web.not_found.before', 'web.not_found.after',
+                'web.prepare.before', 'web.prepare.after',
+                'web.dispatch.before',
+            ], $events->getArrayCopy());
+        } finally {
+            ob_end_clean();
+        }
+    }
+
+    public function testWebAppAdapterStartPassesTheWebContextToTheRuntimeEvents(): void
+    {
+        request()->create('GET', '/test/am/tests');
+
+        $contexts = [];
+
+        foreach (['web.preflight.before', 'web.send.after'] as $name) {
+            event()->listen($name, function (array $payload) use (&$contexts): void {
+                $contexts[] = $payload['context'];
+            });
+        }
+
+        ob_start();
+        $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertCount(2, $contexts);
+        $this->assertInstanceOf(WebContext::class, $contexts[0]);
+        $this->assertSame($contexts[0], $contexts[1]);
+    }
+
+    public function testWebAppAdapterStartDispatchesTheSendAfterEventOnceTheRequestIsCleared(): void
+    {
+        request()->create('GET', '/test/am/tests');
+
+        $uriSeenAfterSend = 'not called';
+
+        event()->listen('web.send.after', function () use (&$uriSeenAfterSend): void {
+            $uriSeenAfterSend = request()->getUri();
+        });
+
+        ob_start();
+        $this->webAppAdapter->start();
+        ob_end_clean();
+
+        $this->assertNull($uriSeenAfterSend);
+    }
+
     public function testWebAppAdapterConstructorDoesNotBoot(): void
     {
         $this->clearAppContext();
@@ -300,6 +418,27 @@ class WebAppAdapterTest extends AppTestCase
             (new WebAppAdapter($this->createContext()))->boot();
             $this->assertCount(1, $GLOBALS['bootEventPayloads']);
         });
+    }
+
+    /**
+     * Listens to the before and after events of every web runtime stage and records their names in order
+     * @return ArrayObject<int, string>
+     */
+    private function recordRuntimeEvents(): ArrayObject
+    {
+        $events = new ArrayObject();
+
+        foreach (['preflight', 'route', 'not_found', 'prepare', 'dispatch', 'send'] as $stage) {
+            foreach (['before', 'after'] as $point) {
+                $name = 'web.' . $stage . '.' . $point;
+
+                event()->listen($name, function () use ($events, $name): void {
+                    $events[] = $name;
+                });
+            }
+        }
+
+        return $events;
     }
 
     private function withTemporaryAppHelper(callable $test): void

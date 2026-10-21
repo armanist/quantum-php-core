@@ -25,6 +25,10 @@ use Exception;
  */
 class RunCommandStage implements StageInterface
 {
+    public const BEFORE = 'console.command.before';
+
+    public const AFTER = 'console.command.after';
+
     /**
      * @param ConsoleContext $context
      * @throws Exception

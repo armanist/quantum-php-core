@@ -3,6 +3,13 @@
 namespace Quantum\Tests\Unit\App;
 
 use Quantum\App\Adapters\Console\Stages\Boot\SetupConsoleApplicationStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\HandleRouteNotFoundStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\HandlePreflightStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\DispatchRequestStage;
+use Quantum\App\Adapters\Console\Stages\Runtime\RunCommandStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\PrepareRequestStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\SendResponseStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\ResolveRouteStage;
 use Quantum\App\Adapters\Console\Stages\Boot\InitConsoleStage;
 use Quantum\App\Adapters\Web\Stages\Boot\InitDebuggerStage;
 use Quantum\App\Adapters\Web\Stages\Boot\LoadModulesStage;
@@ -377,6 +384,30 @@ class PipelineTest extends AppTestCase
 
         $this->assertSame('boot.modules.before', LoadModulesStage::BEFORE);
         $this->assertSame('boot.modules.after', LoadModulesStage::AFTER);
+    }
+
+    public function testPipelineRuntimeStagesDeclareTheirEventNames(): void
+    {
+        $this->assertSame('web.preflight.before', HandlePreflightStage::BEFORE);
+        $this->assertSame('web.preflight.after', HandlePreflightStage::AFTER);
+
+        $this->assertSame('web.route.before', ResolveRouteStage::BEFORE);
+        $this->assertSame('web.route.after', ResolveRouteStage::AFTER);
+
+        $this->assertSame('web.not_found.before', HandleRouteNotFoundStage::BEFORE);
+        $this->assertSame('web.not_found.after', HandleRouteNotFoundStage::AFTER);
+
+        $this->assertSame('web.prepare.before', PrepareRequestStage::BEFORE);
+        $this->assertSame('web.prepare.after', PrepareRequestStage::AFTER);
+
+        $this->assertSame('web.dispatch.before', DispatchRequestStage::BEFORE);
+        $this->assertSame('web.dispatch.after', DispatchRequestStage::AFTER);
+
+        $this->assertSame('web.send.before', SendResponseStage::BEFORE);
+        $this->assertSame('web.send.after', SendResponseStage::AFTER);
+
+        $this->assertSame('console.command.before', RunCommandStage::BEFORE);
+        $this->assertSame('console.command.after', RunCommandStage::AFTER);
     }
 
     public function testLoadHelpersInitConsoleInitDebuggerAndSetupConsoleApplicationStagesDeclareNoEvents(): void

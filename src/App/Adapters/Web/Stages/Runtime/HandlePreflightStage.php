@@ -23,6 +23,10 @@ use Quantum\App\AppContext;
  */
 class HandlePreflightStage implements StageInterface
 {
+    public const BEFORE = 'web.preflight.before';
+
+    public const AFTER = 'web.preflight.after';
+
     /**
      * Answers an OPTIONS request with an empty response and stops the remaining stages
      * @param WebContext $context

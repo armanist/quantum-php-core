@@ -25,6 +25,10 @@ use ReflectionException;
  */
 class HandleRouteNotFoundStage implements StageInterface
 {
+    public const BEFORE = 'web.not_found.before';
+
+    public const AFTER = 'web.not_found.after';
+
     /**
      * Answers a request that matched no route with the page not found response and stops the remaining stages
      * @param WebContext $context

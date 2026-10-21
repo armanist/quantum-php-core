@@ -33,6 +33,10 @@ use RuntimeException;
  */
 class DispatchRequestStage implements StageInterface
 {
+    public const BEFORE = 'web.dispatch.before';
+
+    public const AFTER = 'web.dispatch.after';
+
     /**
      * @param WebContext $context
      * @throws MiddlewareException|BaseException|DiException

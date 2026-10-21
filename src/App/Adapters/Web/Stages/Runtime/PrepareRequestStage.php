@@ -32,6 +32,10 @@ use ReflectionException;
  */
 class PrepareRequestStage implements StageInterface
 {
+    public const BEFORE = 'web.prepare.before';
+
+    public const AFTER = 'web.prepare.after';
+
     /**
      * @param WebContext $context
      * @throws LangException|ConfigException|DiException|ReflectionException

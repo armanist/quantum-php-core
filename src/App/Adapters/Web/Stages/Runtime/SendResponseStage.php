@@ -34,6 +34,10 @@ use Exception;
  */
 class SendResponseStage implements StageInterface
 {
+    public const BEFORE = 'web.send.before';
+
+    public const AFTER = 'web.send.after';
+
     /**
      * @param WebContext $context
      * @throws ConfigException|DiException|ReflectionException|Exception

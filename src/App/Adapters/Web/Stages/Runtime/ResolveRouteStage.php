@@ -25,6 +25,10 @@ use Quantum\App\AppContext;
  */
 class ResolveRouteStage implements StageInterface
 {
+    public const BEFORE = 'web.route.before';
+
+    public const AFTER = 'web.route.after';
+
     /**
      * Finds the route for the current request and stores it on the request, or null when nothing matches
      * @param WebContext $context
