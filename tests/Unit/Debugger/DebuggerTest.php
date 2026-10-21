@@ -155,7 +155,7 @@ class DebuggerTest extends AppTestCase
 
         $method = new \ReflectionMethod($this->debugger, 'createTab');
         $method->setAccessible(true);
-        $method->invoke($this->debugger, Debugger::ROUTES);
+        $method->invoke($this->debugger, Debugger::ROUTES, []);
 
         $this->assertEquals(
             ['info' => ['Route' => '/welcome']],
@@ -172,36 +172,7 @@ class DebuggerTest extends AppTestCase
         $this->assertEmpty($output);
     }
 
-    public function testDebugbarRenderWritesTheRegisteredEventListenersToTheEventsTab(): void
-    {
-        config()->set('app.debug', true);
-
-        $listener = function (): void {
-        };
-
-        event()->listen('test.event', $listener);
-
-        $this->expectRendering();
-
-        $this->debugger->render();
-
-        $this->assertSame([['info' => ['test.event' => [$listener]]]], $this->debuggerStore->get(Debugger::EVENTS));
-    }
-
-    public function testDebugbarRenderWritesNothingToTheEventsTabWithoutEventListeners(): void
-    {
-        config()->set('app.debug', true);
-
-        $this->assertSame([], event()->getRegistered());
-
-        $this->expectRendering();
-
-        $this->debugger->render();
-
-        $this->assertSame([], $this->debuggerStore->get(Debugger::EVENTS));
-    }
-
-    public function testDebugbarRenderWritesNothingWhenDisabled(): void
+    public function testDebugbarRenderPassesNothingToTheTabsWhenDisabled(): void
     {
         config()->set('app.debug', false);
 
@@ -210,18 +181,68 @@ class DebuggerTest extends AppTestCase
 
         request()->setMatchedRoute(new MatchedRoute(new Route(['GET'], 'posts', 'PostController', 'posts'), []));
 
+        info('Logged message');
+
         $this->connectSqlite();
 
         Database::query('SELECT 1');
 
-        $this->debugger->render();
-
-        $this->assertSame([], $this->debuggerStore->get(Debugger::EVENTS));
-        $this->assertSame([], $this->debuggerStore->get(Debugger::ROUTES));
-        $this->assertSame([], $this->debuggerStore->get(Debugger::QUERIES));
+        $this->assertSame([], $this->renderTabs());
     }
 
-    public function testDebugbarRenderWritesTheMatchedRouteToTheRoutesTab(): void
+    public function testDebugbarRenderPassesTheStoredEntriesBeforeTheCollectedOnes(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->debugger->addToStoreCell(Debugger::MESSAGES, LogLevel::INFO, 'Written directly');
+
+        info('Logged message');
+
+        $tabs = $this->renderTabs();
+
+        $this->assertSame([['info' => 'Written directly'], ['info' => 'Logged message']], $tabs[Debugger::MESSAGES]);
+    }
+
+    public function testDebugbarRenderLeavesTheStoreUnchanged(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->debugger->addToStoreCell(Debugger::MESSAGES, LogLevel::INFO, 'Written directly');
+
+        info('Logged message');
+
+        event()->listen('test.event', function (): void {
+        });
+
+        $this->renderTabs();
+
+        $this->assertSame([Debugger::MESSAGES => [['info' => 'Written directly']]], $this->debuggerStore->all());
+    }
+
+    public function testDebugbarRenderListsTheRegisteredEventListenersInTheEventsTab(): void
+    {
+        config()->set('app.debug', true);
+
+        $listener = function (): void {
+        };
+
+        event()->listen('test.event', $listener);
+
+        $tabs = $this->renderTabs();
+
+        $this->assertSame([['info' => ['test.event' => [$listener]]]], $tabs[Debugger::EVENTS]);
+    }
+
+    public function testDebugbarRenderPassesNothingToTheEventsTabWithoutEventListeners(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->assertSame([], event()->getRegistered());
+
+        $this->assertArrayNotHasKey(Debugger::EVENTS, $this->renderTabs());
+    }
+
+    public function testDebugbarRenderListsTheMatchedRouteInTheRoutesTab(): void
     {
         config()->set('app.debug', true);
 
@@ -234,9 +255,7 @@ class DebuggerTest extends AppTestCase
 
         request()->setMatchedRoute(new MatchedRoute($route, ['id' => '5']));
 
-        $this->expectRendering();
-
-        $this->debugger->render();
+        $tabs = $this->renderTabs();
 
         $this->assertSame([['info' => [
             'Methods' => 'GET, POST',
@@ -249,10 +268,10 @@ class DebuggerTest extends AppTestCase
             'Prefix' => 'en',
             'Middlewares' => ['Auth'],
             'Params' => ['id' => '5'],
-        ]]], $this->debuggerStore->get(Debugger::ROUTES));
+        ]]], $tabs[Debugger::ROUTES]);
     }
 
-    public function testDebugbarRenderWritesAClosureRouteToTheRoutesTab(): void
+    public function testDebugbarRenderListsAClosureRouteInTheRoutesTab(): void
     {
         config()->set('app.debug', true);
 
@@ -261,16 +280,14 @@ class DebuggerTest extends AppTestCase
 
         request()->setMatchedRoute(new MatchedRoute($route, []));
 
-        $this->expectRendering();
-
-        $this->debugger->render();
+        $tabs = $this->renderTabs();
 
         $this->assertSame([['info' => [
             'Methods' => 'GET',
             'Pattern' => 'ping',
             'Module' => 'Api',
             'Action' => 'Closure',
-        ]]], $this->debuggerStore->get(Debugger::ROUTES));
+        ]]], $tabs[Debugger::ROUTES]);
     }
 
     public function testDebugbarRenderAddsTheRenderedViewToTheRoutesTab(): void
@@ -284,45 +301,23 @@ class DebuggerTest extends AppTestCase
         $view->setLayout('layout');
         $view->render('index');
 
-        $this->expectRendering();
-
-        $this->debugger->render();
-
-        $routes = $this->debuggerStore->get(Debugger::ROUTES);
+        $routes = $this->renderTabs()[Debugger::ROUTES];
 
         $this->assertCount(1, $routes);
         $this->assertSame('Test/Views/index', $routes[0]['info']['View']);
         $this->assertSame('SomeController', $routes[0]['info']['Controller']);
     }
 
-    public function testDebugbarRenderWritesNothingToTheRoutesTabWithoutARouteOrAView(): void
+    public function testDebugbarRenderPassesNothingToTheRoutesTabWithoutARouteOrAView(): void
     {
         config()->set('app.debug', true);
 
         $this->assertNull(request()->getMatchedRoute());
 
-        $this->expectRendering();
-
-        $this->debugger->render();
-
-        $this->assertSame([], $this->debuggerStore->get(Debugger::ROUTES));
+        $this->assertArrayNotHasKey(Debugger::ROUTES, $this->renderTabs());
     }
 
-    public function testDebugbarRenderListsTheMatchedRouteOnceWhenRenderedTwice(): void
-    {
-        config()->set('app.debug', true);
-
-        request()->setMatchedRoute(new MatchedRoute(new Route(['GET'], 'posts', 'PostController', 'posts'), []));
-
-        $this->expectRendering();
-
-        $this->debugger->render();
-        $this->debugger->render();
-
-        $this->assertCount(1, $this->debuggerStore->get(Debugger::ROUTES));
-    }
-
-    public function testDebugbarRenderWritesTheQueriesOfTheRequestToTheQueriesTab(): void
+    public function testDebugbarRenderListsTheQueriesOfTheRequestInTheQueriesTab(): void
     {
         config()->set('app.debug', true);
 
@@ -330,11 +325,7 @@ class DebuggerTest extends AppTestCase
 
         Database::query('SELECT 1');
 
-        $this->expectRendering();
-
-        $this->debugger->render();
-
-        $queries = $this->debuggerStore->get(Debugger::QUERIES);
+        $queries = $this->renderTabs()[Debugger::QUERIES];
 
         $this->assertCount(count(Database::queryLog()), $queries);
         $this->assertSame(['info' => 'SELECT 1'], end($queries));
@@ -344,15 +335,13 @@ class DebuggerTest extends AppTestCase
     {
         config()->set('app.debug', true);
 
-        $this->expectRendering();
-
-        $this->debugger->render();
+        $tabs = $this->renderTabs();
 
         $this->assertFalse(Di::isRegistered(Database::class));
-        $this->assertSame([], $this->debuggerStore->get(Debugger::QUERIES));
+        $this->assertArrayNotHasKey(Debugger::QUERIES, $tabs);
     }
 
-    public function testDebugbarRenderWritesNothingToTheQueriesTabForAnAdapterWithoutAQueryLog(): void
+    public function testDebugbarRenderPassesNothingToTheQueriesTabForAnAdapterWithoutAQueryLog(): void
     {
         config()->set('app.debug', true);
 
@@ -364,42 +353,19 @@ class DebuggerTest extends AppTestCase
 
         $this->assertSame(SleekDbal::class, db()->getOrmClass());
 
-        $this->expectRendering();
-
-        $this->debugger->render();
-
-        $this->assertSame([], $this->debuggerStore->get(Debugger::QUERIES));
+        $this->assertArrayNotHasKey(Debugger::QUERIES, $this->renderTabs());
     }
 
-    public function testDebugbarRenderListsTheQueriesOnceWhenRenderedTwice(): void
+    public function testDebugbarRenderListsTheLoggedMessagesInTheMessagesTab(): void
     {
         config()->set('app.debug', true);
 
-        $this->connectSqlite();
+        info('First message');
+        warning('Second message');
 
-        Database::query('SELECT 1');
+        $tabs = $this->renderTabs();
 
-        $this->expectRendering();
-
-        $this->debugger->render();
-        $this->debugger->render();
-
-        $this->assertCount(count(Database::queryLog()), $this->debuggerStore->get(Debugger::QUERIES));
-    }
-
-    public function testDebugbarRenderListsTheEventListenersOnceWhenRenderedTwice(): void
-    {
-        config()->set('app.debug', true);
-
-        event()->listen('test.event', function (): void {
-        });
-
-        $this->expectRendering();
-
-        $this->debugger->render();
-        $this->debugger->render();
-
-        $this->assertCount(1, $this->debuggerStore->get(Debugger::EVENTS));
+        $this->assertSame([['info' => 'First message'], ['warning' => 'Second message']], $tabs[Debugger::MESSAGES]);
     }
 
     /**
@@ -419,10 +385,13 @@ class DebuggerTest extends AppTestCase
     }
 
     /**
-     * Lets render() run against the mocked DebugBar: every tab gets a collector that accepts any message
+     * Renders against the mocked DebugBar and returns what each tab's collector received, as [tab => [[level => data], ...]]
+     * @return array<string, array<int, array<string, mixed>>>
      */
-    private function expectRendering(): void
+    private function renderTabs(): array
     {
+        $logged = [];
+
         $rendererMock = Mockery::mock(JavascriptRenderer::class);
         $rendererMock->shouldReceive('setBaseUrl')->andReturnSelf();
         $rendererMock->shouldReceive('addAssets')->andReturnSelf();
@@ -431,7 +400,17 @@ class DebuggerTest extends AppTestCase
 
         $this->debugBarMock->shouldReceive('getJavascriptRenderer')->andReturn($rendererMock);
         $this->debugBarMock->shouldReceive('hasCollector')->andReturn(true);
-        $this->debugBarMock->shouldReceive('getCollector')
-            ->andReturn(Mockery::mock(MessagesCollector::class)->shouldIgnoreMissing());
+        $this->debugBarMock->shouldReceive('getCollector')->andReturnUsing(function (string $tab) use (&$logged) {
+            $collector = Mockery::mock(MessagesCollector::class);
+            $collector->shouldReceive('log')->andReturnUsing(function ($level, $data) use (&$logged, $tab): void {
+                $logged[$tab][] = [$level => $data];
+            });
+
+            return $collector;
+        });
+
+        $this->debugger->render();
+
+        return $logged;
     }
 }

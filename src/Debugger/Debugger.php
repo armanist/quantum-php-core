@@ -17,6 +17,7 @@ use DebugBar\DataCollector\MessagesCollector;
 use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\MemoryCollector;
 use Quantum\Config\Exceptions\ConfigException;
+use Quantum\Logger\Adapters\MessageAdapter;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\View\Factories\ViewFactory;
 use Quantum\Di\Exceptions\DiException;
@@ -148,8 +149,8 @@ class Debugger
     }
 
     /**
-     * Renders the debug bar. The events, routes and queries tabs are filled here, with the event listeners,
-     * the matched route, the rendered view and the query log as they are at this point.
+     * Renders the debug bar. Each tab shows its stored entries, followed by what is collected
+     * from the packages at this point.
      * @throws DebugBarException|DiException|ReflectionException|ConfigException|BaseException
      */
     public function render(): string
@@ -158,24 +159,44 @@ class Debugger
             return '';
         }
 
-        $this->clearStoreCell(self::EVENTS);
-        $this->addToStoreCell(self::EVENTS, 'info', event()->getRegistered());
-
-        $this->clearStoreCell(self::ROUTES);
-        $this->addToStoreCell(self::ROUTES, 'info', $this->routeInfo());
-
-        $this->clearStoreCell(self::QUERIES);
-        foreach ($this->queryLog() as $query) {
-            $this->addToStoreCell(self::QUERIES, 'info', $query);
-        }
-
-        foreach ([self::MESSAGES, self::QUERIES, self::ROUTES, self::EVENTS, self::MAILS] as $tab) {
-            $this->createTab($tab);
+        foreach ($this->collect() as $tab => $entries) {
+            $this->createTab($tab, $entries);
         }
 
         $renderer = $this->getRenderer();
 
         return $renderer->renderHead() . $renderer->render();
+    }
+
+    /**
+     * Collects the entries of each tab from the packages, as they are now
+     * @return array<string, array<int, array<string, mixed>>>
+     * @throws DiException|ReflectionException|ConfigException|BaseException
+     */
+    protected function collect(): array
+    {
+        $routeInfo = $this->routeInfo();
+        $listeners = event()->getRegistered();
+
+        return [
+            self::MESSAGES => $this->logMessages(),
+            self::QUERIES => array_map(fn ($query): array => ['info' => $query], $this->queryLog()),
+            self::ROUTES => $routeInfo !== [] ? [['info' => $routeInfo]] : [],
+            self::EVENTS => $listeners !== [] ? [['info' => $listeners]] : [],
+            self::MAILS => [],
+        ];
+    }
+
+    /**
+     * The messages of the debug-mode logger
+     * @return array<int, array<string, mixed>>
+     * @throws DiException|ReflectionException|ConfigException|BaseException
+     */
+    protected function logMessages(): array
+    {
+        $adapter = logger()->getAdapter();
+
+        return $adapter instanceof MessageAdapter ? $adapter->getMessages() : [];
     }
 
     /**
@@ -228,16 +249,15 @@ class Debugger
     }
 
     /**
-     * Creates a tab
+     * Creates a tab with its stored entries, followed by the collected ones
+     * @param array<int, array<string, mixed>> $collected
      * @throws DebugBarException
      */
-    protected function createTab(string $type): void
+    protected function createTab(string $type, array $collected): void
     {
         $collector = $this->resolveMessagesCollector($type);
 
-        $messages = $this->store->get($type);
-
-        foreach ($messages as $message) {
+        foreach (array_merge($this->store->get($type), $collected) as $message) {
             $fn = key($message);
             $collector->log($fn, $message[$fn]);
         }

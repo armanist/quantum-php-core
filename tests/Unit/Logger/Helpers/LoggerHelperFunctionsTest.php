@@ -8,33 +8,15 @@ use Quantum\Logger\Adapters\SingleAdapter;
 use Quantum\Logger\Adapters\DailyAdapter;
 use Quantum\Logger\Enums\LoggerType;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\Debugger\Debugger;
 use Quantum\Logger\Logger;
-use Quantum\Di\Di;
 
 class LoggerHelperFunctionsTest extends AppTestCase
 {
-    private Debugger $debugger;
-
     public function setUp(): void
     {
         parent::setUp();
 
         config()->set('app.debug', true);
-
-        if (!Di::isRegistered(Debugger::class)) {
-            Di::register(Debugger::class);
-        }
-
-        $this->debugger = Di::get(Debugger::class);
-
-        $this->debugger->resetStore();
-    }
-
-    public function tearDown(): void
-    {
-        $this->debugger->resetStore();
-        parent::tearDown();
     }
 
     public function testLoggerHelperGetDefaultLoggerAdapter(): void
@@ -94,54 +76,34 @@ class LoggerHelperFunctionsTest extends AppTestCase
     {
         error('Fatal Error');
 
-        $storedMessages = $this->debugger->getStoreCell(Debugger::MESSAGES);
-
-        $this->assertArrayHasKey('error', $storedMessages[0]);
-
-        $this->assertEquals('Fatal Error', $storedMessages[0]['error']);
+        $this->assertSame([['error' => 'Fatal Error']], logger()->getAdapter()->getMessages());
     }
 
     public function testWarningHelper(): void
     {
         warning('Warning!!');
 
-        $storedMessages = $this->debugger->getStoreCell(Debugger::MESSAGES);
-
-        $this->assertArrayHasKey('warning', $storedMessages[0]);
-
-        $this->assertEquals('Warning!!', $storedMessages[0]['warning']);
+        $this->assertSame([['warning' => 'Warning!!']], logger()->getAdapter()->getMessages());
     }
 
     public function testNoticeHelper(): void
     {
         notice('Simple Notice');
 
-        $storedMessages = $this->debugger->getStoreCell(Debugger::MESSAGES);
-
-        $this->assertArrayHasKey('notice', $storedMessages[0]);
-
-        $this->assertEquals('Simple Notice', $storedMessages[0]['notice']);
+        $this->assertSame([['notice' => 'Simple Notice']], logger()->getAdapter()->getMessages());
     }
 
     public function testInfoHelper(): void
     {
         info('For your information');
 
-        $storedMessages = $this->debugger->getStoreCell(Debugger::MESSAGES);
-
-        $this->assertArrayHasKey('info', $storedMessages[0]);
-
-        $this->assertEquals('For your information', $storedMessages[0]['info']);
+        $this->assertSame([['info' => 'For your information']], logger()->getAdapter()->getMessages());
     }
 
     public function testDebugHelper(): void
     {
         debug('Debugging!!');
 
-        $storedMessages = $this->debugger->getStoreCell(Debugger::MESSAGES);
-
-        $this->assertArrayHasKey('debug', $storedMessages[0]);
-
-        $this->assertEquals('Debugging!!', $storedMessages[0]['debug']);
+        $this->assertSame([['debug' => 'Debugging!!']], logger()->getAdapter()->getMessages());
     }
 }

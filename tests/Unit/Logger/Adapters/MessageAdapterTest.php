@@ -4,40 +4,28 @@ namespace Quantum\Tests\Unit\Logger\Adapters;
 
 use Quantum\Logger\Adapters\MessageAdapter;
 use Quantum\Tests\Unit\AppTestCase;
-use Quantum\Debugger\Debugger;
-use Quantum\Di\Di;
 
 class MessageAdapterTest extends AppTestCase
 {
     private MessageAdapter $adapter;
-    private Debugger $debugger;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        if (!Di::isRegistered(Debugger::class)) {
-            Di::register(Debugger::class);
-        }
-
-        $this->debugger = Di::get(Debugger::class);
-
-        $this->debugger->initStore();
-
         $this->adapter = new MessageAdapter();
     }
 
-    public function testReportAddsMessageToDebuggerStore(): void
+    public function testGetMessagesIsEmptyBeforeAnyReport(): void
     {
-        $level = 'info';
-        $message = 'Test message';
+        $this->assertSame([], $this->adapter->getMessages());
+    }
 
-        $this->adapter->report($level, $message);
+    public function testReportKeepsTheMessagesInOrder(): void
+    {
+        $this->adapter->report('info', 'Test message');
+        $this->adapter->report('error', 'Error message');
 
-        $storedMessages = $this->debugger->getStoreCell(Debugger::MESSAGES);
-
-        $this->assertArrayHasKey($level, $storedMessages[0]);
-
-        $this->assertEquals($message, $storedMessages[0][$level]);
+        $this->assertSame([['info' => 'Test message'], ['error' => 'Error message']], $this->adapter->getMessages());
     }
 }
