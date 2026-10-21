@@ -10,6 +10,7 @@ use Quantum\ResourceCache\ViewCache;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Http\Enums\ContentType;
 use Quantum\Http\Enums\StatusCode;
+use Quantum\Debugger\DebuggerStore;
 use Quantum\Router\MatchedRoute;
 use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;
@@ -364,6 +365,25 @@ class WebAppAdapterTest extends AppTestCase
         ob_end_clean();
 
         $this->assertNull($uriSeenAfterSend);
+    }
+
+    public function testWebAppAdapterLeavesTheDebuggerStoreEmptyUntilTheToolbarRenders(): void
+    {
+        $store = new DebuggerStore();
+        $store->flush();
+
+        $adapter = new WebAppAdapter($this->createContext());
+        $adapter->boot();
+
+        config()->set('app.debug', true);
+        request()->create('GET', '/test/am/tests');
+
+        ob_start();
+        $adapter->start();
+        ob_end_clean();
+
+        $this->assertFalse($store->has(Debugger::EVENTS));
+        $this->assertSame([], $store->all());
     }
 
     public function testWebAppAdapterConstructorDoesNotBoot(): void
