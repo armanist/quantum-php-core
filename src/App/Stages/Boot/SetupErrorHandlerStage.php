@@ -27,10 +27,6 @@ use Quantum\Di\Di;
  */
 class SetupErrorHandlerStage implements StageInterface
 {
-    public const BEFORE = 'boot.error_handler.before';
-
-    public const AFTER = 'boot.error_handler.after';
-
     /**
      * @throws ConfigException|DiException|BaseException|ReflectionException
      */

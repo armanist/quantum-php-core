@@ -25,10 +25,6 @@ use Quantum\Di\Di;
  */
 class LoadEnvironmentStage implements StageInterface
 {
-    public const BEFORE = 'boot.environment.before';
-
-    public const AFTER = 'boot.environment.after';
-
     /**
      * @throws EnvException|DiException|BaseException
      */

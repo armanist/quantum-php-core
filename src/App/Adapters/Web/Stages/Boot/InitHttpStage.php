@@ -23,10 +23,6 @@ use Quantum\Di\Di;
  */
 class InitHttpStage implements StageInterface
 {
-    public const BEFORE = 'boot.http.before';
-
-    public const AFTER = 'boot.http.after';
-
     public function process(AppContext $context): void
     {
         if (!Di::isRegistered(Request::class)) {

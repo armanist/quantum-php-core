@@ -28,10 +28,6 @@ use Quantum\Di\Di;
  */
 class LoadModulesStage implements StageInterface
 {
-    public const BEFORE = 'boot.modules.before';
-
-    public const AFTER = 'boot.modules.after';
-
     /**
      * @throws ModuleException|RouteException|DiException|ReflectionException
      */

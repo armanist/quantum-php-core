@@ -2,7 +2,6 @@
 
 namespace Quantum\Tests\Unit\App;
 
-use Quantum\App\Adapters\Console\Stages\Boot\SetupConsoleApplicationStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\HandleRouteNotFoundStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\HandlePreflightStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\DispatchRequestStage;
@@ -10,14 +9,7 @@ use Quantum\App\Adapters\Console\Stages\Runtime\RunCommandStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\PrepareRequestStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\SendResponseStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\ResolveRouteStage;
-use Quantum\App\Adapters\Console\Stages\Boot\InitConsoleStage;
-use Quantum\App\Adapters\Web\Stages\Boot\InitDebuggerStage;
-use Quantum\App\Adapters\Web\Stages\Boot\LoadModulesStage;
-use Quantum\App\Adapters\Web\Stages\Boot\InitHttpStage;
-use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
-use Quantum\App\Stages\Boot\LoadEnvironmentStage;
 use Quantum\App\Adapters\Console\ConsoleContext;
-use Quantum\App\Stages\Boot\LoadAppConfigStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Adapters\Web\WebContext;
@@ -202,23 +194,6 @@ class PipelineTest extends AppTestCase
         $this->assertFalse($after);
     }
 
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
-    public function testPipelineSkipsStageEventsWhileEventHelperIsNotLoaded(): void
-    {
-        $this->assertFalse(function_exists('event'));
-
-        $processed = false;
-
-        (new Pipeline([$this->createFirstEventStage(function () use (&$processed): void {
-            $processed = true;
-        })]))->run($this->context);
-
-        $this->assertTrue($processed);
-    }
-
     public function testPipelineEndsTheRunWhenAStageStopsTheContext(): void
     {
         $log = [];
@@ -368,24 +343,6 @@ class PipelineTest extends AppTestCase
         $this->assertSame(ExitCode::INVALID, $exitCodeSeenBySecondStage);
     }
 
-    public function testPipelineStagesDeclareBootEventNames(): void
-    {
-        $this->assertSame('boot.environment.before', LoadEnvironmentStage::BEFORE);
-        $this->assertSame('boot.environment.after', LoadEnvironmentStage::AFTER);
-
-        $this->assertSame('boot.config.before', LoadAppConfigStage::BEFORE);
-        $this->assertSame('boot.config.after', LoadAppConfigStage::AFTER);
-
-        $this->assertSame('boot.error_handler.before', SetupErrorHandlerStage::BEFORE);
-        $this->assertSame('boot.error_handler.after', SetupErrorHandlerStage::AFTER);
-
-        $this->assertSame('boot.http.before', InitHttpStage::BEFORE);
-        $this->assertSame('boot.http.after', InitHttpStage::AFTER);
-
-        $this->assertSame('boot.modules.before', LoadModulesStage::BEFORE);
-        $this->assertSame('boot.modules.after', LoadModulesStage::AFTER);
-    }
-
     public function testPipelineRuntimeStagesDeclareTheirEventNames(): void
     {
         $this->assertSame('web.preflight.before', HandlePreflightStage::BEFORE);
@@ -410,11 +367,28 @@ class PipelineTest extends AppTestCase
         $this->assertSame('console.command.after', RunCommandStage::AFTER);
     }
 
-    public function testLoadHelpersInitConsoleInitDebuggerAndSetupConsoleApplicationStagesDeclareNoEvents(): void
+    public function testPipelineBootStagesDeclareNoEvents(): void
     {
-        foreach ([LoadHelpersStage::class, InitConsoleStage::class, InitDebuggerStage::class, SetupConsoleApplicationStage::class] as $stage) {
-            $this->assertFalse(defined($stage . '::BEFORE'), $stage . ' must not declare BEFORE');
-            $this->assertFalse(defined($stage . '::AFTER'), $stage . ' must not declare AFTER');
+        $app = dirname(__DIR__, 3) . DS . 'src' . DS . 'App';
+
+        $bootFolders = [
+            'Quantum\\App\\Stages\\Boot\\' => $app . DS . 'Stages' . DS . 'Boot',
+            'Quantum\\App\\Adapters\\Web\\Stages\\Boot\\' => $app . DS . 'Adapters' . DS . 'Web' . DS . 'Stages' . DS . 'Boot',
+            'Quantum\\App\\Adapters\\Console\\Stages\\Boot\\' => $app . DS . 'Adapters' . DS . 'Console' . DS . 'Stages' . DS . 'Boot',
+        ];
+
+        foreach ($bootFolders as $namespace => $folder) {
+            $files = glob($folder . DS . '*Stage.php');
+
+            $this->assertNotEmpty($files, 'No boot stages found in ' . $folder);
+
+            foreach ($files as $file) {
+                $stage = $namespace . basename($file, '.php');
+
+                $this->assertTrue(class_exists($stage), $stage . ' must exist');
+                $this->assertFalse(defined($stage . '::BEFORE'), $stage . ' must not declare BEFORE');
+                $this->assertFalse(defined($stage . '::AFTER'), $stage . ' must not declare AFTER');
+            }
         }
     }
 

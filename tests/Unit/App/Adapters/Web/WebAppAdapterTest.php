@@ -386,15 +386,13 @@ class WebAppAdapterTest extends AppTestCase
         $this->assertTrue(config()->has('app'));
     }
 
-    public function testWebAppAdapterBootFiresAppHelperListenerAtModulesBeforeEvent(): void
+    public function testWebAppAdapterStartFiresAppHelperListenerAtPreflightBeforeEvent(): void
     {
         $this->withTemporaryAppHelper(function (): void {
-            $context = $this->createContext();
+            $this->startWithAppHelperListener();
 
-            (new WebAppAdapter($context))->boot();
-
-            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
-            $this->assertSame($context, $GLOBALS['bootEventPayloads'][0]['context']);
+            $this->assertCount(1, $GLOBALS['helperEventPayloads']);
+            $this->assertInstanceOf(WebContext::class, $GLOBALS['helperEventPayloads'][0]['context']);
         });
     }
 
@@ -403,7 +401,7 @@ class WebAppAdapterTest extends AppTestCase
         $this->withTemporaryAppHelper(function (): void {
             (new WebAppAdapter($this->createContext()))->boot();
 
-            $this->assertFalse($GLOBALS['bootEventConfigLoadedAtRegistration']);
+            $this->assertFalse($GLOBALS['helperConfigLoadedAtRegistration']);
             $this->assertTrue(config()->has('app'));
         });
     }
@@ -411,13 +409,28 @@ class WebAppAdapterTest extends AppTestCase
     public function testWebAppAdapterSecondBootDoesNotRegisterAppHelperListenerAgain(): void
     {
         $this->withTemporaryAppHelper(function (): void {
-            (new WebAppAdapter($this->createContext()))->boot();
-            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
+            $this->startWithAppHelperListener();
+            $this->assertCount(1, $GLOBALS['helperEventPayloads']);
 
             // Helper files load with require_once, so a new container does not get the listener again.
-            (new WebAppAdapter($this->createContext()))->boot();
-            $this->assertCount(1, $GLOBALS['bootEventPayloads']);
+            $this->startWithAppHelperListener();
+            $this->assertCount(1, $GLOBALS['helperEventPayloads']);
         });
+    }
+
+    /**
+     * Boots a new adapter, which loads the temporary app helper, and starts it for a matched route
+     */
+    private function startWithAppHelperListener(): void
+    {
+        $adapter = new WebAppAdapter($this->createContext());
+        $adapter->boot();
+
+        request()->create('GET', '/test/am/tests');
+
+        ob_start();
+        $adapter->start();
+        ob_end_clean();
     }
 
     /**
@@ -450,10 +463,10 @@ class WebAppAdapterTest extends AppTestCase
         $helper = <<<'PHP'
 <?php
 
-$GLOBALS['bootEventConfigLoadedAtRegistration'] = config()->has('app');
+$GLOBALS['helperConfigLoadedAtRegistration'] = config()->has('app');
 
-event()->listen('boot.modules.before', function (array $payload): void {
-    $GLOBALS['bootEventPayloads'][] = $payload;
+event()->listen('web.preflight.before', function (array $payload): void {
+    $GLOBALS['helperEventPayloads'][] = $payload;
 });
 PHP;
 
@@ -472,7 +485,7 @@ PHP;
             if ($createdDir && is_dir($dir)) {
                 rmdir($dir);
             }
-            unset($GLOBALS['bootEventPayloads'], $GLOBALS['bootEventConfigLoadedAtRegistration']);
+            unset($GLOBALS['helperEventPayloads'], $GLOBALS['helperConfigLoadedAtRegistration']);
         }
     }
 }
