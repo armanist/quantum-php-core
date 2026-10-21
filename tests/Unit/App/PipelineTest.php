@@ -212,20 +212,137 @@ class PipelineTest extends AppTestCase
         $this->assertTrue($processed);
     }
 
-    public function testPipelineCarriesTheStoppedFlagOfAWebContextBetweenStages(): void
+    public function testPipelineEndsTheRunWhenAStageStopsTheContext(): void
     {
-        $stoppedSeenBySecondStage = null;
+        $log = [];
 
         (new Pipeline([
-            $this->createStage(function (WebContext $context): void {
+            $this->createStage(function (AppContext $context) use (&$log): void {
+                $log[] = 'first';
                 $context->stop();
             }),
-            $this->createStage(function (WebContext $context) use (&$stoppedSeenBySecondStage): void {
-                $stoppedSeenBySecondStage = $context->isStopped();
+            $this->createStage(function () use (&$log): void {
+                $log[] = 'second';
             }),
         ]))->run(new WebContext($this->context));
 
-        $this->assertTrue($stoppedSeenBySecondStage);
+        $this->assertSame(['first'], $log);
+    }
+
+    public function testPipelineDispatchesNoEventsOfTheStagesAfterAStop(): void
+    {
+        $this->loadHelpers();
+
+        $log = [];
+
+        foreach (['test.first.before', 'test.first.after', 'test.second.before', 'test.second.after'] as $name) {
+            event()->listen($name, function () use (&$log, $name): void {
+                $log[] = $name;
+            });
+        }
+
+        (new Pipeline([
+            $this->createFirstEventStage(function (AppContext $context): void {
+                $context->stop();
+            }),
+            $this->createSecondEventStage(function (): void {
+            }),
+        ]))->run($this->context);
+
+        $this->assertSame(['test.first.before', 'test.first.after'], $log);
+    }
+
+    public function testPipelineRunsTheClosingStageAfterTheStages(): void
+    {
+        $log = [];
+
+        (new Pipeline(
+            [
+                $this->createStage(function () use (&$log): void {
+                    $log[] = 'first';
+                }),
+                $this->createStage(function () use (&$log): void {
+                    $log[] = 'second';
+                }),
+            ],
+            $this->createStage(function () use (&$log): void {
+                $log[] = 'closing';
+            })
+        ))->run($this->context);
+
+        $this->assertSame(['first', 'second', 'closing'], $log);
+    }
+
+    public function testPipelineRunsTheClosingStageAfterAStop(): void
+    {
+        $log = [];
+
+        (new Pipeline(
+            [
+                $this->createStage(function (AppContext $context) use (&$log): void {
+                    $log[] = 'first';
+                    $context->stop();
+                }),
+                $this->createStage(function () use (&$log): void {
+                    $log[] = 'second';
+                }),
+            ],
+            $this->createStage(function () use (&$log): void {
+                $log[] = 'closing';
+            })
+        ))->run($this->context);
+
+        $this->assertSame(['first', 'closing'], $log);
+    }
+
+    public function testPipelineDispatchesTheEventsOfTheClosingStageAfterAStop(): void
+    {
+        $this->loadHelpers();
+
+        $log = [];
+
+        foreach (['test.second.before', 'test.second.after'] as $name) {
+            event()->listen($name, function () use (&$log, $name): void {
+                $log[] = $name;
+            });
+        }
+
+        (new Pipeline(
+            [
+                $this->createStage(function (AppContext $context): void {
+                    $context->stop();
+                }),
+            ],
+            $this->createSecondEventStage(function () use (&$log): void {
+                $log[] = 'closing';
+            })
+        ))->run($this->context);
+
+        $this->assertSame(['test.second.before', 'closing', 'test.second.after'], $log);
+    }
+
+    public function testPipelineSkipsTheClosingStageWhenAStageThrows(): void
+    {
+        $closed = false;
+
+        try {
+            (new Pipeline(
+                [
+                    $this->createStage(function (): void {
+                        throw new RuntimeException('Stage failed');
+                    }),
+                ],
+                $this->createStage(function () use (&$closed): void {
+                    $closed = true;
+                })
+            ))->run($this->context);
+
+            $this->fail('Expected the stage exception to propagate.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Stage failed', $exception->getMessage());
+        }
+
+        $this->assertFalse($closed);
     }
 
     public function testPipelineCarriesTheExitCodeOfAConsoleContextBetweenStages(): void

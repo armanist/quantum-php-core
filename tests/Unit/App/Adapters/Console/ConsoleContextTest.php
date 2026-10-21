@@ -12,7 +12,6 @@ use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;
 use Quantum\Di\DiContainer;
-use RuntimeException;
 use Quantum\App\App;
 use Quantum\Di\Di;
 
@@ -71,20 +70,6 @@ class ConsoleContextTest extends AppTestCase
         $context->getContainer()->set(Application::class, $application);
 
         $this->assertSame($application, $consoleContext->getApplication());
-    }
-
-    public function testConsoleContextHasNoBootFailureByDefault(): void
-    {
-        $this->assertNull($this->consoleContext->getBootFailure());
-    }
-
-    public function testConsoleContextExposesTheBootFailure(): void
-    {
-        $failure = new RuntimeException('The boot failed');
-
-        $consoleContext = new ConsoleContext($this->appContext, $failure);
-
-        $this->assertSame($failure, $consoleContext->getBootFailure());
     }
 
     public function testConsoleContextDefaultsExitCodeToSuccess(): void

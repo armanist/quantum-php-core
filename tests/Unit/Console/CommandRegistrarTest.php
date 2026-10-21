@@ -4,9 +4,12 @@ namespace Quantum\Tests\Unit\Console;
 
 use Quantum\Tests\_root\shared\Commands\TestCommand;
 use Symfony\Component\Console\Command\Command;
+use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Symfony\Component\Console\Application;
+use Quantum\Environment\Environment;
 use Quantum\Console\CommandRegistrar;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\Di\Di;
 
 class CommandRegistrarTest extends AppTestCase
 {
@@ -62,5 +65,18 @@ class CommandRegistrarTest extends AppTestCase
         CommandRegistrar::register($this->application, $this->directory, $this->namespace);
 
         $this->assertInstanceOf(TestCommand::class, $this->application->get('test:dummy'));
+    }
+
+    public function testCommandRegistrarRegistersTheCoreCommandsWithoutLoadingTheEnvironmentOrAnyConfig(): void
+    {
+        $this->clearAppContext();
+
+        (new LoadHelpersStage())->process($this->createContext());
+
+        CommandRegistrar::register($this->application, dirname(__DIR__, 3) . DS . 'src' . DS . 'Console' . DS . 'Commands', '\\Quantum\\Console\\Commands\\');
+
+        $this->assertTrue($this->application->has('core:env'));
+        $this->assertFalse(Di::has(Environment::class));
+        $this->assertNull(config()->all());
     }
 }

@@ -27,7 +27,7 @@ use Exception;
  * Class SendResponseStage
  *
  * Sends the response of the request and always clears the request state afterwards,
- * even when sending fails. This stage never checks WebContext::isStopped().
+ * even when sending fails. It is the closing stage of the web runtime, so it also runs after a stop.
  *
  * @implements StageInterface<WebContext>
  * @package Quantum\App

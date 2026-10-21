@@ -8,30 +8,34 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Console;
+namespace Quantum\App\Stages\Boot;
 
-use Quantum\App\Adapters\Console\ConsoleContext;
+use Symfony\Component\Console\Application;
 use Quantum\App\Contracts\StageInterface;
+use Quantum\Di\Exceptions\DiException;
 use Quantum\Console\CommandRegistrar;
 use Quantum\App\AppContext;
 use ReflectionException;
+use Quantum\Di\Di;
 
 /**
  * Class RegisterAppCommandsStage
- * @implements StageInterface<ConsoleContext>
+ *
+ * Runs last in the console boot, so the constructors of the app commands can use the environment and the config.
+ *
+ * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
 class RegisterAppCommandsStage implements StageInterface
 {
     /**
      * Registers the commands of the application
-     * @param ConsoleContext $context
-     * @throws ReflectionException
+     * @throws DiException|ReflectionException
      */
     public function process(AppContext $context): void
     {
         CommandRegistrar::register(
-            $context->getApplication(),
+            Di::get(Application::class),
             $this->directory(),
             $this->namespace(),
         );

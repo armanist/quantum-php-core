@@ -159,14 +159,4 @@ class PrepareRequestStageTest extends AppTestCase
             }
         }
     }
-
-    public function testPrepareRequestStageSkipsWhenContextIsStopped(): void
-    {
-        $this->webContext->stop();
-
-        (new PrepareRequestStage())->process($this->webContext);
-
-        $this->assertFalse(config()->has('lang'));
-        $this->assertFalse(Di::isRegistered(ViewCache::class));
-    }
 }

@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Quantum\Console\Commands;
 
 use Quantum\Storage\Factories\FileSystemFactory;
+use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Module\Exceptions\ModuleException;
 use Quantum\Router\Exceptions\RouteException;
 use Quantum\App\Exceptions\BaseException;
@@ -30,18 +31,6 @@ use Quantum\Di\Di;
  */
 class OpenApiCommand extends CliCommand
 {
-    /**
-     * File System
-     */
-    protected FileSystem $fs;
-
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->fs = FileSystemFactory::get();
-    }
-
     /**
      * Command name
      */
@@ -83,10 +72,12 @@ class OpenApiCommand extends CliCommand
 
     /**
      * Executes the command and generate Open API specifications
-     * @throws ModuleException|RouteException|DiException|BaseException|ReflectionException
+     * @throws ModuleException|RouteException|ConfigException|DiException|BaseException|ReflectionException
      */
     public function exec(): void
     {
+        $fs = FileSystemFactory::get();
+
         if (!Di::isRegistered(ModuleLoader::class)) {
             Di::register(ModuleLoader::class);
         }
@@ -110,34 +101,34 @@ class OpenApiCommand extends CliCommand
 
         $routes = $modulePath . DS . 'routes' . DS . 'routes.php';
 
-        if (!$this->fs->exists(assets_dir() . DS . 'OpenApiUi' . DS . 'index.css')) {
+        if (!$fs->exists(assets_dir() . DS . 'OpenApiUi' . DS . 'index.css')) {
             $this->copyResources();
             $this->info('OpenApi resources successfully published');
         }
 
-        if (!$this->fs->isDirectory($modulePath)) {
+        if (!$fs->isDirectory($modulePath)) {
             $this->error('The module `' . ucfirst($module) . '` not found');
             return;
         }
 
-        if (request()->routeGroupExists('openapi', $module) && $this->fs->exists($modulePath . DS . 'resources' . DS . 'openapi' . DS . 'spec.json')) {
+        if (request()->routeGroupExists('openapi', $module) && $fs->exists($modulePath . DS . 'resources' . DS . 'openapi' . DS . 'spec.json')) {
             $this->error('The Open API specifications already installed for `' . ucfirst($module) . '` module');
             return;
         }
 
         if (!request()->routeGroupExists('openapi', $module)) {
-            $routeContent = $this->fs->get($routes);
+            $routeContent = $fs->get($routes);
 
             if ($routeContent !== false) {
-                $this->fs->put($routes, str_replace('return function ($route) {', $this->openapiRoutes($module), $routeContent));
+                $fs->put($routes, str_replace('return function ($route) {', $this->openapiRoutes($module), $routeContent));
             }
         }
 
-        if (!$this->fs->isDirectory($modulePath . DS . 'resources' . DS . 'openapi')) {
-            $this->fs->makeDirectory($modulePath . DS . 'resources' . DS . 'openapi');
+        if (!$fs->isDirectory($modulePath . DS . 'resources' . DS . 'openapi')) {
+            $fs->makeDirectory($modulePath . DS . 'resources' . DS . 'openapi');
         }
 
-        $this->generateOpenapiSpecification($module);
+        $this->generateOpenapiSpecification($fs, $module);
     }
 
     /**
@@ -161,7 +152,7 @@ class OpenApiCommand extends CliCommand
     /**
      * Generates file with OpenApi specifications
      */
-    private function generateOpenapiSpecification(string $module): void
+    private function generateOpenapiSpecification(FileSystem $fs, string $module): void
     {
         $annotationPath = modules_dir() . DS . $module . DS . 'Controllers' . DS . 'OpenApi' . DS;
 
@@ -174,7 +165,7 @@ class OpenApiCommand extends CliCommand
             return;
         }
 
-        $this->fs->put($specPath, $openApi->toJson());
+        $fs->put($specPath, $openApi->toJson());
 
         $this->info('OpenAPI specification generated successfully.');
     }

@@ -22,8 +22,8 @@ use Quantum\Di\Di;
 /**
  * Class InitConsoleStage
  *
- * Runs before the helpers are loaded, so that the console application, input and output exist
- * even when a helper file fails; for the same reason it declares no boot events.
+ * Runs first in the console boot, before the helpers are loaded, so it declares no boot events.
+ * The core command registration and ResolveEnvironmentStage read the application and the input it registers.
  *
  * @implements StageInterface<AppContext>
  * @package Quantum\App

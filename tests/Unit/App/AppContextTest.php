@@ -4,6 +4,7 @@ namespace Quantum\Tests\Unit\App;
 
 use Quantum\Environment\Environment;
 use PHPUnit\Framework\TestCase;
+use Quantum\App\Enums\ExitCode;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Config\Config;
@@ -46,5 +47,37 @@ class AppContextTest extends TestCase
         $context = new AppContext('/tmp', $container);
 
         $this->assertSame($config, $context->getConfig());
+    }
+
+    public function testAppContextIsNotStoppedByDefault(): void
+    {
+        $context = new AppContext('/tmp', new DiContainer());
+
+        $this->assertFalse($context->isStopped());
+    }
+
+    public function testAppContextStop(): void
+    {
+        $context = new AppContext('/tmp', new DiContainer());
+
+        $context->stop();
+
+        $this->assertTrue($context->isStopped());
+    }
+
+    public function testAppContextExitCodeDefaultsToSuccess(): void
+    {
+        $context = new AppContext('/tmp', new DiContainer());
+
+        $this->assertSame(ExitCode::SUCCESS, $context->getExitCode());
+    }
+
+    public function testAppContextSetExitCode(): void
+    {
+        $context = new AppContext('/tmp', new DiContainer());
+
+        $context->setExitCode(ExitCode::INVALID);
+
+        $this->assertSame(ExitCode::INVALID, $context->getExitCode());
     }
 }

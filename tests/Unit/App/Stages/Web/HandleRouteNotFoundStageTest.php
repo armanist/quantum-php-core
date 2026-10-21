@@ -88,15 +88,4 @@ class HandleRouteNotFoundStageTest extends AppTestCase
         $this->assertNull($this->webContext->getResponse());
         $this->assertFalse($this->webContext->isStopped());
     }
-
-    public function testHandleRouteNotFoundStageSkipsWhenContextIsStopped(): void
-    {
-        request()->create('GET', '/non-existing-uri');
-
-        $this->webContext->stop();
-
-        (new HandleRouteNotFoundStage())->process($this->webContext);
-
-        $this->assertNull($this->webContext->getResponse());
-    }
 }

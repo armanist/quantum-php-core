@@ -7,6 +7,7 @@ use Quantum\App\Exceptions\AppException;
 use Quantum\App\Contracts\AppInterface;
 use Quantum\App\Adapters\Web\WebAppAdapter;
 use Quantum\App\Factories\AppFactory;
+use Quantum\Environment\Environment;
 use PHPUnit\Framework\TestCase;
 use Quantum\App\Enums\AppType;
 use Quantum\App\App;
@@ -47,6 +48,16 @@ class AppFactoryTest extends TestCase
         $this->assertInstanceOf(WebAppAdapter::class, $app->getAdapter());
 
         $this->assertInstanceOf(AppInterface::class, $app->getAdapter());
+    }
+
+    public function testAppFactoryBootsTheCreatedApp(): void
+    {
+        AppFactory::destroy(AppType::WEB);
+
+        AppFactory::create(AppType::WEB, PROJECT_ROOT);
+
+        $this->assertTrue(Di::has(Environment::class));
+        $this->assertTrue(config()->has('app'));
     }
 
     public function testAppFactoryInvalidAdapter(): void

@@ -12,16 +12,13 @@ namespace Quantum\App\Stages\Console;
 
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Contracts\StageInterface;
-use Quantum\Console\CliCommand;
 use Quantum\App\AppContext;
 use Exception;
-use Throwable;
 
 /**
  * Class RunCommandStage
  *
- * Runs the requested command; a missing or unknown command is rejected before anything runs,
- * and so is a command that needs the environment after the boot failed.
+ * Runs the requested command; a missing or unknown command is rejected before anything runs.
  *
  * @implements StageInterface<ConsoleContext>
  * @package Quantum\App
@@ -30,7 +27,7 @@ class RunCommandStage implements StageInterface
 {
     /**
      * @param ConsoleContext $context
-     * @throws Exception|Throwable
+     * @throws Exception
      */
     public function process(AppContext $context): void
     {
@@ -38,12 +35,6 @@ class RunCommandStage implements StageInterface
 
         if ($commandName === null || !$context->getApplication()->has($commandName)) {
             throw new Exception("Command `$commandName` is not defined");
-        }
-
-        $command = $context->getApplication()->get($commandName);
-
-        if ($context->getBootFailure() !== null && $command instanceof CliCommand && $command->requiresEnvironment()) {
-            throw $context->getBootFailure();
         }
 
         $context->setExitCode(

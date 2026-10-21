@@ -32,10 +32,6 @@ class ResolveRouteStage implements StageInterface
      */
     public function process(AppContext $context): void
     {
-        if ($context->isStopped()) {
-            return;
-        }
-
         $request = $context->getRequest();
 
         $request->setMatchedRoute((new RouteFinder($context->getRoutes()))->find($request));

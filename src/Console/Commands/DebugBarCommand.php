@@ -12,7 +12,9 @@ namespace Quantum\Console\Commands;
 
 use Quantum\Storage\Exceptions\FileSystemException;
 use Quantum\Storage\Factories\FileSystemFactory;
+use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
+use Quantum\Di\Exceptions\DiException;
 use Quantum\Storage\FileSystem;
 use Quantum\Console\CliCommand;
 use ReflectionException;
@@ -23,11 +25,6 @@ use ReflectionException;
  */
 class DebugBarCommand extends CliCommand
 {
-    /**
-     * File System
-     */
-    protected FileSystem $fs;
-
     /**
      * Command name
      */
@@ -54,27 +51,19 @@ class DebugBarCommand extends CliCommand
     private string $vendorDebugBarFolderPath = 'vendor/php-debugbar/php-debugbar/src/DebugBar/Resources';
 
     /**
-     * @throws BaseException|ReflectionException
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->fs = FileSystemFactory::get();
-    }
-
-    /**
      * Executes the command and publishes the debug bar assets
-     * @throws FileSystemException|BaseException
+     * @throws FileSystemException|ConfigException|DiException|BaseException|ReflectionException
      */
     public function exec(): void
     {
+        $fs = FileSystemFactory::get();
 
-        if ($this->fs->exists(assets_dir() . DS . 'DebugBar' . DS . 'Resources' . DS . 'debugbar.css')) {
+        if ($fs->exists(assets_dir() . DS . 'DebugBar' . DS . 'Resources' . DS . 'debugbar.css')) {
             $this->error('The debug ber already installed');
             return;
         }
 
-        $this->copyResources($this->vendorDebugBarFolderPath, $this->publicDebugBarFolderPath);
+        $this->copyResources($fs, $this->vendorDebugBarFolderPath, $this->publicDebugBarFolderPath);
 
         $this->info('Debugbar resources successfully published');
     }
@@ -83,19 +72,19 @@ class DebugBarCommand extends CliCommand
      * Recursively copies the debug bar assets
      * @throws FileSystemException
      */
-    private function copyResources(string $src, string $dst): void
+    private function copyResources(FileSystem $fs, string $src, string $dst): void
     {
         $dir = opendir($src);
 
-        if ($dst != $this->publicDebugBarFolderPath && $this->fs->makeDirectory($dst) === false) {
+        if ($dst != $this->publicDebugBarFolderPath && $fs->makeDirectory($dst) === false) {
             throw FileSystemException::directoryNotWritable($dst);
         }
 
         if (is_resource($dir)) {
             while (($file = readdir($dir))) {
                 if (($file !== '.') && ($file !== '..')) {
-                    if ($this->fs->isDirectory($src . DS . $file)) {
-                        $this->copyResources($src . DS . $file, $dst . DS . $file);
+                    if ($fs->isDirectory($src . DS . $file)) {
+                        $this->copyResources($fs, $src . DS . $file, $dst . DS . $file);
                     } else {
                         copy($src . DS . $file, $dst . DS . $file);
                     }

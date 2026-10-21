@@ -21,7 +21,7 @@ use Quantum\Http\Request;
  * Class WebContext
  *
  * Carries the state of a single web request through the web stages.
- * It is an AppContext (same base directory and container) whose response and stopped flag are set by the stages;
+ * It is an AppContext (same base directory and container) whose response is set by the stages;
  * the response the stages set is the one that is sent.
  * The request, the routes and the view cache are read from the container, and the matched route from the request.
  *
@@ -30,8 +30,6 @@ use Quantum\Http\Request;
 class WebContext extends AppContext
 {
     private ?Response $response = null;
-
-    private bool $stopped = false;
 
     public function __construct(AppContext $appContext)
     {
@@ -66,19 +64,5 @@ class WebContext extends AppContext
     public function getViewCache(): ViewCache
     {
         return $this->resolveFromContainer(ViewCache::class);
-    }
-
-    /**
-     * Marks the request as finished early, so stages that compute a response skip their work.
-     * The stage that sends the response still runs.
-     */
-    public function stop(): void
-    {
-        $this->stopped = true;
-    }
-
-    public function isStopped(): bool
-    {
-        return $this->stopped;
     }
 }
