@@ -142,7 +142,7 @@ class Debugger
     }
 
     /**
-     * Renders the debug bar
+     * Renders the debug bar, with the event listeners registered at this point in the events tab
      * @throws DebugBarException|DiException|ReflectionException
      */
     public function render(): string
@@ -150,6 +150,9 @@ class Debugger
         if (!$this->isEnabled()) {
             return '';
         }
+
+        $this->clearStoreCell(self::EVENTS);
+        $this->addToStoreCell(self::EVENTS, 'info', event()->getRegistered());
 
         foreach ([self::MESSAGES, self::QUERIES, self::ROUTES, self::EVENTS, self::MAILS] as $tab) {
             $this->createTab($tab);

@@ -26,6 +26,7 @@ class DebuggerTest extends AppTestCase
         parent::setUp();
 
         $this->debuggerStore = new DebuggerStore();
+        $this->debuggerStore->flush();
 
         $this->debugBarMock = Mockery::mock(DebugBar::class);
 
@@ -161,5 +162,78 @@ class DebuggerTest extends AppTestCase
         $output = $this->debugger->render();
 
         $this->assertEmpty($output);
+    }
+
+    public function testDebugbarRenderWritesTheRegisteredEventListenersToTheEventsTab(): void
+    {
+        config()->set('app.debug', true);
+
+        $listener = function (): void {
+        };
+
+        event()->listen('test.event', $listener);
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $this->assertSame([['info' => ['test.event' => [$listener]]]], $this->debuggerStore->get(Debugger::EVENTS));
+    }
+
+    public function testDebugbarRenderWritesNothingToTheEventsTabWithoutEventListeners(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->assertSame([], event()->getRegistered());
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $this->assertSame([], $this->debuggerStore->get(Debugger::EVENTS));
+    }
+
+    public function testDebugbarRenderWritesNothingToTheEventsTabWhenDisabled(): void
+    {
+        config()->set('app.debug', false);
+
+        event()->listen('test.event', function (): void {
+        });
+
+        $this->debugger->render();
+
+        $this->assertSame([], $this->debuggerStore->get(Debugger::EVENTS));
+    }
+
+    public function testDebugbarRenderListsTheEventListenersOnceWhenRenderedTwice(): void
+    {
+        config()->set('app.debug', true);
+
+        event()->listen('test.event', function (): void {
+        });
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+        $this->debugger->render();
+
+        $this->assertCount(1, $this->debuggerStore->get(Debugger::EVENTS));
+    }
+
+    /**
+     * Lets render() run against the mocked DebugBar: every tab gets a collector that accepts any message
+     */
+    private function expectRendering(): void
+    {
+        $rendererMock = Mockery::mock(JavascriptRenderer::class);
+        $rendererMock->shouldReceive('setBaseUrl')->andReturnSelf();
+        $rendererMock->shouldReceive('addAssets')->andReturnSelf();
+        $rendererMock->shouldReceive('renderHead')->andReturn('');
+        $rendererMock->shouldReceive('render')->andReturn('');
+
+        $this->debugBarMock->shouldReceive('getJavascriptRenderer')->andReturn($rendererMock);
+        $this->debugBarMock->shouldReceive('hasCollector')->andReturn(true);
+        $this->debugBarMock->shouldReceive('getCollector')
+            ->andReturn(Mockery::mock(MessagesCollector::class)->shouldIgnoreMissing());
     }
 }

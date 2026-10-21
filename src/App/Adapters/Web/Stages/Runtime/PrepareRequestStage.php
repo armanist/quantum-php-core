@@ -17,15 +17,13 @@ use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Lang\Factories\LangFactory;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\ResourceCache\ViewCache;
-use Quantum\Debugger\Debugger;
 use Quantum\App\AppContext;
 use ReflectionException;
 
 /**
  * Class PrepareRequestStage
  *
- * Prepares a matched request: loads the language, logs debug info and sets up the view cache.
- * The order of these steps is kept from the former WebAppAdapter flow.
+ * Prepares a matched request: loads the language and sets up the view cache.
  *
  * @implements StageInterface<WebContext>
  * @package Quantum\App
@@ -44,21 +42,7 @@ class PrepareRequestStage implements StageInterface
     {
         LangFactory::get();
 
-        $this->logDebugInfo();
-
         $this->setupViewCache($context);
-    }
-
-    /**
-     * @throws DiException|ReflectionException
-     */
-    private function logDebugInfo(): void
-    {
-        $debugBar = debugbar();
-
-        if ($debugBar->isEnabled()) {
-            $debugBar->addToStoreCell(Debugger::EVENTS, 'info', event()->getRegistered());
-        }
     }
 
     /**
