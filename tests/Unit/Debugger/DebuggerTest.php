@@ -4,6 +4,7 @@ namespace Quantum\Tests\Unit\Debugger;
 
 use Quantum\Database\Adapters\Sleekdb\SleekDbal;
 use Quantum\Database\Adapters\Idiorm\IdiormDbal;
+use Quantum\Database\Exceptions\DatabaseException;
 use DebugBar\DataCollector\MessagesCollector;
 use Quantum\Mailer\Factories\MailerFactory;
 use DebugBar\DataCollector\PhpInfoCollector;
@@ -353,6 +354,40 @@ class DebuggerTest extends AppTestCase
         config()->set('database.default', 'sleekdb');
 
         $this->assertSame(SleekDbal::class, db()->getOrmClass());
+
+        $this->assertArrayNotHasKey(Debugger::QUERIES, $this->renderTabs());
+    }
+
+    public function testDebugbarRenderPassesNothingToTheQueriesTabAfterTheDatabaseDisconnected(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->connectSqlite();
+
+        Database::query('SELECT 1');
+
+        IdiormDbal::disconnect();
+
+        $this->assertArrayNotHasKey(Debugger::QUERIES, $this->renderTabs());
+    }
+
+    public function testDebugbarRenderPassesNothingToTheQueriesTabWhenTheDatabaseFailedToStart(): void
+    {
+        config()->set('app.debug', true);
+
+        if (!config()->has('database')) {
+            config()->import(new Setup('config', 'database'));
+        }
+
+        config()->set('database.default', 'unknown');
+
+        try {
+            db();
+            $this->fail('db() should throw for an unknown adapter');
+        } catch (DatabaseException $e) {
+        }
+
+        $this->assertTrue(Di::isRegistered(Database::class));
 
         $this->assertArrayNotHasKey(Debugger::QUERIES, $this->renderTabs());
     }

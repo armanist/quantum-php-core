@@ -12,11 +12,12 @@ namespace Quantum\Debugger;
 
 use Quantum\Database\Contracts\RelationalInterface;
 use DebugBar\DataCollector\RequestDataCollector;
+use Quantum\Config\Exceptions\ConfigException;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DataCollector\MessagesCollector;
+use Quantum\Database\Contracts\DbalInterface;
 use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\MemoryCollector;
-use Quantum\Config\Exceptions\ConfigException;
 use Quantum\Logger\Adapters\MessageAdapter;
 use Quantum\Mailer\Factories\MailerFactory;
 use Quantum\App\Exceptions\BaseException;
@@ -242,21 +243,34 @@ class Debugger
             ];
         }
 
-        if (Di::isRegistered(ViewFactory::class) && ViewFactory::get()->getViewFile() !== null) {
-            $info['View'] = request()->getCurrentModule() . '/Views/' . ViewFactory::get()->getViewFile();
+        $viewFile = Di::isRegistered(ViewFactory::class) ? ViewFactory::get()->getViewFile() : null;
+
+        if ($viewFile !== null) {
+            $info['View'] = request()->getCurrentModule() . '/Views/' . $viewFile;
         }
 
         return array_filter($info, fn ($value): bool => $value !== null && $value !== []);
     }
 
     /**
-     * The queries run so far, only when the request used the database and its adapter keeps a query log
+     * The queries run so far, only when the request started the database, it is still connected
+     * and its adapter keeps a query log
      * @return array<mixed>
      * @throws DiException|ReflectionException
      */
     protected function queryLog(): array
     {
-        if (!Di::isRegistered(Database::class) || !is_subclass_of(db()->getOrmClass(), RelationalInterface::class)) {
+        if (!Di::has(Database::class)) {
+            return [];
+        }
+
+        $ormClass = db()->getOrmClass();
+
+        if (!is_subclass_of($ormClass, DbalInterface::class) || !$ormClass::getConnection()) {
+            return [];
+        }
+
+        if (!is_subclass_of($ormClass, RelationalInterface::class)) {
             return [];
         }
 
