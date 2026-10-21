@@ -1,8 +1,8 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Web;
+namespace Quantum\Tests\Unit\App\Adapters\Web\Stages\Runtime;
 
-use Quantum\App\Stages\Web\HandlePreflightStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\HandlePreflightStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Http\Enums\StatusCode;
 use Quantum\App\Adapters\Web\WebContext;

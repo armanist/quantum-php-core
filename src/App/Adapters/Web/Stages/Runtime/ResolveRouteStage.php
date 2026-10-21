@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Web;
+namespace Quantum\App\Adapters\Web\Stages\Runtime;
 
 use Quantum\Router\Exceptions\RouteException;
 use Quantum\App\Contracts\StageInterface;

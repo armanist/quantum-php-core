@@ -1,8 +1,8 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Web;
+namespace Quantum\Tests\Unit\App\Adapters\Web\Stages\Runtime;
 
-use Quantum\App\Stages\Web\PrepareRequestStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\PrepareRequestStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\App\Adapters\Web\WebContext;

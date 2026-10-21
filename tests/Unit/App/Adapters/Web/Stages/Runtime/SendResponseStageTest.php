@@ -1,8 +1,8 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Web;
+namespace Quantum\Tests\Unit\App\Adapters\Web\Stages\Runtime;
 
-use Quantum\App\Stages\Web\SendResponseStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\SendResponseStage;
 use Quantum\Http\Exceptions\HttpException;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Web\WebContext;

@@ -39,11 +39,11 @@ namespace Quantum\Tests\_root\modules\Test\Middlewares {
     }
 }
 
-namespace Quantum\Tests\Unit\App\Stages\Web {
+namespace Quantum\Tests\Unit\App\Adapters\Web\Stages\Runtime {
     use Quantum\Tests\_root\modules\Test\Middlewares\DispatchStageMwPassThrough;
     use Quantum\Tests\_root\modules\Test\Middlewares\DispatchStageMwRecorder;
-    use Quantum\App\Stages\Web\DispatchRequestStage;
-    use Quantum\App\Stages\Web\ResolveRouteStage;
+    use Quantum\App\Adapters\Web\Stages\Runtime\DispatchRequestStage;
+    use Quantum\App\Adapters\Web\Stages\Runtime\ResolveRouteStage;
     use Quantum\Router\Exceptions\RouteException;
     use Quantum\Di\Exceptions\DiException;
     use Quantum\Tests\Unit\AppTestCase;

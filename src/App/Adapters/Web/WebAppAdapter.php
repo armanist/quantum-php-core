@@ -10,19 +10,19 @@ declare(strict_types=1);
 
 namespace Quantum\App\Adapters\Web;
 
-use Quantum\App\Stages\Web\HandleRouteNotFoundStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\HandleRouteNotFoundStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\HandlePreflightStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\DispatchRequestStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\PrepareRequestStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\SendResponseStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\ResolveRouteStage;
+use Quantum\App\Adapters\Web\Stages\Boot\InitDebuggerStage;
+use Quantum\App\Adapters\Web\Stages\Boot\LoadModulesStage;
+use Quantum\App\Adapters\Web\Stages\Boot\InitHttpStage;
 use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
 use Quantum\App\Stages\Boot\LoadEnvironmentStage;
-use Quantum\App\Stages\Web\HandlePreflightStage;
-use Quantum\App\Stages\Web\DispatchRequestStage;
-use Quantum\App\Stages\Web\PrepareRequestStage;
 use Quantum\App\Stages\Boot\LoadAppConfigStage;
-use Quantum\App\Stages\Boot\InitDebuggerStage;
-use Quantum\App\Stages\Web\SendResponseStage;
-use Quantum\App\Stages\Web\ResolveRouteStage;
-use Quantum\App\Stages\Boot\LoadModulesStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
-use Quantum\App\Stages\Boot\InitHttpStage;
 use Quantum\App\Contracts\AppInterface;
 use Quantum\App\Enums\ExitCode;
 use Quantum\App\AppContext;

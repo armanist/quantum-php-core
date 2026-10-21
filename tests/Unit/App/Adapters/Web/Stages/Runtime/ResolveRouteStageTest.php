@@ -1,8 +1,8 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Web;
+namespace Quantum\Tests\Unit\App\Adapters\Web\Stages\Runtime;
 
-use Quantum\App\Stages\Web\ResolveRouteStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\ResolveRouteStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\RouteCollection;

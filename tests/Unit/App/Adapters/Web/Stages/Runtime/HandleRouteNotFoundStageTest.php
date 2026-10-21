@@ -1,8 +1,8 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Web;
+namespace Quantum\Tests\Unit\App\Adapters\Web\Stages\Runtime;
 
-use Quantum\App\Stages\Web\HandleRouteNotFoundStage;
+use Quantum\App\Adapters\Web\Stages\Runtime\HandleRouteNotFoundStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Http\Enums\ContentType;
 use Quantum\Http\Enums\StatusCode;

@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Boot;
+namespace Quantum\App\Adapters\Web\Stages\Boot;
 
 use Quantum\App\Contracts\StageInterface;
 use Quantum\App\AppContext;
