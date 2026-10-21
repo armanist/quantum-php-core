@@ -12,6 +12,9 @@ The format is based on Keep a Changelog.
 - Added adapter-based Lang provider support with `DeepL` and `Google Translate` adapters plus shared remote request/caching infrastructure (#533)
 
 ### Changed
+- **BREAKING:** Took the debugbar out of the app flow (#539): the App package no longer references the Debugger package.
+  - Removed `InitDebuggerStage` (`Quantum\App\Stages\InitDebuggerStage` in 3.0.3) from the web boot. The debugger store creates a tab on its first write; code that wants the tabs up front can call `debugbar()->initStore()`.
+  - `Debugger::render()` fills the `events` tab with the event listeners registered when the toolbar renders, instead of `PrepareRequestStage` writing them while a matched request is prepared. Listeners added later in the request, for example in a controller, are listed too.
 - **BREAKING:** Reworked the app boot and runtime into pipelines of stages that the adapters run in explicit steps (#537, #538, #575, #576, #579, #583, #589):
   - `AppInterface` gains `boot()`. The adapter constructors only store the context, and `AppFactory` calls `boot()` right after creating the adapter, so `AppFactory::create(...)->start()` is unchanged. Code that creates an adapter directly must call `boot()` before `start()`.
   - Removed the `AppAdapter` base class and the `WebAppTrait` and `ConsoleAppTrait` traits: `WebAppAdapter` and `ConsoleAppAdapter` implement `AppInterface` directly and moved to `Quantum\App\Adapters\Web` and `Quantum\App\Adapters\Console`. The stages are grouped by the adapter that runs them: the boot stages both adapters run in `Quantum\App\Stages\Boot`, the others in `Quantum\App\Adapters\Web\Stages\Boot`, `...\Web\Stages\Runtime`, `...\Console\Stages\Boot` and `...\Console\Stages\Runtime`. Code that goes through `AppFactory` is unaffected; code that references these classes directly must update its imports.
