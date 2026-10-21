@@ -53,7 +53,6 @@ class ViewFactory
             $this->instance = new View(
                 RendererFactory::get(),
                 asset(),
-                debugbar(),
                 Di::get(ViewCache::class)
             );
         }

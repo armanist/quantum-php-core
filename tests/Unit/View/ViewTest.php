@@ -6,6 +6,7 @@ use Quantum\View\Exceptions\ViewException;
 use Quantum\View\Factories\ViewFactory;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Router\MatchedRoute;
+use Quantum\Debugger\Debugger;
 use Quantum\View\RawParam;
 use Quantum\Router\Route;
 use Quantum\View\View;
@@ -98,6 +99,31 @@ class ViewTest extends AppTestCase
         $this->assertEquals('<p>Mowglis brothers</p>', $this->view->getParam('chapter_one'));
 
         $this->assertEquals('<p>Monkey people</p>', $this->view->getParam('chapter_two'));
+    }
+
+    public function testGetViewFileIsNullBeforeAViewIsRendered(): void
+    {
+        $this->assertNull($this->view->getViewFile());
+    }
+
+    public function testGetViewFileReturnsTheLastRenderedView(): void
+    {
+        $this->view->setLayout('layout');
+
+        $this->view->render('index');
+
+        $this->assertSame('index', $this->view->getViewFile());
+    }
+
+    public function testRenderWritesNothingToTheDebugger(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->view->setLayout('layout');
+
+        $this->view->render('index');
+
+        $this->assertSame([], debugbar()->getStoreCell(Debugger::ROUTES));
     }
 
     public function testRenderWithoutLayout(): void

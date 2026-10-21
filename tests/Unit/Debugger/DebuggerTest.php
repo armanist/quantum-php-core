@@ -4,10 +4,13 @@ namespace Quantum\Tests\Unit\Debugger;
 
 use DebugBar\DataCollector\MessagesCollector;
 use DebugBar\DataCollector\PhpInfoCollector;
+use Quantum\View\Factories\ViewFactory;
 use Quantum\Debugger\DebuggerStore;
 use Quantum\Tests\Unit\AppTestCase;
 use DebugBar\JavascriptRenderer;
+use Quantum\Router\MatchedRoute;
 use Quantum\Debugger\Debugger;
+use Quantum\Router\Route;
 use DebugBar\DebugBar;
 use Psr\Log\LogLevel;
 use Mockery;
@@ -193,16 +196,120 @@ class DebuggerTest extends AppTestCase
         $this->assertSame([], $this->debuggerStore->get(Debugger::EVENTS));
     }
 
-    public function testDebugbarRenderWritesNothingToTheEventsTabWhenDisabled(): void
+    public function testDebugbarRenderWritesNothingWhenDisabled(): void
     {
         config()->set('app.debug', false);
 
         event()->listen('test.event', function (): void {
         });
 
+        request()->setMatchedRoute(new MatchedRoute(new Route(['GET'], 'posts', 'PostController', 'posts'), []));
+
         $this->debugger->render();
 
         $this->assertSame([], $this->debuggerStore->get(Debugger::EVENTS));
+        $this->assertSame([], $this->debuggerStore->get(Debugger::ROUTES));
+    }
+
+    public function testDebugbarRenderWritesTheMatchedRouteToTheRoutesTab(): void
+    {
+        config()->set('app.debug', true);
+
+        $route = (new Route(['GET', 'POST'], 'posts/[id=:num]', 'PostController', 'show'))
+            ->module('Web')
+            ->name('post')
+            ->group('blog')
+            ->prefix('en')
+            ->addMiddlewares(['Auth']);
+
+        request()->setMatchedRoute(new MatchedRoute($route, ['id' => '5']));
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $this->assertSame([['info' => [
+            'Methods' => 'GET, POST',
+            'Pattern' => 'posts/[id=:num]',
+            'Module' => 'Web',
+            'Controller' => 'PostController',
+            'Action' => 'show',
+            'Name' => 'post',
+            'Group' => 'blog',
+            'Prefix' => 'en',
+            'Middlewares' => ['Auth'],
+            'Params' => ['id' => '5'],
+        ]]], $this->debuggerStore->get(Debugger::ROUTES));
+    }
+
+    public function testDebugbarRenderWritesAClosureRouteToTheRoutesTab(): void
+    {
+        config()->set('app.debug', true);
+
+        $route = (new Route(['GET'], 'ping', null, null, function (): void {
+        }))->module('Api');
+
+        request()->setMatchedRoute(new MatchedRoute($route, []));
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $this->assertSame([['info' => [
+            'Methods' => 'GET',
+            'Pattern' => 'ping',
+            'Module' => 'Api',
+            'Action' => 'Closure',
+        ]]], $this->debuggerStore->get(Debugger::ROUTES));
+    }
+
+    public function testDebugbarRenderAddsTheRenderedViewToTheRoutesTab(): void
+    {
+        config()->set('app.debug', true);
+
+        request()->create('GET', '/test');
+        request()->setMatchedRoute(new MatchedRoute((new Route(['GET'], 'test', 'SomeController', 'test'))->module('Test'), []));
+
+        $view = ViewFactory::get();
+        $view->setLayout('layout');
+        $view->render('index');
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $routes = $this->debuggerStore->get(Debugger::ROUTES);
+
+        $this->assertCount(1, $routes);
+        $this->assertSame('Test/Views/index', $routes[0]['info']['View']);
+        $this->assertSame('SomeController', $routes[0]['info']['Controller']);
+    }
+
+    public function testDebugbarRenderWritesNothingToTheRoutesTabWithoutARouteOrAView(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->assertNull(request()->getMatchedRoute());
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $this->assertSame([], $this->debuggerStore->get(Debugger::ROUTES));
+    }
+
+    public function testDebugbarRenderListsTheMatchedRouteOnceWhenRenderedTwice(): void
+    {
+        config()->set('app.debug', true);
+
+        request()->setMatchedRoute(new MatchedRoute(new Route(['GET'], 'posts', 'PostController', 'posts'), []));
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+        $this->debugger->render();
+
+        $this->assertCount(1, $this->debuggerStore->get(Debugger::ROUTES));
     }
 
     public function testDebugbarRenderListsTheEventListenersOnceWhenRenderedTwice(): void

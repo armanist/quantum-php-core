@@ -15,11 +15,15 @@ use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DataCollector\MessagesCollector;
 use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\MemoryCollector;
+use Quantum\Config\Exceptions\ConfigException;
+use Quantum\App\Exceptions\BaseException;
+use Quantum\View\Factories\ViewFactory;
 use Quantum\Di\Exceptions\DiException;
 use DebugBar\JavascriptRenderer;
 use DebugBar\DebugBarException;
 use ReflectionException;
 use DebugBar\DebugBar;
+use Quantum\Di\Di;
 
 /**
  * Class Debugger
@@ -142,8 +146,9 @@ class Debugger
     }
 
     /**
-     * Renders the debug bar, with the event listeners registered at this point in the events tab
-     * @throws DebugBarException|DiException|ReflectionException
+     * Renders the debug bar. The events and routes tabs are filled here, with the event listeners,
+     * the matched route and the rendered view as they are at this point.
+     * @throws DebugBarException|DiException|ReflectionException|ConfigException|BaseException
      */
     public function render(): string
     {
@@ -154,6 +159,9 @@ class Debugger
         $this->clearStoreCell(self::EVENTS);
         $this->addToStoreCell(self::EVENTS, 'info', event()->getRegistered());
 
+        $this->clearStoreCell(self::ROUTES);
+        $this->addToStoreCell(self::ROUTES, 'info', $this->routeInfo());
+
         foreach ([self::MESSAGES, self::QUERIES, self::ROUTES, self::EVENTS, self::MAILS] as $tab) {
             $this->createTab($tab);
         }
@@ -161,6 +169,41 @@ class Debugger
         $renderer = $this->getRenderer();
 
         return $renderer->renderHead() . $renderer->render();
+    }
+
+    /**
+     * The matched route and the rendered view, without the values that are not set
+     * @return array<string, mixed>
+     * @throws DiException|ReflectionException|ConfigException|BaseException
+     */
+    protected function routeInfo(): array
+    {
+        $info = [];
+
+        $matchedRoute = request()->getMatchedRoute();
+
+        if ($matchedRoute !== null) {
+            $route = $matchedRoute->getRoute();
+
+            $info = [
+                'Methods' => implode(', ', $route->getMethods()),
+                'Pattern' => $route->getPattern(),
+                'Module' => $route->getModule(),
+                'Controller' => $route->getController(),
+                'Action' => $route->getClosure() !== null ? 'Closure' : $route->getAction(),
+                'Name' => $route->getName(),
+                'Group' => $route->getGroup(),
+                'Prefix' => $route->getPrefix(),
+                'Middlewares' => $route->getMiddlewares(),
+                'Params' => $matchedRoute->getParams(),
+            ];
+        }
+
+        if (Di::isRegistered(ViewFactory::class) && ViewFactory::get()->getViewFile() !== null) {
+            $info['View'] = request()->getCurrentModule() . '/Views/' . ViewFactory::get()->getViewFile();
+        }
+
+        return array_filter($info, fn ($value): bool => $value !== null && $value !== []);
     }
 
     /**
