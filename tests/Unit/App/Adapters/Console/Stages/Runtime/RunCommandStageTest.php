@@ -1,10 +1,11 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Console;
+namespace Quantum\Tests\Unit\App\Adapters\Console\Stages\Runtime;
 
+use Quantum\Tests\Unit\App\Adapters\Console\Stages\ConsoleStageTestCase;
+use Quantum\App\Adapters\Console\Stages\Runtime\RunCommandStage;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
-use Quantum\App\Stages\Console\RunCommandStage;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Application;
 use Quantum\App\Enums\ExitCode;

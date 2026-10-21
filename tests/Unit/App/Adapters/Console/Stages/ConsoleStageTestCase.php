@@ -1,6 +1,6 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Console;
+namespace Quantum\Tests\Unit\App\Adapters\Console\Stages;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;

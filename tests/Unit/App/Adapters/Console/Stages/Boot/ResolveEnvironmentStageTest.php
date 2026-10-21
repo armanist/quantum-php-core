@@ -1,9 +1,9 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Boot;
+namespace Quantum\Tests\Unit\App\Adapters\Console\Stages\Boot;
 
-use Quantum\Tests\Unit\App\Stages\Console\ConsoleStageTestCase;
-use Quantum\App\Stages\Boot\ResolveEnvironmentStage;
+use Quantum\Tests\Unit\App\Adapters\Console\Stages\ConsoleStageTestCase;
+use Quantum\App\Adapters\Console\Stages\Boot\ResolveEnvironmentStage;
 use Quantum\Environment\Exceptions\EnvException;
 use Dotenv\Exception\InvalidFileException;
 use Symfony\Component\Console\Application;

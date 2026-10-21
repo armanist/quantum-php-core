@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Boot;
+namespace Quantum\App\Adapters\Console\Stages\Boot;
 
 use Symfony\Component\Console\Application;
 use Quantum\App\Contracts\StageInterface;

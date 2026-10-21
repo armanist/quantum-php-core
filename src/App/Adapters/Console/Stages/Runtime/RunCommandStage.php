@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Console;
+namespace Quantum\App\Adapters\Console\Stages\Runtime;
 
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Contracts\StageInterface;

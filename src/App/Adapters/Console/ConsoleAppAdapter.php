@@ -10,15 +10,15 @@ declare(strict_types=1);
 
 namespace Quantum\App\Adapters\Console;
 
-use Quantum\App\Stages\Boot\SetupConsoleApplicationStage;
-use Quantum\App\Stages\Boot\RegisterCoreCommandsStage;
-use Quantum\App\Stages\Boot\RegisterAppCommandsStage;
-use Quantum\App\Stages\Boot\ResolveEnvironmentStage;
+use Quantum\App\Adapters\Console\Stages\Boot\SetupConsoleApplicationStage;
+use Quantum\App\Adapters\Console\Stages\Boot\RegisterCoreCommandsStage;
+use Quantum\App\Adapters\Console\Stages\Boot\RegisterAppCommandsStage;
+use Quantum\App\Adapters\Console\Stages\Boot\ResolveEnvironmentStage;
+use Quantum\App\Adapters\Console\Stages\Runtime\RunCommandStage;
+use Quantum\App\Adapters\Console\Stages\Boot\InitConsoleStage;
 use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
 use Quantum\App\Stages\Boot\LoadEnvironmentStage;
-use Quantum\App\Stages\Console\RunCommandStage;
 use Quantum\App\Stages\Boot\LoadAppConfigStage;
-use Quantum\App\Stages\Boot\InitConsoleStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Quantum\App\Contracts\AppInterface;
 use Quantum\App\AppContext;

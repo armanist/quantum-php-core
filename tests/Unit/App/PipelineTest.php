@@ -2,15 +2,15 @@
 
 namespace Quantum\Tests\Unit\App;
 
+use Quantum\App\Adapters\Console\Stages\Boot\SetupConsoleApplicationStage;
+use Quantum\App\Adapters\Console\Stages\Boot\InitConsoleStage;
 use Quantum\App\Adapters\Web\Stages\Boot\InitDebuggerStage;
 use Quantum\App\Adapters\Web\Stages\Boot\LoadModulesStage;
-use Quantum\App\Stages\Boot\SetupConsoleApplicationStage;
 use Quantum\App\Adapters\Web\Stages\Boot\InitHttpStage;
 use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
 use Quantum\App\Stages\Boot\LoadEnvironmentStage;
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Stages\Boot\LoadAppConfigStage;
-use Quantum\App\Stages\Boot\InitConsoleStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Adapters\Web\WebContext;

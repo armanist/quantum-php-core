@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @link https://quantumphp.io
  */
 
-namespace Quantum\App\Stages\Boot;
+namespace Quantum\App\Adapters\Console\Stages\Boot;
 
 use Symfony\Component\Console\Application;
 use Quantum\App\Contracts\StageInterface;
@@ -19,17 +19,19 @@ use ReflectionException;
 use Quantum\Di\Di;
 
 /**
- * Class RegisterAppCommandsStage
+ * Class RegisterCoreCommandsStage
  *
- * Runs last in the console boot, so the constructors of the app commands can use the environment and the config.
+ * Runs right after the helpers, before the environment, so that ResolveEnvironmentStage can find
+ * core:env when the .env file cannot be loaded. A core command constructor therefore uses
+ * no environment and no config.
  *
  * @implements StageInterface<AppContext>
  * @package Quantum\App
  */
-class RegisterAppCommandsStage implements StageInterface
+class RegisterCoreCommandsStage implements StageInterface
 {
     /**
-     * Registers the commands of the application
+     * Registers the commands that ship with the framework
      * @throws DiException|ReflectionException
      */
     public function process(AppContext $context): void
@@ -43,11 +45,11 @@ class RegisterAppCommandsStage implements StageInterface
 
     private function namespace(): string
     {
-        return '\\Shared\\Commands\\';
+        return '\\Quantum\\Console\\Commands\\';
     }
 
     private function directory(): string
     {
-        return base_dir() . DS . 'shared' . DS . 'Commands';
+        return framework_dir() . DS . 'Console' . DS . 'Commands';
     }
 }

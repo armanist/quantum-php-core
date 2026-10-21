@@ -1,8 +1,8 @@
 <?php
 
-namespace Quantum\Tests\Unit\App\Stages\Boot;
+namespace Quantum\Tests\Unit\App\Adapters\Console\Stages\Boot;
 
-use Quantum\App\Stages\Boot\SetupConsoleApplicationStage;
+use Quantum\App\Adapters\Console\Stages\Boot\SetupConsoleApplicationStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Symfony\Component\Console\Application;
 use Quantum\Tests\Unit\AppTestCase;
