@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Quantum\Debugger;
 
+use Quantum\Database\Contracts\RelationalInterface;
 use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DataCollector\MessagesCollector;
@@ -21,6 +22,7 @@ use Quantum\View\Factories\ViewFactory;
 use Quantum\Di\Exceptions\DiException;
 use DebugBar\JavascriptRenderer;
 use DebugBar\DebugBarException;
+use Quantum\Database\Database;
 use ReflectionException;
 use DebugBar\DebugBar;
 use Quantum\Di\Di;
@@ -146,8 +148,8 @@ class Debugger
     }
 
     /**
-     * Renders the debug bar. The events and routes tabs are filled here, with the event listeners,
-     * the matched route and the rendered view as they are at this point.
+     * Renders the debug bar. The events, routes and queries tabs are filled here, with the event listeners,
+     * the matched route, the rendered view and the query log as they are at this point.
      * @throws DebugBarException|DiException|ReflectionException|ConfigException|BaseException
      */
     public function render(): string
@@ -161,6 +163,11 @@ class Debugger
 
         $this->clearStoreCell(self::ROUTES);
         $this->addToStoreCell(self::ROUTES, 'info', $this->routeInfo());
+
+        $this->clearStoreCell(self::QUERIES);
+        foreach ($this->queryLog() as $query) {
+            $this->addToStoreCell(self::QUERIES, 'info', $query);
+        }
 
         foreach ([self::MESSAGES, self::QUERIES, self::ROUTES, self::EVENTS, self::MAILS] as $tab) {
             $this->createTab($tab);
@@ -204,6 +211,20 @@ class Debugger
         }
 
         return array_filter($info, fn ($value): bool => $value !== null && $value !== []);
+    }
+
+    /**
+     * The queries run so far, only when the request used the database and its adapter keeps a query log
+     * @return array<mixed>
+     * @throws DiException|ReflectionException
+     */
+    protected function queryLog(): array
+    {
+        if (!Di::isRegistered(Database::class) || !is_subclass_of(db()->getOrmClass(), RelationalInterface::class)) {
+            return [];
+        }
+
+        return Database::queryLog();
     }
 
     /**

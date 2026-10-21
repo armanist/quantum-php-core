@@ -2,6 +2,8 @@
 
 namespace Quantum\Tests\Unit\Debugger;
 
+use Quantum\Database\Adapters\Sleekdb\SleekDbal;
+use Quantum\Database\Adapters\Idiorm\IdiormDbal;
 use DebugBar\DataCollector\MessagesCollector;
 use DebugBar\DataCollector\PhpInfoCollector;
 use Quantum\View\Factories\ViewFactory;
@@ -9,10 +11,13 @@ use Quantum\Debugger\DebuggerStore;
 use Quantum\Tests\Unit\AppTestCase;
 use DebugBar\JavascriptRenderer;
 use Quantum\Router\MatchedRoute;
+use Quantum\Database\Database;
 use Quantum\Debugger\Debugger;
 use Quantum\Router\Route;
+use Quantum\Config\Setup;
 use DebugBar\DebugBar;
 use Psr\Log\LogLevel;
+use Quantum\Di\Di;
 use Mockery;
 
 class DebuggerTest extends AppTestCase
@@ -205,10 +210,15 @@ class DebuggerTest extends AppTestCase
 
         request()->setMatchedRoute(new MatchedRoute(new Route(['GET'], 'posts', 'PostController', 'posts'), []));
 
+        $this->connectSqlite();
+
+        Database::query('SELECT 1');
+
         $this->debugger->render();
 
         $this->assertSame([], $this->debuggerStore->get(Debugger::EVENTS));
         $this->assertSame([], $this->debuggerStore->get(Debugger::ROUTES));
+        $this->assertSame([], $this->debuggerStore->get(Debugger::QUERIES));
     }
 
     public function testDebugbarRenderWritesTheMatchedRouteToTheRoutesTab(): void
@@ -312,6 +322,71 @@ class DebuggerTest extends AppTestCase
         $this->assertCount(1, $this->debuggerStore->get(Debugger::ROUTES));
     }
 
+    public function testDebugbarRenderWritesTheQueriesOfTheRequestToTheQueriesTab(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->connectSqlite();
+
+        Database::query('SELECT 1');
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $queries = $this->debuggerStore->get(Debugger::QUERIES);
+
+        $this->assertCount(count(Database::queryLog()), $queries);
+        $this->assertSame(['info' => 'SELECT 1'], end($queries));
+    }
+
+    public function testDebugbarRenderLeavesTheDatabaseUnusedWhenTheRequestDidNotUseIt(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $this->assertFalse(Di::isRegistered(Database::class));
+        $this->assertSame([], $this->debuggerStore->get(Debugger::QUERIES));
+    }
+
+    public function testDebugbarRenderWritesNothingToTheQueriesTabForAnAdapterWithoutAQueryLog(): void
+    {
+        config()->set('app.debug', true);
+
+        if (!config()->has('database')) {
+            config()->import(new Setup('config', 'database'));
+        }
+
+        config()->set('database.default', 'sleekdb');
+
+        $this->assertSame(SleekDbal::class, db()->getOrmClass());
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+
+        $this->assertSame([], $this->debuggerStore->get(Debugger::QUERIES));
+    }
+
+    public function testDebugbarRenderListsTheQueriesOnceWhenRenderedTwice(): void
+    {
+        config()->set('app.debug', true);
+
+        $this->connectSqlite();
+
+        Database::query('SELECT 1');
+
+        $this->expectRendering();
+
+        $this->debugger->render();
+        $this->debugger->render();
+
+        $this->assertCount(count(Database::queryLog()), $this->debuggerStore->get(Debugger::QUERIES));
+    }
+
     public function testDebugbarRenderListsTheEventListenersOnceWhenRenderedTwice(): void
     {
         config()->set('app.debug', true);
@@ -325,6 +400,22 @@ class DebuggerTest extends AppTestCase
         $this->debugger->render();
 
         $this->assertCount(1, $this->debuggerStore->get(Debugger::EVENTS));
+    }
+
+    /**
+     * Connects the in-memory SQLite database again, so the connection logs queries with the current app.debug
+     */
+    private function connectSqlite(): void
+    {
+        if (!config()->has('database')) {
+            config()->import(new Setup('config', 'database'));
+        }
+
+        config()->set('database.default', 'sqlite');
+
+        IdiormDbal::disconnect();
+
+        db();
     }
 
     /**
