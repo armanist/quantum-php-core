@@ -24,10 +24,6 @@ use ReflectionException;
  */
 class LoadAppConfigStage implements StageInterface
 {
-    public const BEFORE = 'boot.config.before';
-
-    public const AFTER = 'boot.config.after';
-
     /**
      * @throws ConfigException|DiException|ReflectionException
      */

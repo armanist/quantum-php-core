@@ -85,7 +85,7 @@ final class Pipeline
 
     /**
      * Dispatches the event a stage declares for the given point, if any.
-     * Skipped while the event() helper is not loaded yet, since nothing can listen then.
+     * Only runtime stages declare events, and they run after the helpers are loaded.
      * @param StageInterface<TContext> $stage
      * @param TContext $context
      */
@@ -93,7 +93,7 @@ final class Pipeline
     {
         $constant = $stage::class . '::' . $point;
 
-        if (!defined($constant) || !function_exists('event')) {
+        if (!defined($constant)) {
             return;
         }
 

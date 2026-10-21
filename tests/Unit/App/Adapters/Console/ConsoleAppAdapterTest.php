@@ -5,6 +5,7 @@ namespace Quantum\Tests\Unit\App\Adapters\Console;
 use Symfony\Component\Console\Output\OutputInterface;
 use Quantum\App\Adapters\Console\ConsoleAppAdapter;
 use Symfony\Component\Console\Input\InputInterface;
+use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\Environment\Exceptions\EnvException;
 use Quantum\Tests\Helpers\NonExitingApplication;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -193,6 +194,50 @@ class ConsoleAppAdapterTest extends AppTestCase
         $this->assertTrue(Di::has(Environment::class));
         $this->assertTrue(Di::isRegistered(ErrorHandler::class));
         $this->assertTrue(config()->has('app'));
+    }
+
+    public function testConsoleAppAdapterStartDispatchesTheCommandEventsAroundTheCommandWithTheConsoleContext(): void
+    {
+        $_SERVER['argv'] = ['qt', 'list', '--quiet'];
+
+        $adapter = $this->createAdapter(new NonExitingApplication('Qt Console Application', 'test'));
+
+        $events = [];
+
+        foreach (['console.command.before', 'console.command.after'] as $name) {
+            event()->listen($name, function (array $payload) use (&$events, $name): void {
+                $events[] = [$name, get_class($payload['context'])];
+            });
+        }
+
+        $this->assertSame(0, $adapter->start());
+
+        $this->assertSame([
+            ['console.command.before', ConsoleContext::class],
+            ['console.command.after', ConsoleContext::class],
+        ], $events);
+    }
+
+    public function testConsoleAppAdapterStartDispatchesNoAfterEventWhenTheCommandIsUnknown(): void
+    {
+        $_SERVER['argv'] = ['qt', 'unknown:command', '--quiet'];
+
+        $adapter = $this->createAdapter();
+
+        $events = [];
+
+        foreach (['console.command.before', 'console.command.after'] as $name) {
+            event()->listen($name, function () use (&$events, $name): void {
+                $events[] = $name;
+            });
+        }
+
+        try {
+            $adapter->start();
+            $this->fail('Expected the unknown command to be rejected.');
+        } catch (Exception $exception) {
+            $this->assertSame(['console.command.before'], $events);
+        }
     }
 
     public function testConsoleAppAdapterConstructorDoesNotBoot(): void
