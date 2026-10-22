@@ -84,7 +84,7 @@ trait MailerTrait
     protected array $stringAttachments = [];
 
     /**
-     * Transport log
+     * Transport log, cut to its last mailer.transport_log_limit lines at the start of each send
      * @var array<string>
      */
     private array $transportLog = [];
@@ -222,6 +222,13 @@ trait MailerTrait
      */
     public function send(): bool
     {
+        // Cut here, as every send reaches this point, also after the previous one threw
+        $limit = (int) config()->get('mailer.transport_log_limit', 1000);
+
+        if ($limit > 0 && count($this->transportLog) > $limit) {
+            $this->transportLog = array_slice($this->transportLog, -$limit);
+        }
+
         $this->prepare();
 
         $sent = config()->get('mailer.mail_trap') ? $this->saveEmail() : $this->sendEmail();

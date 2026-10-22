@@ -5,6 +5,8 @@ return [
 
     'mail_trap' => true,
 
+    'transport_log_limit' => 1000,
+
     'smtp' => [
         'host' => '127.0.0.1',
         'secure' => 'ssl',
