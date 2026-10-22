@@ -70,6 +70,34 @@ class LoggerFactoryTest extends AppTestCase
         $this->assertInstanceOf(ReportableInterface::class, $logger->getAdapter());
     }
 
+    public function testLoggerFactoryPassesTheMessageLimitFromTheConfig(): void
+    {
+        config()->set('logging.message.limit', 2);
+        config()->set('app.debug', true);
+
+        $logger = LoggerFactory::get();
+
+        $logger->info('First');
+        $logger->info('Second');
+        $logger->info('Third');
+
+        $this->assertSame([['info' => 'Second'], ['info' => 'Third']], $logger->getAdapter()->getMessages());
+    }
+
+    public function testLoggerFactoryUsesTheDefaultMessageLimitWithoutTheKey(): void
+    {
+        config()->set('logging.message', []);
+        config()->set('app.debug', true);
+
+        $logger = LoggerFactory::get();
+
+        for ($i = 1; $i <= 1001; $i++) {
+            $logger->info('Message ' . $i);
+        }
+
+        $this->assertCount(1000, $logger->getAdapter()->getMessages());
+    }
+
     public function testLoggerFactoryInConsoleDebugModeGetsTheDefaultAdapter(): void
     {
         $this->useAppType(AppType::CONSOLE);

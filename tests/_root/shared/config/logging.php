@@ -12,4 +12,8 @@ return [
         'path' => logs_dir(),
         'level' => 'warning',
     ],
+
+    'message' => [
+        'limit' => 1000,
+    ],
 ];
