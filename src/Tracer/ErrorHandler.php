@@ -17,11 +17,9 @@ use Quantum\Config\Exceptions\ConfigException;
 use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Http\Enums\StatusCode;
-use Quantum\App\Enums\AppType;
 use Quantum\Logger\Logger;
 use ReflectionException;
 use ErrorException;
-use Quantum\App\App;
 use Throwable;
 use Exception;
 
@@ -81,7 +79,7 @@ class ErrorHandler
      */
     public function handleException(Throwable $throwable): void
     {
-        if (App::getContext()->getType() === AppType::CONSOLE) {
+        if (is_console_app()) {
             $this->handleCliException($throwable);
         } else {
             $this->handleWebException($throwable);
