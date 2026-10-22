@@ -3,7 +3,9 @@
 namespace Quantum\Tests\Unit\Mailer\Adapters;
 
 use Quantum\Mailer\Adapters\SendinblueAdapter;
+use Quantum\Mailer\Contracts\MailerInterface;
 use Quantum\Mailer\Adapters\SmtpAdapter;
+use Quantum\Mailer\Traits\MailerTrait;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Config\Setup;
 
@@ -91,5 +93,39 @@ class MailerAdapterTraitTest extends AppTestCase
         $adapter = new SendinblueAdapter(['api_key' => 'xxx11122233']);
 
         $this->assertIsString($adapter->getMessageId());
+    }
+
+    public function testMailerTraitGetTransportLogIsEmptyBeforeASend(): void
+    {
+        $this->assertSame([], $this->adapter->getTransportLog());
+    }
+
+    public function testMailerTraitSendKeepsTheTransportErrorsOfAFailedSendAndLogsThem(): void
+    {
+        config()->set('app.debug', true);
+        config()->set('mailer.mail_trap', false);
+
+        $adapter = new class () implements MailerInterface {
+            use MailerTrait;
+
+            protected function prepare(): void
+            {
+            }
+
+            protected function sendEmail(): bool
+            {
+                return false;
+            }
+
+            protected function getTransportErrors(): array
+            {
+                return ['Connection refused'];
+            }
+        };
+
+        $this->assertFalse($adapter->send());
+
+        $this->assertSame(['Connection refused'], $adapter->getTransportLog());
+        $this->assertSame([['warning' => 'Connection refused']], logger()->getAdapter()->getMessages());
     }
 }

@@ -12,7 +12,6 @@ namespace Quantum\Mailer\Traits;
 
 use Quantum\Mailer\Contracts\MailerInterface;
 use Quantum\Di\Exceptions\DiException;
-use Quantum\Debugger\Debugger;
 use Quantum\Mailer\MailTrap;
 use ReflectionException;
 use Quantum\Di\Di;
@@ -83,6 +82,12 @@ trait MailerTrait
      * @var array<int|string, mixed>
      */
     protected array $stringAttachments = [];
+
+    /**
+     * Transport log
+     * @var array<string>
+     */
+    private array $transportLog = [];
 
     abstract protected function prepare(): void;
 
@@ -226,11 +231,20 @@ trait MailerTrait
         if (!$sent) {
             $errors = $this->getTransportErrors();
             if (!empty($errors)) {
-                warning(implode(', ', $errors), ['tab' => Debugger::MAILS]);
+                $this->transportLog = array_merge($this->transportLog, $errors);
+                warning(implode(', ', $errors));
             }
         }
 
         return $sent;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTransportLog(): array
+    {
+        return $this->transportLog;
     }
 
     /**

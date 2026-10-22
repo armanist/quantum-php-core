@@ -7,7 +7,6 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
-use Quantum\Debugger\Debugger;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Router\Route;
@@ -39,46 +38,6 @@ class PrepareRequestStageTest extends AppTestCase
         (new PrepareRequestStage())->process($this->webContext);
 
         $this->assertTrue(config()->has('lang'));
-    }
-
-    public function testPrepareRequestStageLogsRegisteredEventsToDebugger(): void
-    {
-        config()->set('app.debug', true);
-
-        $listener = function (): void {
-        };
-
-        event()->listen('test.event', $listener);
-
-        (new PrepareRequestStage())->process($this->webContext);
-
-        $cell = debugbar()->getStoreCell(Debugger::EVENTS);
-
-        $this->assertCount(1, $cell);
-        $this->assertSame(['test.event' => [$listener]], $cell[0]['info']);
-    }
-
-    public function testPrepareRequestStageLogsNothingToDebuggerWithoutEventListeners(): void
-    {
-        config()->set('app.debug', true);
-
-        $this->assertSame([], event()->getRegistered());
-
-        (new PrepareRequestStage())->process($this->webContext);
-
-        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
-    }
-
-    public function testPrepareRequestStageSkipsDebuggerLoggingWhenDebugDisabled(): void
-    {
-        config()->set('app.debug', false);
-
-        event()->listen('test.event', function (): void {
-        });
-
-        (new PrepareRequestStage())->process($this->webContext);
-
-        $this->assertSame([], debugbar()->getStoreCell(Debugger::EVENTS));
     }
 
     public function testPrepareRequestStageRegistersViewCache(): void

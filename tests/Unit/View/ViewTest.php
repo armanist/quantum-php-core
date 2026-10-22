@@ -100,6 +100,20 @@ class ViewTest extends AppTestCase
         $this->assertEquals('<p>Monkey people</p>', $this->view->getParam('chapter_two'));
     }
 
+    public function testGetViewFileIsNullBeforeAViewIsRendered(): void
+    {
+        $this->assertNull($this->view->getViewFile());
+    }
+
+    public function testGetViewFileReturnsTheLastRenderedView(): void
+    {
+        $this->view->setLayout('layout');
+
+        $this->view->render('index');
+
+        $this->assertSame('index', $this->view->getViewFile());
+    }
+
     public function testRenderWithoutLayout(): void
     {
         $this->expectException(ViewException::class);

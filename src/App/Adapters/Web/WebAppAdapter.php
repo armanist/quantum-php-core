@@ -16,7 +16,6 @@ use Quantum\App\Adapters\Web\Stages\Runtime\DispatchRequestStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\PrepareRequestStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\SendResponseStage;
 use Quantum\App\Adapters\Web\Stages\Runtime\ResolveRouteStage;
-use Quantum\App\Adapters\Web\Stages\Boot\InitDebuggerStage;
 use Quantum\App\Adapters\Web\Stages\Boot\LoadModulesStage;
 use Quantum\App\Adapters\Web\Stages\Boot\InitHttpStage;
 use Quantum\App\Stages\Boot\SetupErrorHandlerStage;
@@ -49,7 +48,6 @@ class WebAppAdapter implements AppInterface
             new LoadAppConfigStage(),
             new SetupErrorHandlerStage(),
             new InitHttpStage(),
-            new InitDebuggerStage(),
             new LoadModulesStage(),
         ]);
 

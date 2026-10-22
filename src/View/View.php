@@ -19,10 +19,8 @@ use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Asset\AssetManager;
-use Quantum\Debugger\Debugger;
 use Quantum\Renderer\Renderer;
 use ReflectionException;
-use Psr\Log\LogLevel;
 
 /**
  * Class View
@@ -34,14 +32,17 @@ class View
 
     private AssetManager $assetManager;
 
-    private Debugger $debugger;
-
     private ViewCache $viewCache;
 
     /**
      * Layout file
      */
     private ?string $layoutFile = null;
+
+    /**
+     * Last view file rendered with render()
+     */
+    private ?string $viewFile = null;
 
     /**
      * Rendered view
@@ -63,12 +64,10 @@ class View
     public function __construct(
         Renderer $renderer,
         AssetManager $assetManager,
-        Debugger $debugger,
         ViewCache $viewCache
     ) {
         $this->renderer = $renderer;
         $this->assetManager = $assetManager;
-        $this->debugger = $debugger;
         $this->viewCache = $viewCache;
     }
 
@@ -171,13 +170,10 @@ class View
         }
 
         $this->viewContent = $this->renderFile($viewFile);
+        $this->viewFile = $viewFile;
 
         if ($this->assets !== []) {
             $this->assetManager->register($this->assets);
-        }
-
-        if ($this->debugger->isEnabled()) {
-            $this->updateDebugger($viewFile);
         }
 
         $layoutContent = $this->renderFile($layoutFile);
@@ -205,6 +201,14 @@ class View
         }
 
         return $this->renderFile($viewFile);
+    }
+
+    /**
+     * Gets the last view rendered with render(), or null before the first one
+     */
+    public function getViewFile(): ?string
+    {
+        return $this->viewFile;
     }
 
     /**
@@ -267,18 +271,5 @@ class View
     private function sanitizeHtml(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    }
-
-    /**
-     * @throws ReflectionException|DiException
-     */
-    private function updateDebugger(string $viewFile): void
-    {
-        $routesCell = $this->debugger->getStoreCell(Debugger::ROUTES);
-        $currentData = current($routesCell)[LogLevel::INFO] ?? [];
-        $additionalData = ['View' => request()->getCurrentModule() . '/Views/' . $viewFile];
-        $mergedData = array_merge($currentData, $additionalData);
-        $this->debugger->clearStoreCell(Debugger::ROUTES);
-        $this->debugger->addToStoreCell(Debugger::ROUTES, LogLevel::INFO, $mergedData);
     }
 }

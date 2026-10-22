@@ -10,16 +10,25 @@ declare(strict_types=1);
 
 namespace Quantum\Debugger;
 
+use Quantum\Database\Contracts\RelationalInterface;
 use DebugBar\DataCollector\RequestDataCollector;
+use Quantum\Config\Exceptions\ConfigException;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DataCollector\MessagesCollector;
+use Quantum\Database\Contracts\DbalInterface;
 use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\MemoryCollector;
+use Quantum\Logger\Adapters\MessageAdapter;
+use Quantum\Mailer\Factories\MailerFactory;
+use Quantum\App\Exceptions\BaseException;
+use Quantum\View\Factories\ViewFactory;
 use Quantum\Di\Exceptions\DiException;
 use DebugBar\JavascriptRenderer;
 use DebugBar\DebugBarException;
+use Quantum\Database\Database;
 use ReflectionException;
 use DebugBar\DebugBar;
+use Quantum\Di\Di;
 
 /**
  * Class Debugger
@@ -142,8 +151,9 @@ class Debugger
     }
 
     /**
-     * Renders the debug bar
-     * @throws DebugBarException|DiException|ReflectionException
+     * Renders the debug bar. Each tab shows its stored entries, followed by what is collected
+     * from the packages at this point.
+     * @throws DebugBarException|DiException|ReflectionException|ConfigException|BaseException
      */
     public function render(): string
     {
@@ -151,8 +161,8 @@ class Debugger
             return '';
         }
 
-        foreach ([self::MESSAGES, self::QUERIES, self::ROUTES, self::EVENTS, self::MAILS] as $tab) {
-            $this->createTab($tab);
+        foreach ($this->collect() as $tab => $entries) {
+            $this->createTab($tab, $entries);
         }
 
         $renderer = $this->getRenderer();
@@ -161,16 +171,122 @@ class Debugger
     }
 
     /**
-     * Creates a tab
+     * Collects the entries of each tab from the packages, as they are now
+     * @return array<string, array<int, array<string, mixed>>>
+     * @throws DiException|ReflectionException|ConfigException|BaseException
+     */
+    protected function collect(): array
+    {
+        $routeInfo = $this->routeInfo();
+        $listeners = event()->getRegistered();
+
+        return [
+            self::MESSAGES => $this->logMessages(),
+            self::QUERIES => array_map(fn ($query): array => ['info' => $query], $this->queryLog()),
+            self::ROUTES => $routeInfo !== [] ? [['info' => $routeInfo]] : [],
+            self::EVENTS => $listeners !== [] ? [['info' => $listeners]] : [],
+            self::MAILS => $this->mailLog(),
+        ];
+    }
+
+    /**
+     * The transport log of the mailer, only when the request used it
+     * @return array<int, array<string, string>>
+     * @throws DiException|ReflectionException|ConfigException|BaseException
+     */
+    protected function mailLog(): array
+    {
+        if (!Di::isRegistered(MailerFactory::class)) {
+            return [];
+        }
+
+        return array_map(fn (string $line): array => ['warning' => $line], mailer()->getAdapter()->getTransportLog());
+    }
+
+    /**
+     * The messages of the debug-mode logger
+     * @return array<int, array<string, mixed>>
+     * @throws DiException|ReflectionException|ConfigException|BaseException
+     */
+    protected function logMessages(): array
+    {
+        $adapter = logger()->getAdapter();
+
+        return $adapter instanceof MessageAdapter ? $adapter->getMessages() : [];
+    }
+
+    /**
+     * The matched route and the rendered view, without the values that are not set
+     * @return array<string, mixed>
+     * @throws DiException|ReflectionException|ConfigException|BaseException
+     */
+    protected function routeInfo(): array
+    {
+        $info = [];
+
+        $matchedRoute = request()->getMatchedRoute();
+
+        if ($matchedRoute !== null) {
+            $route = $matchedRoute->getRoute();
+
+            $info = [
+                'Methods' => implode(', ', $route->getMethods()),
+                'Pattern' => $route->getPattern(),
+                'Module' => $route->getModule(),
+                'Controller' => $route->getController(),
+                'Action' => $route->getClosure() !== null ? 'Closure' : $route->getAction(),
+                'Name' => $route->getName(),
+                'Group' => $route->getGroup(),
+                'Prefix' => $route->getPrefix(),
+                'Middlewares' => $route->getMiddlewares(),
+                'Params' => $matchedRoute->getParams(),
+            ];
+        }
+
+        $viewFile = Di::isRegistered(ViewFactory::class) ? ViewFactory::get()->getViewFile() : null;
+
+        if ($viewFile !== null) {
+            $info['View'] = request()->getCurrentModule() . '/Views/' . $viewFile;
+        }
+
+        return array_filter($info, fn ($value): bool => $value !== null && $value !== []);
+    }
+
+    /**
+     * The queries run so far, only when the request started the database, it is still connected
+     * and its adapter keeps a query log
+     * @return array<mixed>
+     * @throws DiException|ReflectionException
+     */
+    protected function queryLog(): array
+    {
+        if (!Di::has(Database::class)) {
+            return [];
+        }
+
+        $ormClass = db()->getOrmClass();
+
+        if (!is_subclass_of($ormClass, DbalInterface::class) || !$ormClass::getConnection()) {
+            return [];
+        }
+
+        if (!is_subclass_of($ormClass, RelationalInterface::class)) {
+            return [];
+        }
+
+        return Database::queryLog();
+    }
+
+    /**
+     * Creates a tab with its stored entries, followed by the collected ones
+     * @param array<int, array<string, mixed>> $collected
      * @throws DebugBarException
      */
-    protected function createTab(string $type): void
+    protected function createTab(string $type, array $collected): void
     {
         $collector = $this->resolveMessagesCollector($type);
 
-        $messages = $this->store->get($type);
-
-        foreach ($messages as $message) {
+        foreach (array_merge($this->store->get($type), $collected) as $message) {
             $fn = key($message);
             $collector->log($fn, $message[$fn]);
         }
