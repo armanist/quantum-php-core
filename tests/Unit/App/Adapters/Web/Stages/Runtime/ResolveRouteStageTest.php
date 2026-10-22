@@ -7,6 +7,7 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\RouteCollection;
 use Quantum\Router\MatchedRoute;
+use Quantum\App\Enums\AppType;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Http\Request;
@@ -72,7 +73,7 @@ class ResolveRouteStageTest extends AppTestCase
         $container->set(Request::class, $request);
         $container->set(RouteCollection::class, $routes);
 
-        (new ResolveRouteStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container)));
+        (new ResolveRouteStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container, AppType::WEB)));
 
         $this->assertSame('contextAction', $request->getMatchedRoute()->getRoute()->getAction());
         $this->assertNull(request()->getMatchedRoute());

@@ -7,6 +7,7 @@ use Quantum\Tests\Unit\AppTestCase;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
+use Quantum\App\Enums\AppType;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Router\Route;
@@ -88,7 +89,7 @@ class PrepareRequestStageTest extends AppTestCase
     {
         $container = new DiContainer();
 
-        (new PrepareRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container)));
+        (new PrepareRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container, AppType::WEB)));
 
         $this->assertTrue($container->isRegistered(ViewCache::class));
         $this->assertFalse(Di::isRegistered(ViewCache::class));
@@ -105,7 +106,7 @@ class PrepareRequestStageTest extends AppTestCase
         $container->get(ViewCache::class)->enableCaching(true);
 
         try {
-            (new PrepareRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container)));
+            (new PrepareRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container, AppType::WEB)));
 
             $this->assertDirectoryExists($moduleDir);
         } finally {

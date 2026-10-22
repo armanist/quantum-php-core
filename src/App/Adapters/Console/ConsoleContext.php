@@ -28,7 +28,7 @@ class ConsoleContext extends AppContext
 {
     public function __construct(AppContext $appContext)
     {
-        parent::__construct($appContext->getBaseDir(), $appContext->getContainer());
+        parent::__construct($appContext->getBaseDir(), $appContext->getContainer(), $appContext->getType());
     }
 
     public function getApplication(): Application

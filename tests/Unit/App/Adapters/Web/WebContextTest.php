@@ -7,6 +7,7 @@ use Quantum\ResourceCache\ViewCache;
 use Quantum\Router\RouteCollection;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Router\MatchedRoute;
+use Quantum\App\Enums\AppType;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Http\Request;
@@ -32,11 +33,12 @@ class WebContextTest extends AppTestCase
     {
         $container = new DiContainer();
 
-        $webContext = new WebContext(new AppContext('/base/dir', $container));
+        $webContext = new WebContext(new AppContext('/base/dir', $container, AppType::WEB));
 
         $this->assertInstanceOf(AppContext::class, $webContext);
         $this->assertSame('/base/dir', $webContext->getBaseDir());
         $this->assertSame($container, $webContext->getContainer());
+        $this->assertSame(AppType::WEB, $webContext->getType());
     }
 
     public function testWebContextExposesRequestAndRoutesFromTheContainer(): void
@@ -48,7 +50,7 @@ class WebContextTest extends AppTestCase
         $container->set(Request::class, $request);
         $container->set(RouteCollection::class, $routes);
 
-        $webContext = new WebContext(new AppContext('/base/dir', $container));
+        $webContext = new WebContext(new AppContext('/base/dir', $container, AppType::WEB));
 
         $this->assertSame($request, $webContext->getRequest());
         $this->assertSame($routes, $webContext->getRoutes());
@@ -80,7 +82,7 @@ class WebContextTest extends AppTestCase
         $viewCache = Mockery::mock(ViewCache::class);
         $container->set(ViewCache::class, $viewCache);
 
-        $webContext = new WebContext(new AppContext('/base/dir', $container));
+        $webContext = new WebContext(new AppContext('/base/dir', $container, AppType::WEB));
 
         $this->assertSame($viewCache, $webContext->getViewCache());
     }

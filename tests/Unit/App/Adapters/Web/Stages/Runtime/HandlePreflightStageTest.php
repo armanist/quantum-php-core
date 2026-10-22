@@ -6,6 +6,7 @@ use Quantum\App\Adapters\Web\Stages\Runtime\HandlePreflightStage;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Http\Enums\StatusCode;
 use Quantum\App\Adapters\Web\WebContext;
+use Quantum\App\Enums\AppType;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Http\Request;
@@ -53,7 +54,7 @@ class HandlePreflightStageTest extends AppTestCase
         $container = new DiContainer();
         $container->set(Request::class, $request);
 
-        $webContext = new WebContext(new AppContext(PROJECT_ROOT, $container));
+        $webContext = new WebContext(new AppContext(PROJECT_ROOT, $container, AppType::WEB));
 
         (new HandlePreflightStage())->process($webContext);
 

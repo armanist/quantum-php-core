@@ -8,6 +8,7 @@ use Quantum\Http\Enums\ContentType;
 use Quantum\Http\Enums\StatusCode;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
+use Quantum\App\Enums\AppType;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Router\Route;
@@ -70,7 +71,7 @@ class HandleRouteNotFoundStageTest extends AppTestCase
         $container = new DiContainer();
         $container->set(Request::class, $request);
 
-        $webContext = new WebContext(new AppContext(PROJECT_ROOT, $container));
+        $webContext = new WebContext(new AppContext(PROJECT_ROOT, $container, AppType::WEB));
 
         (new HandleRouteNotFoundStage())->process($webContext);
 

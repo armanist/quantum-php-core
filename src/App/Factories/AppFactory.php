@@ -63,7 +63,7 @@ class AppFactory
 
         $container = new DiContainer();
 
-        $context = new AppContext($baseDir, $container);
+        $context = new AppContext($baseDir, $container, $type);
         App::setContext($context);
 
         $adapterClass = self::ADAPTERS[$type];
