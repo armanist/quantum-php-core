@@ -7,11 +7,9 @@ use Quantum\Tracer\WebExceptionRenderer;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
 use Quantum\App\Enums\AppType;
-use Quantum\App\AppContext;
 use Quantum\Logger\Logger;
 use ReflectionException;
 use ErrorException;
-use Quantum\App\App;
 use ParseError;
 use Exception;
 use Mockery;
@@ -242,14 +240,6 @@ class ErrorHandlerTest extends AppTestCase
             'reflection-exception' => [new ReflectionException('reflection failed'), 'warning'],
             'generic-exception' => [new Exception('unknown'), 'error'],
         ];
-    }
-
-    /**
-     * Replaces the app context with one of the given type that keeps the current container
-     */
-    private function useAppType(string $type): void
-    {
-        App::setContext(new AppContext(PROJECT_ROOT, App::getContext()->getContainer(), $type));
     }
 
 }

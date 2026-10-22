@@ -20,9 +20,11 @@ use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
 use Quantum\Logger\Enums\LoggerType;
 use Quantum\Logger\LoggerConfig;
+use Quantum\App\Enums\AppType;
 use Quantum\Logger\Logger;
 use Quantum\Config\Setup;
 use ReflectionException;
+use Quantum\App\App;
 use Quantum\Di\Di;
 
 /**
@@ -69,7 +71,9 @@ class LoggerFactory
             throw LoggerException::adapterNotSupported(LoggerType::MESSAGE);
         }
 
-        $adapter = $isDebug ? LoggerType::MESSAGE : ($adapter ?? config()->get('logging.default'));
+        $inMemory = $isDebug && App::getContext()->getType() === AppType::WEB;
+
+        $adapter = $inMemory ? LoggerType::MESSAGE : ($adapter ?? config()->get('logging.default'));
 
         $adapterClass = $this->getAdapterClass($adapter);
 

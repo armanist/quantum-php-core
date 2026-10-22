@@ -65,6 +65,14 @@ abstract class AppTestCase extends TestCase
         return $context;
     }
 
+    /**
+     * Replaces the app context with one of the given type that keeps the current container
+     */
+    protected function useAppType(string $type): void
+    {
+        App::setContext(new AppContext(PROJECT_ROOT, App::getContext()->getContainer(), $type));
+    }
+
     protected function clearAppContext(): void
     {
         $prop = new ReflectionProperty(App::class, 'context');
