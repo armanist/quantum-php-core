@@ -11,13 +11,14 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Application;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\App\Enums\AppType;
 use Quantum\Di\Di;
 
 class InitConsoleStageTest extends AppTestCase
 {
     public function setUp(): void
     {
-        $this->context = $this->createContext();
+        $this->context = $this->createContext(AppType::CONSOLE);
     }
 
     public function tearDown(): void

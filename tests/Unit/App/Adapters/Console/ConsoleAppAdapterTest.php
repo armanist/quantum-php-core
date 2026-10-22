@@ -15,6 +15,7 @@ use Dotenv\Exception\InvalidFileException;
 use Quantum\Environment\Environment;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
+use Quantum\App\Enums\AppType;
 use Quantum\App\AppContext;
 use Quantum\App\Pipeline;
 use ReflectionProperty;
@@ -244,7 +245,7 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        new ConsoleAppAdapter($this->createContext());
+        new ConsoleAppAdapter($this->createContext(AppType::CONSOLE));
 
         $this->assertFalse(Di::isRegistered(Application::class));
         $this->assertFalse(Di::has(Environment::class));
@@ -254,7 +255,7 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $adapter = new ConsoleAppAdapter($this->createContext());
+        $adapter = new ConsoleAppAdapter($this->createContext(AppType::CONSOLE));
         $adapter->boot();
 
         $this->assertTrue(Di::isRegistered(Application::class));
@@ -266,7 +267,7 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'core:env', '--yes'];
 
-        (new ConsoleAppAdapter($this->createContext()))->boot();
+        (new ConsoleAppAdapter($this->createContext(AppType::CONSOLE)))->boot();
 
         $this->assertTrue(Di::isRegistered(Application::class));
         $this->assertTrue(Di::isRegistered(OutputInterface::class));
@@ -279,7 +280,7 @@ class ConsoleAppAdapterTest extends AppTestCase
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
         $this->withoutEnvironmentFile(function (): void {
-            (new ConsoleAppAdapter($this->createContext()))->boot();
+            (new ConsoleAppAdapter($this->createContext(AppType::CONSOLE)))->boot();
 
             $this->assertTrue(Di::isRegistered(Application::class));
             $this->assertTrue(Di::isRegistered(OutputInterface::class));
@@ -316,7 +317,7 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $context = $this->createContext();
+        $context = $this->createContext(AppType::CONSOLE);
 
         (new Pipeline([new LoadHelpersStage()]))->run($context);
 
@@ -333,7 +334,7 @@ class ConsoleAppAdapterTest extends AppTestCase
     {
         $_SERVER['argv'] = ['qt', 'list', '--quiet'];
 
-        $context = $this->createContext();
+        $context = $this->createContext(AppType::CONSOLE);
 
         (new Pipeline([new LoadHelpersStage()]))->run($context);
 
@@ -677,7 +678,7 @@ PHP;
      */
     private function createAdapter(?Application $application = null, ?AppContext $context = null): ConsoleAppAdapter
     {
-        $context ??= $this->createContext();
+        $context ??= $this->createContext(AppType::CONSOLE);
 
         if ($application !== null) {
             Di::set(Application::class, $application);
