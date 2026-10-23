@@ -91,6 +91,55 @@ class ErrorHandlerTest extends AppTestCase
         }
     }
 
+    /**
+     * @dataProvider deprecationSeverityProvider
+     */
+    public function testHandleErrorLogsADeprecationInsteadOfThrowing(int $severity): void
+    {
+        $logged = $this->captureWarnings();
+
+        $oldLevel = error_reporting(E_ALL);
+
+        try {
+            $result = $this->errorHandler->handleError($severity, 'Feature is deprecated', '/app/file.php', 12);
+
+            $this->assertTrue($result);
+            $this->assertSame(['Feature is deprecated in /app/file.php:12'], $logged());
+        } finally {
+            error_reporting($oldLevel);
+        }
+    }
+
+    /**
+     * @dataProvider deprecationSeverityProvider
+     */
+    public function testHandleErrorIgnoresADeprecationWhenThereIsNoLogger(int $severity): void
+    {
+        $this->setPrivateProperty($this->errorHandler, 'logger', null);
+
+        $oldLevel = error_reporting(E_ALL);
+
+        try {
+            $this->assertTrue($this->errorHandler->handleError($severity, 'Feature is deprecated', __FILE__, __LINE__));
+        } finally {
+            error_reporting($oldLevel);
+        }
+    }
+
+    public function testHandleErrorLeavesAnUnreportedDeprecationToPhp(): void
+    {
+        $logged = $this->captureWarnings();
+
+        $oldLevel = error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
+        try {
+            $this->assertFalse($this->errorHandler->handleError(E_DEPRECATED, 'Feature is deprecated', __FILE__, __LINE__));
+            $this->assertSame([], $logged());
+        } finally {
+            error_reporting($oldLevel);
+        }
+    }
+
     public function testHandleExceptionCliWritesExceptionMessage(): void
     {
         $this->useAppType(AppType::CONSOLE);
@@ -219,6 +268,17 @@ class ErrorHandlerTest extends AppTestCase
     }
 
     /**
+     * @return array<string, array{0: int}>
+     */
+    public function deprecationSeverityProvider(): array
+    {
+        return [
+            'deprecated' => [E_DEPRECATED],
+            'user-deprecated' => [E_USER_DEPRECATED],
+        ];
+    }
+
+    /**
      * @dataProvider errorTypeProvider
      */
     public function testGetErrorTypeMappings(\Throwable $throwable, string $expected): void
@@ -240,6 +300,26 @@ class ErrorHandlerTest extends AppTestCase
             'reflection-exception' => [new ReflectionException('reflection failed'), 'warning'],
             'generic-exception' => [new Exception('unknown'), 'error'],
         ];
+    }
+
+    /**
+     * Gives the handler a logger that records its warnings, and returns a function that lists them
+     * @return callable(): array<int, string>
+     */
+    private function captureWarnings(): callable
+    {
+        $logged = [];
+
+        $logger = Mockery::mock(Logger::class);
+        $logger->shouldReceive('warning')->andReturnUsing(function (string $message) use (&$logged): void {
+            $logged[] = $message;
+        });
+
+        $this->setPrivateProperty($this->errorHandler, 'logger', $logger);
+
+        return function () use (&$logged): array {
+            return $logged;
+        };
     }
 
 }

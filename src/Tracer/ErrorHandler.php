@@ -63,12 +63,22 @@ class ErrorHandler
     }
 
     /**
+     * Turns a reported PHP error into an exception. A deprecation only warns about a future PHP version,
+     * often from code that is not ours, so it is logged and the script goes on.
      * @throws ErrorException
      */
     public function handleError(int $severity, string $message, string $file, int $line): bool
     {
         if ((error_reporting() & $severity) === 0) {
             return false;
+        }
+
+        if ($severity === E_DEPRECATED || $severity === E_USER_DEPRECATED) {
+            if ($this->logger !== null) {
+                $this->logger->warning($message . ' in ' . $file . ':' . $line);
+            }
+
+            return true;
         }
 
         throw new ErrorException($message, 0, $severity, $file, $line);
