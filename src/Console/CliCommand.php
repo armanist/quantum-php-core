@@ -12,6 +12,7 @@ namespace Quantum\Console;
 
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -142,6 +143,7 @@ abstract class CliCommand extends Command implements CommandInterface
      */
     public function confirm(string $message): bool
     {
+        /** @var QuestionHelper $helper */
         $helper = $this->getHelper('question');
 
         $question = new ConfirmationQuestion($message . ' [y/N] ', false);
