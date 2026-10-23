@@ -41,7 +41,7 @@
         "dflydev/dot-access-data": "^3.0",
         "php-debugbar/php-debugbar": "^2.2",
         "phpmailer/phpmailer": "^7.1",
-        "psr/log": "^2.0",
+        "psr/log": "^2.0 || ^3.0",
         "rakibtg/sleekdb": "^2.13",
         "swagger-api/swagger-ui": "^5.32",
         "zircote/swagger-php": "^5.8",
