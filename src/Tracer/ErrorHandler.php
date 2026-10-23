@@ -53,8 +53,8 @@ class ErrorHandler
     {
         $this->logger = $logger;
 
-        set_error_handler([$this, 'handleError']);
-        set_exception_handler([$this, 'handleException']);
+        set_error_handler($this->handleError(...));
+        set_exception_handler($this->handleException(...));
     }
 
     public function setCliOutput(OutputInterface $output): void

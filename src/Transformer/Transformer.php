@@ -25,6 +25,6 @@ class Transformer
      */
     public static function transform(array $data, TransformerInterface $transformer): array
     {
-        return array_map([$transformer, 'transform'], $data);
+        return array_map($transformer->transform(...), $data);
     }
 }
