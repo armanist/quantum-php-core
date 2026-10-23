@@ -93,7 +93,7 @@ final class Route
             throw RouteException::noHttpMethods();
         }
 
-        $this->methods = array_map('strtoupper', $methods);
+        $this->methods = array_map(strtoupper(...), $methods);
         $this->pattern = $pattern;
 
         if ($closure !== null) {

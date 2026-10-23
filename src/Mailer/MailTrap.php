@@ -126,7 +126,7 @@ class MailTrap
     public function getParsedToAddresses(): array
     {
         $addresses = explode(',', $this->message->getHeaderValue('to'));
-        return array_map('trim', $addresses);
+        return array_map(trim(...), $addresses);
     }
 
     /**
@@ -144,7 +144,7 @@ class MailTrap
     public function getParsedCcAddresses(): array
     {
         $addresses = explode(',', $this->message->getHeaderValue('cc'));
-        return array_map('trim', $addresses);
+        return array_map(trim(...), $addresses);
     }
 
     /**
@@ -154,7 +154,7 @@ class MailTrap
     public function getParsedBccAddresses(): array
     {
         $addresses = explode(',', $this->message->getHeaderValue('bcc'));
-        return array_map('trim', $addresses);
+        return array_map(trim(...), $addresses);
     }
 
     /**
@@ -164,7 +164,7 @@ class MailTrap
     public function getParsedReplyToAddresses(): array
     {
         $addresses = explode(',', $this->message->getHeaderValue('reply-to'));
-        return array_map('trim', $addresses);
+        return array_map(trim(...), $addresses);
     }
 
     /**

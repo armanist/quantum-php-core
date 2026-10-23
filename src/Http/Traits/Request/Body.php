@@ -50,7 +50,7 @@ trait Body
         }
 
         return is_array($value)
-            ? array_map('strip_tags', $value)
+            ? array_map(strip_tags(...), $value)
             : strip_tags($value);
     }
 
