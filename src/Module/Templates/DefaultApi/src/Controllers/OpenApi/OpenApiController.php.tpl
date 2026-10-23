@@ -16,7 +16,7 @@ use OpenApi\Attributes as OA;
  */
 #[OA\Info(
     title: 'Quantum API documentation',
-    version: '2.9.0',
+    version: '3.x',
     description: ' *Quantum Documentation: https://quantumphp.io/en/docs/v1/overview'
 )]
 #[OA\SecurityScheme(
@@ -29,4 +29,3 @@ abstract class OpenApiController
 {
 
 }
-
