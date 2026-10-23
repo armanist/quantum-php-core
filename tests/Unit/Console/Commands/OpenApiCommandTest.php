@@ -160,6 +160,97 @@ class OpenApiCommandTest extends AppTestCase
         @rmdir($sourceDir);
     }
 
+    public function testCopyResourcesCreatesTheTargetFolderWhenItIsMissing(): void
+    {
+        $sourceDir = base_dir() . DS . 'var' . DS . 'tmp_openapi_src_' . uniqid();
+        $targetDir = base_dir() . DS . 'var' . DS . 'tmp_openapi_dst_' . uniqid();
+
+        mkdir($sourceDir, 0777, true);
+
+        file_put_contents($sourceDir . DS . 'swagger-ui.css', 'body{}');
+
+        $this->setPrivateProperty($this->command, 'vendorOpenApiFolderPath', $sourceDir);
+        $this->setPrivateProperty($this->command, 'publicOpenApiFolderPath', $targetDir);
+
+        $method = new ReflectionMethod($this->command, 'copyResources');
+        $method->setAccessible(true);
+        $method->invoke($this->command);
+
+        $this->assertFileExists($targetDir . DS . 'swagger-ui.css');
+
+        @unlink($targetDir . DS . 'swagger-ui.css');
+        @rmdir($targetDir);
+        @unlink($sourceDir . DS . 'swagger-ui.css');
+        @rmdir($sourceDir);
+    }
+
+    public function testExecCreatesTheResourcesFoldersOfAModuleWithoutThem(): void
+    {
+        $openApiAssets = assets_dir() . DS . 'OpenApiUi';
+        $indexCssPath = $openApiAssets . DS . 'index.css';
+        $assetsDirCreatedByTest = false;
+        $indexCssExisted = false;
+        $indexCssBackup = '';
+
+        $moduleName = 'OpenApiModule' . uniqid();
+        $className = 'SpecController' . uniqid();
+        $modulePath = modules_dir() . DS . $moduleName;
+        $routesDir = $modulePath . DS . 'routes';
+        $controllersDir = $modulePath . DS . 'Controllers' . DS . 'OpenApi';
+        $resourcesDir = $modulePath . DS . 'resources';
+        $specPath = $resourcesDir . DS . 'openapi' . DS . 'spec.json';
+
+        if (!$this->fs->isDirectory($openApiAssets)) {
+            mkdir($openApiAssets, 0777, true);
+            $assetsDirCreatedByTest = true;
+        }
+
+        if ($this->fs->exists($indexCssPath)) {
+            $indexCssExisted = true;
+            $indexCssBackup = (string) $this->fs->get($indexCssPath);
+        }
+
+        $this->fs->put($indexCssPath, '/* stub */');
+
+        mkdir($routesDir, 0777, true);
+        mkdir($controllersDir, 0777, true);
+
+        file_put_contents($routesDir . DS . 'routes.php', "<?php\n\nreturn function (\$route) {\n};\n");
+        file_put_contents($controllersDir . DS . 'SpecController.php', "<?php\n\nuse OpenApi\\Attributes as OA;\n\n#[OA\\Info(title: 'Spec', version: '1.0.0')]\nclass " . $className . "\n{\n}\n");
+
+        require_once $controllersDir . DS . 'SpecController.php';
+
+        try {
+            $tester = new CommandTester($this->command);
+            $tester->execute([
+                'module' => $moduleName,
+            ]);
+
+            $this->assertFileExists($specPath);
+            $this->assertStringContainsString('"title": "Spec"', (string) file_get_contents($specPath));
+        } finally {
+            @unlink($specPath);
+            @rmdir($resourcesDir . DS . 'openapi');
+            @rmdir($resourcesDir);
+            @unlink($controllersDir . DS . 'SpecController.php');
+            @rmdir($controllersDir);
+            @rmdir($modulePath . DS . 'Controllers');
+            @unlink($routesDir . DS . 'routes.php');
+            @rmdir($routesDir);
+            @rmdir($modulePath);
+
+            if ($indexCssExisted) {
+                $this->fs->put($indexCssPath, $indexCssBackup);
+            } elseif ($this->fs->exists($indexCssPath)) {
+                $this->fs->remove($indexCssPath);
+            }
+
+            if ($assetsDirCreatedByTest && $this->fs->isDirectory($openApiAssets)) {
+                @rmdir($openApiAssets);
+            }
+        }
+    }
+
     public function testGenerateOpenapiSpecificationCreatesSpecFile(): void
     {
         $command = new class () extends OpenApiCommand {
@@ -173,13 +264,16 @@ class OpenApiCommandTest extends AppTestCase
         };
 
         $moduleName = 'OpenApiSpec' . uniqid();
+        $className = 'SpecController' . uniqid();
         $annotationDir = modules_dir() . DS . $moduleName . DS . 'Controllers' . DS . 'OpenApi';
         $specDir = modules_dir() . DS . $moduleName . DS . 'resources' . DS . 'openapi';
         $specPath = $specDir . DS . 'spec.json';
 
         mkdir($annotationDir, 0777, true);
         mkdir($specDir, 0777, true);
-        file_put_contents($annotationDir . DS . 'SpecController.php', "<?php\n/**\n * @OA\\Info(title=\"Spec\", version=\"1.0.0\")\n */\nclass SpecController {}\n");
+        file_put_contents($annotationDir . DS . 'SpecController.php', "<?php\n\nuse OpenApi\\Attributes as OA;\n\n#[OA\\Info(title: 'Spec', version: '1.0.0')]\nclass " . $className . "\n{\n}\n");
+
+        require_once $annotationDir . DS . 'SpecController.php';
 
         try {
             $method = new ReflectionMethod($command, 'generateOpenapiSpecification');
@@ -187,7 +281,7 @@ class OpenApiCommandTest extends AppTestCase
             $method->invoke($command, $this->fs, $moduleName);
 
             $this->assertFileExists($specPath);
-            $this->assertNotSame('', trim((string) file_get_contents($specPath)));
+            $this->assertStringContainsString('"title": "Spec"', (string) file_get_contents($specPath));
         } finally {
             @unlink($annotationDir . DS . 'SpecController.php');
             @rmdir($annotationDir);
