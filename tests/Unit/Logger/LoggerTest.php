@@ -6,6 +6,8 @@ use Quantum\Logger\Contracts\ReportableInterface;
 use Quantum\Logger\Adapters\MessageAdapter;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Logger\Logger;
+use Psr\Log\LogLevel;
+use Stringable;
 
 class LoggerTest extends AppTestCase
 {
@@ -39,5 +41,46 @@ class LoggerTest extends AppTestCase
         $this->logger->log('error', 'Error message', []);
 
         $this->assertSame([['info' => 'Test message'], ['error' => 'Error message']], $this->adapter->getMessages());
+    }
+
+    /**
+     * @dataProvider levelMethodProvider
+     */
+    public function testLoggerLevelMethodReportsTheMessageWithItsLevel(string $method, string $level): void
+    {
+        $this->logger->$method('Some message');
+
+        $this->assertSame([[$level => 'Some message']], $this->adapter->getMessages());
+    }
+
+    public function testLoggerAcceptsAStringableMessage(): void
+    {
+        $message = new class () implements Stringable {
+            public function __toString(): string
+            {
+                return 'From an object';
+            }
+        };
+
+        $this->logger->critical($message);
+
+        $this->assertSame([['critical' => $message]], $this->adapter->getMessages());
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public function levelMethodProvider(): array
+    {
+        return [
+            'emergency' => ['emergency', LogLevel::EMERGENCY],
+            'alert' => ['alert', LogLevel::ALERT],
+            'critical' => ['critical', LogLevel::CRITICAL],
+            'error' => ['error', LogLevel::ERROR],
+            'warning' => ['warning', LogLevel::WARNING],
+            'notice' => ['notice', LogLevel::NOTICE],
+            'info' => ['info', LogLevel::INFO],
+            'debug' => ['debug', LogLevel::DEBUG],
+        ];
     }
 }
