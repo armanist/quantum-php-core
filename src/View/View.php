@@ -28,11 +28,11 @@ use ReflectionException;
  */
 class View
 {
-    private Renderer $renderer;
+    private readonly Renderer $renderer;
 
-    private AssetManager $assetManager;
+    private readonly AssetManager $assetManager;
 
-    private ViewCache $viewCache;
+    private readonly ViewCache $viewCache;
 
     /**
      * Layout file

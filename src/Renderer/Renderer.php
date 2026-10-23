@@ -21,7 +21,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class Renderer
 {
-    private TemplateRendererInterface $adapter;
+    private readonly TemplateRendererInterface $adapter;
 
     public function __construct(TemplateRendererInterface $adapter)
     {

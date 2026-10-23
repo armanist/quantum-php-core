@@ -36,7 +36,7 @@ class ViewCache
 
     private bool $minification = false;
 
-    private FileSystem $fs;
+    private readonly FileSystem $fs;
 
     /**
      * @throws DiException

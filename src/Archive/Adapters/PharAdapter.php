@@ -25,7 +25,7 @@ use Phar;
  */
 class PharAdapter implements ArchiveInterface
 {
-    private FileSystem $fs;
+    private readonly FileSystem $fs;
 
     private ?string $archiveName = null;
 

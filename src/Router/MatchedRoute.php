@@ -17,12 +17,12 @@ namespace Quantum\Router;
  */
 final class MatchedRoute
 {
-    private Route $route;
+    private readonly Route $route;
 
     /**
      * @var array<string, mixed>
      */
-    private array $params;
+    private readonly array $params;
 
     /**
      * @param array<string, mixed> $params

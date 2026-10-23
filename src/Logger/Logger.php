@@ -21,7 +21,7 @@ use Stringable;
  */
 class Logger implements LoggerInterface
 {
-    private ReportableInterface $adapter;
+    private readonly ReportableInterface $adapter;
 
     public function __construct(ReportableInterface $adapter)
     {

@@ -34,11 +34,11 @@ class MiddlewareManager
     /**
      * Current module
      */
-    private ?string $module;
+    private readonly ?string $module;
 
-    private Route $route;
+    private readonly Route $route;
 
-    private bool $hasRateLimit;
+    private readonly bool $hasRateLimit;
 
     public function __construct(MatchedRoute $matchedRoute)
     {

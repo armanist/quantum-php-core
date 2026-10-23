@@ -20,9 +20,9 @@ use Closure;
  */
 final class RouteBuilder
 {
-    private RouteCollection $collection;
+    private readonly RouteCollection $collection;
 
-    private PatternCompiler $patternCompiler;
+    private readonly PatternCompiler $patternCompiler;
 
     private ?Route $currentRoute = null;
 

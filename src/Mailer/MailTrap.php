@@ -27,16 +27,16 @@ use ReflectionException;
  */
 class MailTrap
 {
-    private FileSystem $fs;
+    private readonly FileSystem $fs;
 
-    private MessageParser $parser;
+    private readonly MessageParser $parser;
 
     /**
      * @var MessagePart|MessagePartInterface
      */
     private $message;
 
-    private string $emailsDirectory;
+    private readonly string $emailsDirectory;
 
     /**
      * @throws BaseException

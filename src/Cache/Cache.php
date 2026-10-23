@@ -28,7 +28,7 @@ use Psr\SimpleCache\CacheInterface;
  */
 class Cache
 {
-    private CacheInterface $adapter;
+    private readonly CacheInterface $adapter;
 
     /**
      * Cache constructor

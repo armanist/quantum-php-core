@@ -16,7 +16,7 @@ use Quantum\Storage\UploadedFile;
 
 class UploadStorage
 {
-    private LocalFilesystemAdapterInterface $localFileSystem;
+    private readonly LocalFilesystemAdapterInterface $localFileSystem;
 
     public function __construct(LocalFilesystemAdapterInterface $localFileSystem)
     {

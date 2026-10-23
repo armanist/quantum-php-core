@@ -65,12 +65,12 @@ class Debugger
     /**
      * Store
      */
-    private DebuggerStore $store;
+    private readonly DebuggerStore $store;
 
     /**
      * DebugBar instance
      */
-    private DebugBar $debugBar;
+    private readonly DebugBar $debugBar;
 
     /**
      * Assets url

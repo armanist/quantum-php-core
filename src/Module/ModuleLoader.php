@@ -41,7 +41,7 @@ class ModuleLoader
     /** @var array<string, Closure> */
     private array $moduleRouteClosures = [];
 
-    private FileSystem $fs;
+    private readonly FileSystem $fs;
 
     /**
      * @throws ModuleException|ConfigException|DiException|BaseException|ReflectionException

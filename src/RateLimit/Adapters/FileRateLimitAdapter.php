@@ -23,13 +23,13 @@ use ReflectionException;
  */
 class FileRateLimitAdapter implements RateLimitAdapterInterface
 {
-    private FileSystem $fs;
+    private readonly FileSystem $fs;
 
-    private int $resetInterval;
+    private readonly int $resetInterval;
 
-    private string $path;
+    private readonly string $path;
 
-    private string $prefix;
+    private readonly string $prefix;
 
     /**
      * @param array<string, mixed> $params

@@ -24,7 +24,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class Auth
 {
-    private AuthenticatableInterface $adapter;
+    private readonly AuthenticatableInterface $adapter;
 
     public function __construct(AuthenticatableInterface $adapter)
     {

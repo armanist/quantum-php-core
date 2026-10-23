@@ -29,18 +29,18 @@ class Asset
      */
     public const JS = 2;
 
-    private int $type;
+    private readonly int $type;
 
-    private string $path;
+    private readonly string $path;
 
-    private ?string $name;
+    private readonly ?string $name;
 
     /**
      * @var array<string>|null
      */
-    private ?array $attributes;
+    private readonly ?array $attributes;
 
-    private int $position;
+    private readonly int $position;
 
     /**
      * Asset templates

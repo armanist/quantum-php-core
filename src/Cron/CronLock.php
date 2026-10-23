@@ -22,18 +22,18 @@ use ReflectionException;
  */
 class CronLock
 {
-    private string $lockDirectory;
+    private readonly string $lockDirectory;
 
-    private string $taskName;
+    private readonly string $taskName;
 
-    private string $lockFile;
+    private readonly string $lockFile;
 
     /** @var resource|null */
     private $lockHandle;
 
     private bool $ownsLock = false;
 
-    private int $maxLockAge;
+    private readonly int $maxLockAge;
 
     private const DEFAULT_MAX_LOCK_AGE = 86400;
 

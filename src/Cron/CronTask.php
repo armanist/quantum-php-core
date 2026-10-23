@@ -29,7 +29,7 @@ class CronTask implements CronTaskInterface
     /**
      * Task name
      */
-    private string $name;
+    private readonly string $name;
 
     /**
      * Task callback

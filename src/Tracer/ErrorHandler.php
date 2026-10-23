@@ -31,8 +31,8 @@ class ErrorHandler
 {
     private ?Logger $logger = null;
     private ?OutputInterface $cliOutput = null;
-    private ExceptionSeverityResolver $severityResolver;
-    private WebExceptionRenderer $webExceptionRenderer;
+    private readonly ExceptionSeverityResolver $severityResolver;
+    private readonly WebExceptionRenderer $webExceptionRenderer;
 
     public function __construct(
         ?ExceptionSeverityResolver $severityResolver = null,

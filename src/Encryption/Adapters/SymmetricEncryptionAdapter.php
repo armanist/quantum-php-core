@@ -27,7 +27,7 @@ class SymmetricEncryptionAdapter implements EncryptionInterface
      */
     public const CIPHER_METHOD = 'aes-256-cbc';
 
-    private string $appKey;
+    private readonly string $appKey;
 
     /**
      * @throws BaseException|ReflectionException

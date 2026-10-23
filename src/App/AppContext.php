@@ -25,11 +25,11 @@ use Quantum\Config\Config;
  */
 class AppContext
 {
-    private string $baseDir;
+    private readonly string $baseDir;
 
-    private DiContainer $container;
+    private readonly DiContainer $container;
 
-    private string $type;
+    private readonly string $type;
 
     private bool $stopped = false;
 

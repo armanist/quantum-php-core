@@ -35,9 +35,9 @@ class Csrf
      */
     public const TOKEN_KEY = 'csrf-token';
 
-    private Session $storage;
+    private readonly Session $storage;
 
-    private Hasher $hasher;
+    private readonly Hasher $hasher;
 
     /**
      * @throws ConfigException

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
-use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 use Rector\Config\RectorConfig;
@@ -22,5 +21,4 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         ClassPropertyAssignToConstructorPromotionRector::class,
-        ReadOnlyPropertyRector::class,
     ]);

@@ -19,9 +19,9 @@ use Quantum\Http\Request;
  */
 final class RouteFinder
 {
-    private PatternCompiler $patternCompiler;
+    private readonly PatternCompiler $patternCompiler;
 
-    private RouteCollection $routes;
+    private readonly RouteCollection $routes;
 
     public function __construct(RouteCollection $routes)
     {

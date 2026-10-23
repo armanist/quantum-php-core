@@ -32,7 +32,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class Mailer
 {
-    private MailerInterface $adapter;
+    private readonly MailerInterface $adapter;
 
     public function __construct(MailerInterface $adapter)
     {

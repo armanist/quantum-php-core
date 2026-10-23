@@ -25,7 +25,7 @@ use Exception;
  */
 class ZipAdapter implements ArchiveInterface
 {
-    private FileSystem $fs;
+    private readonly FileSystem $fs;
 
     private ?string $archiveName = null;
 

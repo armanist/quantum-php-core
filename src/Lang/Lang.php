@@ -22,7 +22,7 @@ class Lang
 {
     private ?string $currentLang = null;
 
-    private LangAdapterInterface $adapter;
+    private readonly LangAdapterInterface $adapter;
 
     public function __construct(string $lang, LangAdapterInterface $adapter)
     {
