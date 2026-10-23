@@ -231,7 +231,7 @@ trait MailerTrait
 
         $this->prepare();
 
-        $sent = config()->get('mailer.mail_trap') ? $this->saveEmail() : $this->sendEmail();
+        $sent = filter_var(config()->get('mailer.mail_trap'), FILTER_VALIDATE_BOOLEAN) ? $this->saveEmail() : $this->sendEmail();
 
         $this->resetFields();
 

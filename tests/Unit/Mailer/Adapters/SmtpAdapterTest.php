@@ -185,6 +185,41 @@ class SmtpAdapterTest extends MailerTestCase
         ], $adapter->getTransportLog());
     }
 
+    public function testSmtpAdapterSendsThroughTheTransportWhenMailTrapIsTheTextFalse(): void
+    {
+        config()->set('mailer.mail_trap', 'false');
+
+        $adapter = new SmtpAdapter(config()->get('mailer.smtp'));
+
+        $this->setPrivateProperty($adapter, 'mailer', new class (true) extends PHPMailer {
+            public function send()
+            {
+                throw new Exception('Sent through the transport');
+            }
+        });
+
+        $adapter->setFrom('john@hotmail.com', 'John Doe');
+        $adapter->setAddress('benny@gmail.com', 'Benny');
+        $adapter->setBody('Lorem ipsum dolor sit amet');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Sent through the transport');
+
+        $adapter->send();
+    }
+
+    public function testSmtpAdapterSavesToTheMailTrapWhenMailTrapIsTheTextTrue(): void
+    {
+        config()->set('mailer.mail_trap', 'true');
+
+        $this->adapter->setFrom('john@hotmail.com', 'John Doe');
+        $this->adapter->setAddress('benny@gmail.com', 'Benny');
+        $this->adapter->setSubject('Lorem');
+        $this->adapter->setBody('Lorem ipsum dolor sit amet');
+
+        $this->assertTrue($this->adapter->send());
+    }
+
     public function testSmtpAdapterKeepsNoSmtpExchangeOutsideDebugMode(): void
     {
         config()->set('app.debug', false);

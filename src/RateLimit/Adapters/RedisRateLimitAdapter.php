@@ -36,7 +36,7 @@ class RedisRateLimitAdapter implements RateLimitAdapterInterface
         $this->prefix = (string) ($params['prefix'] ?? '');
 
         $this->redis = new Redis();
-        $this->redis->connect($params['host'], $params['port']);
+        $this->redis->connect($params['host'], (int) $params['port']);
     }
 
     public function hit(string $key, int $limit, int $interval): bool

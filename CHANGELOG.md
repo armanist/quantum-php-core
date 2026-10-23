@@ -59,6 +59,9 @@ The format is based on Keep a Changelog.
 - The debugbar `queries` tab lists the queries the request ran; it has been empty since 2.6.0 (#539)
 - `SmtpAdapter` records the SMTP exchange in debug mode: it checked `config()->get('debug')`, which is never set, instead of `app.debug`, so the exchange never reached the `mails` tab (#539)
 - Idiorm keeps no query log when debug mode is off. It received `app.debug` unconverted, and `DEBUG=false` from `.env` arrives as the text `"false"`, which PHP reads as true, so every query was kept in memory, also in production (#593)
+- `mailer.mail_trap` set from `.env` is read as a boolean: `MAIL_TRAP=false` arrives as the text `"false"`, which kept every mail in the trap instead of sending it (#593)
+- A "remember me" login works with `REMEMBER_LIFETIME` set in `.env`: the session auth adapter passed the text on to `Cookie::set()`, which takes an `int`, and threw a `TypeError` (#593)
+- The Redis and Memcached cache adapters and the Redis rate limiter accept a `port` set from `.env`: `Memcached::addServer()` takes an `int` and threw a `TypeError` for the text (#593)
 
 ## [3.0.3] - 2026-07-10
 

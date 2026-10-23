@@ -29,6 +29,20 @@ class RedisAdapterTest extends AppTestCase
         $this->redis->clear();
     }
 
+    public function testRedisAdapterConnectsWithThePortAsText(): void
+    {
+        $adapter = new RedisAdapter([
+            'prefix' => 'test',
+            'host' => '127.0.0.1',
+            'port' => '6379',
+            'ttl' => 60,
+        ]);
+
+        $adapter->set('port-as-text', 'connected');
+
+        $this->assertSame('connected', $adapter->get('port-as-text'));
+    }
+
     public function testRedisAdapterSetGetDelete(): void
     {
 

@@ -38,7 +38,7 @@ class RedisAdapter implements CacheInterface
         $this->prefix = $params['prefix'];
 
         $this->redis = new Redis();
-        $this->redis->connect($params['host'], $params['port']);
+        $this->redis->connect($params['host'], (int) $params['port']);
     }
 
     /**
