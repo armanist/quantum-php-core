@@ -31,16 +31,22 @@ class DatabaseHandlerTest extends AppTestCase
         parent::tearDown();
     }
 
-    public function testDatabaseHandlerGcDeletesTheExpiredSessionsAndKeepsTheOthers(): void
+    public function testDatabaseHandlerGcDeletesTheExpiredSessionsAndReturnsTheirNumber(): void
     {
-        $handler = new DatabaseHandler(ModelFactory::createDynamicModel('sessions')->getOrmInstance());
+        $this->insertSession('expired-1', time() - 7200);
+        $this->insertSession('expired-2', time() - 5400);
+        $this->insertSession('active', time());
 
-        $handler->write('expired', 'old data');
-        $handler->write('active', 'new data');
+        $this->assertSame(2, $this->createHandler()->gc(3600));
 
-        IdiormDbal::execute('UPDATE sessions SET ttl = ? WHERE session_id = ?', [time() - 7200, 'expired']);
+        $this->assertSame([['session_id' => 'active']], IdiormDbal::query('SELECT session_id FROM sessions'));
+    }
 
-        $this->assertSame(0, $handler->gc(3600));
+    public function testDatabaseHandlerGcReturnsZeroWhenNoSessionHasExpired(): void
+    {
+        $this->insertSession('active', time());
+
+        $this->assertSame(0, $this->createHandler()->gc(3600));
 
         $this->assertSame([['session_id' => 'active']], IdiormDbal::query('SELECT session_id FROM sessions'));
     }
@@ -49,6 +55,7 @@ class DatabaseHandlerTest extends AppTestCase
     {
         $model = Mockery::mock(DbalInterface::class);
         $model->shouldReceive('criteria')->with('ttl', '<', Mockery::type('int'))->andReturnSelf();
+        $model->shouldReceive('count')->andReturn(2);
         $model->shouldReceive('deleteMany')->andReturn(false);
 
         $this->assertFalse((new DatabaseHandler($model))->gc(3600));
@@ -60,6 +67,19 @@ class DatabaseHandlerTest extends AppTestCase
     public function testDatabaseHandlerDeclaresTheReturnTypeOfItsInterfaceMethods(string $method): void
     {
         $this->assertTrue((new ReflectionMethod(DatabaseHandler::class, $method))->hasReturnType());
+    }
+
+    /**
+     * A handler serves one session, so every check gets a handler of its own
+     */
+    private function createHandler(): DatabaseHandler
+    {
+        return new DatabaseHandler(ModelFactory::createDynamicModel('sessions')->getOrmInstance());
+    }
+
+    private function insertSession(string $id, int $ttl): void
+    {
+        IdiormDbal::execute('INSERT INTO sessions (session_id, data, ttl) VALUES (?, ?, ?)', [$id, 'data', $ttl]);
     }
 
     /**
