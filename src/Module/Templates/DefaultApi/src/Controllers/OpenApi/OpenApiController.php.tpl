@@ -8,23 +8,24 @@
 
 namespace {{MODULE_NAMESPACE}}\Controllers\OpenApi;
 
+use OpenApi\Attributes as OA;
+
 /**
  * Class ApiController
  * @package Modules\Api
- * @OA\Info(
- *    title="Quantum API documentation",
- *    version="2.9.0",
- *    description=" *Quantum Documentation: https://quantumphp.io/en/docs/v1/overview"
- *  ),
- * @OA\SecurityScheme(
- *    securityScheme="bearer_token",
- *    type="apiKey",
- *    name="Authorization",
- *    in="header"
- *  )
  */
+#[OA\Info(
+    title: 'Quantum API documentation',
+    version: '3.x',
+    description: ' *Quantum Documentation: https://quantumphp.io/en/docs/v1/overview'
+)]
+#[OA\SecurityScheme(
+    securityScheme: 'bearer_token',
+    type: 'apiKey',
+    name: 'Authorization',
+    in: 'header'
+)]
 abstract class OpenApiController
 {
 
 }
-
