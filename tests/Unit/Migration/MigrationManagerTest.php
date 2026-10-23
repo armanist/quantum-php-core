@@ -9,6 +9,7 @@ use Quantum\Migration\MigrationTable;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Database\Database;
 use Quantum\Config\Setup;
+use Quantum\Di\Di;
 use Mockery;
 
 class MigrationManagerTest extends AppTestCase
@@ -95,11 +96,16 @@ class MigrationManagerTest extends AppTestCase
 
     public function testApplyMigrationsThrowsForUnsupportedDriver(): void
     {
-        $manager = new MigrationManager();
+        $ormClass = db()->getOrmClass();
+
+        $this->createContext();
 
         $db = Mockery::mock(Database::class);
+        $db->shouldReceive('getOrmClass')->andReturn($ormClass);
         $db->shouldReceive('getConfigs')->andReturn(['driver' => 'sqlserver']);
-        $this->setPrivateProperty($manager, 'db', $db);
+        Di::set(Database::class, $db);
+
+        $manager = new MigrationManager();
 
         $this->expectException(MigrationException::class);
         $this->expectExceptionMessage('The driver `sqlserver` is not supported.');
@@ -109,11 +115,16 @@ class MigrationManagerTest extends AppTestCase
 
     public function testApplyMigrationsThrowsForWrongDirection(): void
     {
-        $manager = new MigrationManager();
+        $ormClass = db()->getOrmClass();
+
+        $this->createContext();
 
         $db = Mockery::mock(Database::class);
+        $db->shouldReceive('getOrmClass')->andReturn($ormClass);
         $db->shouldReceive('getConfigs')->andReturn(['driver' => 'sqlite']);
-        $this->setPrivateProperty($manager, 'db', $db);
+        Di::set(Database::class, $db);
+
+        $manager = new MigrationManager();
 
         $this->expectException(MigrationException::class);
         $this->expectExceptionMessage('Migration direction can only be [up] or [down]');

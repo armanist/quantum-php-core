@@ -28,7 +28,7 @@ class MessageAdapter implements ReportableInterface
     /**
      * The number of last messages kept; 0 keeps every message
      */
-    private int $limit;
+    private readonly int $limit;
 
     public function __construct(int $limit = 1000)
     {

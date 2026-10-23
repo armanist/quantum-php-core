@@ -29,12 +29,12 @@ final class Pipeline
     /**
      * @var array<StageInterface<TContext>>
      */
-    private array $stages;
+    private readonly array $stages;
 
     /**
      * @var StageInterface<TContext>|null
      */
-    private ?StageInterface $closingStage;
+    private readonly ?StageInterface $closingStage;
 
     /**
      * @param array<StageInterface<TContext>> $stages

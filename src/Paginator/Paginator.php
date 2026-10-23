@@ -36,7 +36,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class Paginator
 {
-    private PaginatorInterface $adapter;
+    private readonly PaginatorInterface $adapter;
 
     public function __construct(PaginatorInterface $adapter)
     {

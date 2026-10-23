@@ -18,7 +18,7 @@ use Quantum\RateLimit\Contracts\RateLimitAdapterInterface;
  */
 class RateLimiter
 {
-    private RateLimitAdapterInterface $adapter;
+    private readonly RateLimitAdapterInterface $adapter;
 
     public function __construct(RateLimitAdapterInterface $adapter)
     {

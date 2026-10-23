@@ -19,7 +19,7 @@ use Exception;
  */
 class GoogleDriveFileSystemAdapter implements FilesystemAdapterInterface
 {
-    private GoogleDriveApp $googleDriveApp;
+    private readonly GoogleDriveApp $googleDriveApp;
 
     public function __construct(GoogleDriveApp $googleDriveApp)
     {

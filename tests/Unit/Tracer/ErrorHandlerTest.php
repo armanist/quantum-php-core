@@ -9,9 +9,11 @@ use Quantum\Tracer\ErrorHandler;
 use Quantum\App\Enums\AppType;
 use Quantum\Logger\Logger;
 use ReflectionException;
+use ReflectionFunction;
 use ErrorException;
 use ParseError;
 use Exception;
+use Closure;
 use Mockery;
 
 class ErrorHandlerTest extends AppTestCase
@@ -43,9 +45,12 @@ class ErrorHandlerTest extends AppTestCase
         restore_error_handler();
 
         $this->assertNotNull($currentHandler);
-        $this->assertIsArray($currentHandler);
-        $this->assertInstanceOf(ErrorHandler::class, $currentHandler[0]);
-        $this->assertEquals('handleError', $currentHandler[1]);
+        $this->assertInstanceOf(Closure::class, $currentHandler);
+
+        $reflection = new ReflectionFunction($currentHandler);
+
+        $this->assertInstanceOf(ErrorHandler::class, $reflection->getClosureThis());
+        $this->assertEquals('handleError', $reflection->getName());
     }
 
     public function testSetupRegistersExceptionHandler(): void
@@ -59,9 +64,12 @@ class ErrorHandlerTest extends AppTestCase
         restore_exception_handler();
 
         $this->assertNotNull($currentHandler);
-        $this->assertIsArray($currentHandler);
-        $this->assertInstanceOf(ErrorHandler::class, $currentHandler[0]);
-        $this->assertEquals('handleException', $currentHandler[1]);
+        $this->assertInstanceOf(Closure::class, $currentHandler);
+
+        $reflection = new ReflectionFunction($currentHandler);
+
+        $this->assertInstanceOf(ErrorHandler::class, $reflection->getClosureThis());
+        $this->assertEquals('handleException', $reflection->getName());
     }
 
     public function testHandleErrorThrowsErrorException(): void

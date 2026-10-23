@@ -30,7 +30,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class Session
 {
-    private SessionStorageInterface $adapter;
+    private readonly SessionStorageInterface $adapter;
 
     public function __construct(SessionStorageInterface $adapter)
     {

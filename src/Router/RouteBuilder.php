@@ -20,9 +20,9 @@ use Closure;
  */
 final class RouteBuilder
 {
-    private RouteCollection $collection;
+    private readonly RouteCollection $collection;
 
-    private PatternCompiler $patternCompiler;
+    private readonly PatternCompiler $patternCompiler;
 
     private ?Route $currentRoute = null;
 
@@ -94,7 +94,7 @@ final class RouteBuilder
     public function add(string $path, string $methods, $handler, string $action = null): self
     {
         $methodList = array_filter(
-            array_map('trim', explode('|', $methods)),
+            array_map(trim(...), explode('|', $methods)),
             static fn ($m): bool => $m !== ''
         );
 

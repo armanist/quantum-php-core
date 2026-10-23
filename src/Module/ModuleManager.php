@@ -33,19 +33,19 @@ class ModuleManager
 
     protected bool $optionEnabled;
 
-    private string $moduleName;
+    private readonly string $moduleName;
 
-    private string $template;
+    private readonly string $template;
 
-    private string $modulePath;
+    private readonly string $modulePath;
 
-    private string $assetsPath;
+    private readonly string $assetsPath;
 
-    private string $templatePath;
+    private readonly string $templatePath;
 
-    private bool $withAssets;
+    private readonly bool $withAssets;
 
-    private string $modulesConfigPath;
+    private readonly string $modulesConfigPath;
 
     /**
      * @throws ConfigException|DiException|BaseException|ReflectionException

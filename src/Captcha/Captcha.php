@@ -26,7 +26,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class Captcha
 {
-    private CaptchaInterface $adapter;
+    private readonly CaptchaInterface $adapter;
 
     public function __construct(CaptchaInterface $adapter)
     {

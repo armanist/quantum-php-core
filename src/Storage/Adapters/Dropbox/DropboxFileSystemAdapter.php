@@ -19,7 +19,7 @@ use Exception;
  */
 class DropboxFileSystemAdapter implements FilesystemAdapterInterface
 {
-    private DropboxApp $dropboxApp;
+    private readonly DropboxApp $dropboxApp;
 
     public function __construct(DropboxApp $dropboxApp)
     {

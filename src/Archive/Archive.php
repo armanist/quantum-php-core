@@ -30,7 +30,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class Archive
 {
-    private ArchiveInterface $adapter;
+    private readonly ArchiveInterface $adapter;
 
     public function __construct(ArchiveInterface $adapter)
     {

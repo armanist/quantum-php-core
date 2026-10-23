@@ -42,7 +42,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class FileSystem
 {
-    private FilesystemAdapterInterface $adapter;
+    private readonly FilesystemAdapterInterface $adapter;
 
     public function __construct(FilesystemAdapterInterface $adapter)
     {

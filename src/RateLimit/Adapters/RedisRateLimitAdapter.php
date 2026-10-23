@@ -20,11 +20,11 @@ use Redis;
  */
 class RedisRateLimitAdapter implements RateLimitAdapterInterface
 {
-    private Redis $redis;
+    private readonly Redis $redis;
 
-    private int $resetInterval;
+    private readonly int $resetInterval;
 
-    private string $prefix;
+    private readonly string $prefix;
 
     /**
      * @param array<string, mixed> $params

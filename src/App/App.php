@@ -25,7 +25,7 @@ class App
 {
     private static ?AppContext $context = null;
 
-    private AppInterface $adapter;
+    private readonly AppInterface $adapter;
 
     public function __construct(AppInterface $adapter)
     {

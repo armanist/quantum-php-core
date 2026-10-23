@@ -55,13 +55,13 @@ class MigrationManager
      */
     private array $migrations = [];
 
-    private TableFactory $tableFactory;
+    private readonly TableFactory $tableFactory;
 
-    private string $migrationFolder;
+    private readonly string $migrationFolder;
 
-    private FileSystem $fs;
+    private readonly FileSystem $fs;
 
-    private Database $db;
+    private readonly Database $db;
 
     /**
      * @throws BaseException|ConfigException|DiException|FileSystemException|ReflectionException

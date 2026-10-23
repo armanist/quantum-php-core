@@ -113,7 +113,7 @@ class Column
      */
     public const ATTR_ZEROFILL = 'UNSIGNED ZEROFILL';
 
-    private string $name;
+    private readonly string $name;
 
     private ?string $newName = null;
 

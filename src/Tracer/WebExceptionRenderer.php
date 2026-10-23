@@ -19,7 +19,7 @@ use Throwable;
 
 class WebExceptionRenderer
 {
-    private StackTraceFormatter $stackTraceFormatter;
+    private readonly StackTraceFormatter $stackTraceFormatter;
 
     public function __construct(?StackTraceFormatter $stackTraceFormatter = null)
     {

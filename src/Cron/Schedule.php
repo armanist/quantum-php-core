@@ -22,7 +22,7 @@ class Schedule
     /**
      * Task name
      */
-    private string $name;
+    private readonly string $name;
 
     /**
      * Cron expression

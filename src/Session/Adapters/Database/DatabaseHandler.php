@@ -19,7 +19,7 @@ use SessionHandlerInterface;
  */
 class DatabaseHandler implements SessionHandlerInterface
 {
-    private DbalInterface $sessionModel;
+    private readonly DbalInterface $sessionModel;
 
     /**
      * DatabaseHandler constructor.

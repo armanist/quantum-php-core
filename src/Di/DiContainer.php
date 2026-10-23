@@ -28,7 +28,7 @@ use Closure;
  */
 class DiContainer
 {
-    private DiRegistry $registry;
+    private readonly DiRegistry $registry;
 
     /**
      * @var array<string, object>

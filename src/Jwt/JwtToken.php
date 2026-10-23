@@ -25,7 +25,7 @@ class JwtToken extends JWT
     /**
      * JWT secret key
      */
-    private string $key;
+    private readonly string $key;
 
     /**
      * Encryption algorithm

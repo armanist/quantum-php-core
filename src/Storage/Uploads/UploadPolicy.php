@@ -63,7 +63,7 @@ class UploadPolicy
 
         foreach ($allowedMimeTypes as $mimeType => $extensions) {
             $values = is_array($extensions) ? $extensions : [$extensions];
-            $normalized[$mimeType] = array_values(array_map('strval', $values));
+            $normalized[$mimeType] = array_values(array_map(strval(...), $values));
         }
 
         return $normalized;

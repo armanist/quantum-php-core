@@ -31,8 +31,8 @@ class ErrorHandler
 {
     private ?Logger $logger = null;
     private ?OutputInterface $cliOutput = null;
-    private ExceptionSeverityResolver $severityResolver;
-    private WebExceptionRenderer $webExceptionRenderer;
+    private readonly ExceptionSeverityResolver $severityResolver;
+    private readonly WebExceptionRenderer $webExceptionRenderer;
 
     public function __construct(
         ?ExceptionSeverityResolver $severityResolver = null,
@@ -53,8 +53,8 @@ class ErrorHandler
     {
         $this->logger = $logger;
 
-        set_error_handler([$this, 'handleError']);
-        set_exception_handler([$this, 'handleException']);
+        set_error_handler($this->handleError(...));
+        set_exception_handler($this->handleException(...));
     }
 
     public function setCliOutput(OutputInterface $output): void

@@ -23,7 +23,7 @@ use Quantum\App\Exceptions\BaseException;
  */
 class Cryptor
 {
-    private EncryptionInterface $adapter;
+    private readonly EncryptionInterface $adapter;
 
     public function __construct(EncryptionInterface $adapter)
     {

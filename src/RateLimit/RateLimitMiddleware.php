@@ -24,7 +24,7 @@ use Closure;
  */
 class RateLimitMiddleware extends Middleware
 {
-    private Route $route;
+    private readonly Route $route;
 
     public function __construct(Route $route)
     {
