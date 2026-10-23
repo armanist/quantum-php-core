@@ -124,6 +124,10 @@ class OpenApiCommand extends CliCommand
             }
         }
 
+        if (!$fs->isDirectory($modulePath . DS . 'resources')) {
+            $fs->makeDirectory($modulePath . DS . 'resources');
+        }
+
         if (!$fs->isDirectory($modulePath . DS . 'resources' . DS . 'openapi')) {
             $fs->makeDirectory($modulePath . DS . 'resources' . DS . 'openapi');
         }
@@ -136,6 +140,10 @@ class OpenApiCommand extends CliCommand
      */
     private function copyResources(): void
     {
+        if (!is_dir($this->publicOpenApiFolderPath)) {
+            mkdir($this->publicOpenApiFolderPath, 0777, true);
+        }
+
         $dir = opendir($this->vendorOpenApiFolderPath);
 
         if (is_resource($dir)) {
