@@ -65,6 +65,20 @@ class OpenApiTemplatesTest extends TestCase
     }
 
     /**
+     * @dataProvider apiTemplateProvider
+     */
+    public function testApiTemplatesDescribeTheApiWithAttributesOnly(string $template): void
+    {
+        $templates = glob(dirname(__DIR__, 4) . '/src/Module/Templates/' . $template . '/src/Controllers/OpenApi/*.php.tpl') ?: [];
+
+        $this->assertNotEmpty($templates);
+
+        foreach ($templates as $file) {
+            $this->assertStringNotContainsString('@OA\\', (string) file_get_contents($file), basename($file));
+        }
+    }
+
+    /**
      * @return array<string, array{0: string}>
      */
     public function apiTemplateProvider(): array
