@@ -85,18 +85,19 @@ class DatabaseHandler implements SessionHandlerInterface
     }
 
     /**
-     * @inheritDoc
+     * Deletes the expired sessions
+     * @return int|false The number of deleted sessions, or false when they cannot be deleted
      */
-    public function gc($max_lifetime)
+    public function gc($max_lifetime): int|false
     {
         $old = time() - $max_lifetime;
 
-        $result = $this->sessionModel->criteria('ttl', '<', $old)->deleteMany();
+        $expired = $this->sessionModel->criteria('ttl', '<', $old)->count();
 
-        if ($result === false) {
-            return false;
+        if ($expired === 0) {
+            return 0;
         }
 
-        return 0;
+        return $this->sessionModel->criteria('ttl', '<', $old)->deleteMany() ? $expired : false;
     }
 }

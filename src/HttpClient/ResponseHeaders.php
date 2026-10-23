@@ -82,7 +82,7 @@ class ResponseHeaders implements ArrayAccess, Countable, Iterator
      * @param string $offset
      * @return mixed|null
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->data[strtolower($offset)] ?? null;
     }
@@ -95,7 +95,7 @@ class ResponseHeaders implements ArrayAccess, Countable, Iterator
     /**
      * @return mixed
      */
-    public function current()
+    public function current(): mixed
     {
         return current($this->data);
     }
@@ -108,7 +108,7 @@ class ResponseHeaders implements ArrayAccess, Countable, Iterator
     /**
      * @return string|null
      */
-    public function key()
+    public function key(): mixed
     {
         $key = key($this->data);
 
