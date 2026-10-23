@@ -50,6 +50,16 @@ The format is based on Keep a Changelog.
 - Applied the pending Rector refactors across `src/` (null-coalescing assignment for lazy initialization, explicit `instanceof` checks instead of truthiness checks on nullable objects, native return types on `env()`, `CurlAdapter::getId()` and `CurlAdapter::getResponseCookies()`) and added `composer rector:check` to the CI workflow after PHPStan (#587)
 - In debug mode the console logs to the configured adapter, or the one a caller asks for, at every level. Before, debug mode always used the in-memory `message` adapter, so the console's log lines were never written anywhere, and `CronManager`'s `single` logger was replaced too. The web app keeps the `message` adapter for the debug toolbar (#593)
 - The error handler chooses the console or the web output by the app type instead of checking `PHP_SAPI`; `php qt`, `php -S` and PHP-FPM behave as before (#593)
+- **BREAKING:** Raised the minimum supported PHP version from `8.0` to `8.1` (#595). Applications on PHP `8.0` stay on 3.0.x.
+  - CI tests PHP `8.1`, `8.2` and `8.3`. PHPStan analyses the code as PHP `8.1`, and Rector uses its PHP `8.1` level set.
+  - `ResponseHeaders` (`offsetGet()`, `current()`, `key()`: `mixed`) and `DatabaseHandler::gc()` (`int|false`) declare the return types PHP `8.1` expects. Without them each raised a deprecation when the class loaded. A class that extends them and overrides these methods must declare compatible return types.
+  - Applied the PHP `8.1` syntax Rector proposes: first-class callable syntax (`array_map(trim(...), $items)`, `$this->handleError(...)`) and `readonly` for 84 private properties that are only assigned in the constructor, so subclasses are unaffected. `ErrorHandler` registers closures with `set_error_handler()` and `set_exception_handler()` instead of array callables (#601).
+- **BREAKING:** Moved `symfony/console`, `symfony/var-dumper` and `symfony/var-exporter` to the `^6.4` line and dropped `symfony/polyfill-php73`. An application that subclasses Symfony classes may need the stricter return types of Symfony 6 (#596)
+- Allowed `psr/log` `^2.0 || ^3.0`. The nine PSR-3 methods of `Logger` declare `string|Stringable $message`; a class that extends `Logger` and overrides them must declare the same type (#599)
+- **BREAKING:** The API module templates describe the OpenAPI documentation with `#[OA\...]` attributes instead of `@OA\...` docblocks, and `doctrine/annotations` is no longer a dependency (#597). The `DefaultApi` and `DemoApi` templates now document version `3.x`.
+  - Modules generated before 3.1 keep their `@OA` docblocks, and without `doctrine/annotations` `install:openapi` fails with `Required @OA\PathItem() not found`. Convert them to attributes (`use OpenApi\Attributes as OA;` and `#[OA\Get(...)]`), or require `doctrine/annotations` in the application.
+  - This replaces the 3.0.3 note that kept OpenAPI on annotations for the PHP `8.0` baseline.
+- **BREAKING:** The error handler logs a reported deprecation (`E_DEPRECATED` or `E_USER_DEPRECATED`) as a warning (`<message> in <file>:<line>`) and lets the script go on, instead of throwing an `ErrorException` that stopped the request. Other reported errors still throw. Idiorm's query logging in debug mode raised such a deprecation on PHP `8.1` for every `NULL` bound value (#598)
 
 ### Fixed
 - The page not found response is JSON for every client that asks for JSON, not only when the `Accept` header is exactly `application/json`: clients such as axios (`application/json, text/plain, */*`), a `charset` parameter, `+json` types and AJAX requests used to get the HTML page. `page_not_found_response()` decides with `Request::expectsJson()` and takes an optional request (#581)
@@ -62,6 +72,8 @@ The format is based on Keep a Changelog.
 - `mailer.mail_trap` set from `.env` is read as a boolean: `MAIL_TRAP=false` arrives as the text `"false"`, which kept every mail in the trap instead of sending it (#593)
 - A "remember me" login works with `REMEMBER_LIFETIME` set in `.env`: the session auth adapter passed the text on to `Cookie::set()`, which takes an `int`, and threw a `TypeError` (#593)
 - The Redis and Memcached cache adapters and the Redis rate limiter accept a `port` set from `.env`: `Memcached::addServer()` takes an `int` and threw a `TypeError` for the text (#593)
+- `DatabaseHandler::gc()` returns the number of deleted sessions, as `SessionHandlerInterface::gc()` documents. It returned `0` after any successful delete and `false` when SleekDB had nothing to delete (#595)
+- `install:openapi` creates the `resources` folder of a module that has none, for example one generated from the `DefaultApi` template, and the `public/assets/OpenApiUi` folder, instead of failing with `mkdir()` and `copy()` errors (#606)
 
 ## [3.0.3] - 2026-07-10
 
