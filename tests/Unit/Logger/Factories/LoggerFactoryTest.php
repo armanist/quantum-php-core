@@ -10,6 +10,7 @@ use Quantum\Logger\Adapters\SingleAdapter;
 use Quantum\Logger\Adapters\DailyAdapter;
 use Quantum\Logger\Enums\LoggerType;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\App\Enums\AppType;
 use Quantum\Logger\Logger;
 use Quantum\Di\Di;
 
@@ -67,6 +68,61 @@ class LoggerFactoryTest extends AppTestCase
         $this->assertInstanceOf(MessageAdapter::class, $logger->getAdapter());
 
         $this->assertInstanceOf(ReportableInterface::class, $logger->getAdapter());
+    }
+
+    public function testLoggerFactoryPassesTheMessageLimitFromTheConfig(): void
+    {
+        config()->set('logging.message.limit', 2);
+        config()->set('app.debug', true);
+
+        $logger = LoggerFactory::get();
+
+        $logger->info('First');
+        $logger->info('Second');
+        $logger->info('Third');
+
+        $this->assertSame([['info' => 'Second'], ['info' => 'Third']], $logger->getAdapter()->getMessages());
+    }
+
+    public function testLoggerFactoryUsesTheDefaultMessageLimitWithoutTheKey(): void
+    {
+        config()->set('logging.message', []);
+        config()->set('app.debug', true);
+
+        $logger = LoggerFactory::get();
+
+        for ($i = 1; $i <= 1001; $i++) {
+            $logger->info('Message ' . $i);
+        }
+
+        $this->assertCount(1000, $logger->getAdapter()->getMessages());
+    }
+
+    public function testLoggerFactoryInConsoleDebugModeGetsTheDefaultAdapter(): void
+    {
+        $this->useAppType(AppType::CONSOLE);
+
+        config()->set('app.debug', true);
+
+        $this->assertInstanceOf(SingleAdapter::class, LoggerFactory::get()->getAdapter());
+    }
+
+    public function testLoggerFactoryInConsoleDebugModeGetsTheRequestedAdapter(): void
+    {
+        $this->useAppType(AppType::CONSOLE);
+
+        config()->set('app.debug', true);
+
+        $this->assertInstanceOf(DailyAdapter::class, LoggerFactory::get(LoggerType::DAILY)->getAdapter());
+    }
+
+    public function testLoggerFactoryInConsoleDebugModeGetsTheMessageAdapterWhenAsked(): void
+    {
+        $this->useAppType(AppType::CONSOLE);
+
+        config()->set('app.debug', true);
+
+        $this->assertInstanceOf(MessageAdapter::class, LoggerFactory::get(LoggerType::MESSAGE)->getAdapter());
     }
 
     public function testLoggerFactoryTryingToGetMessageAdapter(): void

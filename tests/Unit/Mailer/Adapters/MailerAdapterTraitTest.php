@@ -128,4 +128,106 @@ class MailerAdapterTraitTest extends AppTestCase
         $this->assertSame(['Connection refused'], $adapter->getTransportLog());
         $this->assertSame([['warning' => 'Connection refused']], logger()->getAdapter()->getMessages());
     }
+
+    public function testMailerTraitSendCutsTheTransportLogToItsLastLinesBeforeSending(): void
+    {
+        config()->set('mailer.transport_log_limit', 2);
+
+        $adapter = $this->createFailingAdapter(1);
+
+        for ($i = 1; $i <= 4; $i++) {
+            $adapter->send();
+        }
+
+        $this->assertSame(['Send 2 line 1', 'Send 3 line 1', 'Send 4 line 1'], $adapter->getTransportLog());
+    }
+
+    public function testMailerTraitSendKeepsEveryLineOfTheSendInProgress(): void
+    {
+        config()->set('mailer.transport_log_limit', 1);
+
+        $adapter = $this->createFailingAdapter(3);
+
+        $adapter->send();
+
+        $this->assertSame(['Send 1 line 1', 'Send 1 line 2', 'Send 1 line 3'], $adapter->getTransportLog());
+
+        $adapter->send();
+
+        $this->assertSame(
+            ['Send 1 line 3', 'Send 2 line 1', 'Send 2 line 2', 'Send 2 line 3'],
+            $adapter->getTransportLog()
+        );
+    }
+
+    public function testMailerTraitSendKeepsTheWholeTransportLogWithZeroLimit(): void
+    {
+        config()->set('mailer.transport_log_limit', 0);
+
+        $adapter = $this->createFailingAdapter(1);
+
+        for ($i = 1; $i <= 5; $i++) {
+            $adapter->send();
+        }
+
+        $this->assertCount(5, $adapter->getTransportLog());
+    }
+
+    public function testMailerTraitSendKeepsTheLastThousandLinesWithoutTheKey(): void
+    {
+        config()->delete('mailer.transport_log_limit');
+
+        $adapter = $this->createFailingAdapter(1001);
+
+        $adapter->send();
+        $adapter->send();
+
+        $log = $adapter->getTransportLog();
+
+        $this->assertCount(2001, $log);
+        $this->assertSame('Send 1 line 2', $log[0]);
+    }
+
+    /**
+     * Creates an adapter whose every send fails with the given number of transport error lines
+     */
+    private function createFailingAdapter(int $linesPerSend): MailerInterface
+    {
+        config()->set('mailer.mail_trap', false);
+
+        return new class ($linesPerSend) implements MailerInterface {
+            use MailerTrait;
+
+            private int $linesPerSend;
+
+            private int $sends = 0;
+
+            public function __construct(int $linesPerSend)
+            {
+                $this->linesPerSend = $linesPerSend;
+            }
+
+            protected function prepare(): void
+            {
+            }
+
+            protected function sendEmail(): bool
+            {
+                $this->sends++;
+
+                return false;
+            }
+
+            protected function getTransportErrors(): array
+            {
+                $lines = [];
+
+                for ($i = 1; $i <= $this->linesPerSend; $i++) {
+                    $lines[] = 'Send ' . $this->sends . ' line ' . $i;
+                }
+
+                return $lines;
+            }
+        };
+    }
 }

@@ -7,6 +7,7 @@ use Quantum\Http\Exceptions\HttpException;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Router\MatchedRoute;
+use Quantum\App\Enums\AppType;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
 use Quantum\Config\Config;
@@ -125,7 +126,7 @@ class SendResponseStageTest extends AppTestCase
         $container->set(Request::class, $request);
         $container->set(Config::class, $config);
 
-        $webContext = new WebContext(new AppContext(PROJECT_ROOT, $container));
+        $webContext = new WebContext(new AppContext(PROJECT_ROOT, $container, AppType::WEB));
         $webContext->setResponse(response()->html(''));
 
         ob_start();

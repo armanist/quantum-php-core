@@ -29,6 +29,20 @@ class MemcachedAdapterTest extends AppTestCase
         $this->memCached->clear();
     }
 
+    public function testMemcachedAdapterConnectsWithThePortAsText(): void
+    {
+        $adapter = new MemcachedAdapter([
+            'prefix' => 'test',
+            'host' => '127.0.0.1',
+            'port' => '11211',
+            'ttl' => 60,
+        ]);
+
+        $adapter->set('port-as-text', 'connected');
+
+        $this->assertSame('connected', $adapter->get('port-as-text'));
+    }
+
     public function testMemcachedAdapterSetGetDelete(): void
     {
 

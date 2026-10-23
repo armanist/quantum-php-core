@@ -39,7 +39,7 @@ class MemcachedAdapter implements CacheInterface
         $this->prefix = $params['prefix'];
 
         $this->memcached = new Memcached();
-        $this->memcached->addServer($params['host'], $params['port']);
+        $this->memcached->addServer($params['host'], (int) $params['port']);
 
         if (!$this->memcached->getStats()) {
             throw CacheException::cantConnect('Memcached server');

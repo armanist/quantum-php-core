@@ -200,7 +200,7 @@ class SessionAuthAdapter implements AuthenticatableInterface
             [$this->keyFields[AuthKeys::REMEMBER_TOKEN] => $rememberToken]
         );
 
-        $rememberLifetime = $this->config['session']['remember_lifetime'] ?? self::DEFAULT_REMEMBER_LIFETIME;
+        $rememberLifetime = (int) ($this->config['session']['remember_lifetime'] ?? self::DEFAULT_REMEMBER_LIFETIME);
 
         cookie()->set(
             $this->keyFields[AuthKeys::REMEMBER_TOKEN],

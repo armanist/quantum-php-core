@@ -18,7 +18,7 @@ use Quantum\Config\Config;
 /**
  * Class AppContext
  *
- * Carries the base directory and the container of an application, and the state of the run it is passed through:
+ * Carries the base directory, the container and the type (web or console) of an application, and the state of the run it is passed through:
  * the stopped flag, which ends the pipeline run early, and the exit code.
  *
  * @package Quantum\App
@@ -29,14 +29,20 @@ class AppContext
 
     private DiContainer $container;
 
+    private string $type;
+
     private bool $stopped = false;
 
     private int $exitCode = ExitCode::SUCCESS;
 
-    public function __construct(string $baseDir, DiContainer $container)
+    /**
+     * @param string $type AppType::WEB or AppType::CONSOLE
+     */
+    public function __construct(string $baseDir, DiContainer $container, string $type)
     {
         $this->baseDir = $baseDir;
         $this->container = $container;
+        $this->type = $type;
     }
 
     public function getBaseDir(): string
@@ -47,6 +53,14 @@ class AppContext
     public function getContainer(): DiContainer
     {
         return $this->container;
+    }
+
+    /**
+     * Gets the type of the application: AppType::WEB or AppType::CONSOLE
+     */
+    public function getType(): string
+    {
+        return $this->type;
     }
 
     public function getEnvironment(): Environment

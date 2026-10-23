@@ -10,6 +10,7 @@ use Symfony\Component\Console\Application;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Adapters\Console\ConsoleContext;
 use Quantum\App\Enums\ExitCode;
+use Quantum\App\Enums\AppType;
 use Quantum\App\AppContext;
 use Quantum\Di\DiContainer;
 use Quantum\App\App;
@@ -47,11 +48,12 @@ class ConsoleContextTest extends AppTestCase
     {
         $container = new DiContainer();
 
-        $consoleContext = new ConsoleContext(new AppContext('/base/dir', $container));
+        $consoleContext = new ConsoleContext(new AppContext('/base/dir', $container, AppType::CONSOLE));
 
         $this->assertInstanceOf(AppContext::class, $consoleContext);
         $this->assertSame('/base/dir', $consoleContext->getBaseDir());
         $this->assertSame($container, $consoleContext->getContainer());
+        $this->assertSame(AppType::CONSOLE, $consoleContext->getType());
     }
 
     public function testConsoleContextExposesApplicationInputAndOutputFromTheContainer(): void
@@ -63,7 +65,7 @@ class ConsoleContextTest extends AppTestCase
 
     public function testConsoleContextReadsTheConsoleObjectsFromTheContainerWhenAsked(): void
     {
-        $context = new AppContext(PROJECT_ROOT, new \Quantum\Di\DiContainer());
+        $context = new AppContext(PROJECT_ROOT, new \Quantum\Di\DiContainer(), AppType::CONSOLE);
         $consoleContext = new ConsoleContext($context);
 
         $application = new Application('Late', '1.0');

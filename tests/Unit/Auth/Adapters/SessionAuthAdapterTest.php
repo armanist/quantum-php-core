@@ -239,4 +239,14 @@ class SessionAuthAdapterTest extends AuthTestCase
 
         $this->assertTrue(cookie()->has('remember_token'));
     }
+
+    public function testWebRememberTokenLifetimeAcceptsTheTextFromEnv(): void
+    {
+        config()->set('auth.session.remember_lifetime', '86400');
+        $this->sessionAuth = $this->createSessionAuth();
+
+        $this->sessionAuth->signin('admin@qt.com', 'qwerty', true);
+
+        $this->assertTrue(cookie()->has('remember_token'));
+    }
 }

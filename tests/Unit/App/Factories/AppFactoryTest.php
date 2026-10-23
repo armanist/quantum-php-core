@@ -90,6 +90,19 @@ class AppFactoryTest extends TestCase
         $this->assertNotSame($app1, $app2);
     }
 
+    public function testAppFactorySetsTheContextTypeOfTheCreatedApp(): void
+    {
+        AppFactory::destroy(AppType::WEB);
+        AppFactory::create(AppType::WEB, PROJECT_ROOT);
+
+        $this->assertSame(AppType::WEB, App::getContext()->getType());
+
+        AppFactory::destroy(AppType::CONSOLE);
+        AppFactory::create(AppType::CONSOLE, PROJECT_ROOT);
+
+        $this->assertSame(AppType::CONSOLE, App::getContext()->getType());
+    }
+
     public function testAppFactoryResetsContainerOnCreate(): void
     {
         AppFactory::destroy(AppType::WEB);

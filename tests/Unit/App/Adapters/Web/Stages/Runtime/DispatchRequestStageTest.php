@@ -50,6 +50,7 @@ namespace Quantum\Tests\Unit\App\Adapters\Web\Stages\Runtime {
     use Quantum\ResourceCache\ViewCache;
     use Quantum\App\Adapters\Web\WebContext;
     use Quantum\Router\MatchedRoute;
+    use Quantum\App\Enums\AppType;
     use Quantum\Di\DiContainer;
     use Quantum\App\AppContext;
     use Quantum\Http\Request;
@@ -190,7 +191,7 @@ namespace Quantum\Tests\Unit\App\Adapters\Web\Stages\Runtime {
 
             DispatchStageMwRecorder::$request = null;
 
-            (new DispatchRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container)));
+            (new DispatchRequestStage())->process(new WebContext(new AppContext(PROJECT_ROOT, $container, AppType::WEB)));
 
             $this->assertSame($request, DispatchStageMwRecorder::$request);
         }

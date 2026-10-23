@@ -25,6 +25,17 @@ class RedisRateLimitAdapterTest extends AppTestCase
         $this->adapter->reset('k2');
     }
 
+    public function testRedisAdapterConnectsWithThePortAsText(): void
+    {
+        $adapter = new RedisRateLimitAdapter([
+            'host' => '127.0.0.1',
+            'port' => '6379',
+            'ttl' => 30,
+        ]);
+
+        $this->assertTrue($adapter->hit('k2', 5, 30));
+    }
+
     public function testRedisAdapterHitAndResetFlow(): void
     {
         $this->assertTrue($this->adapter->hit('k2', 1, 60));

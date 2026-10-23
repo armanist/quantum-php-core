@@ -15,6 +15,7 @@ use Quantum\App\Contracts\StageInterface;
 use Quantum\App\Adapters\Web\WebContext;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\App\Enums\ExitCode;
+use Quantum\App\Enums\AppType;
 use InvalidArgumentException;
 use Quantum\Di\DiContainer;
 use Quantum\App\AppContext;
@@ -47,21 +48,21 @@ class PipelineTest extends AppTestCase
             $this->createStage(function () use (&$log): void {
                 $log[] = 'third';
             }),
-        ]))->run(new AppContext('', new DiContainer()));
+        ]))->run(new AppContext('', new DiContainer(), AppType::WEB));
 
         $this->assertSame(['first', 'second', 'third'], $log);
     }
 
     public function testEmptyPipelineRunsWithoutError(): void
     {
-        (new Pipeline([]))->run(new AppContext('', new DiContainer()));
+        (new Pipeline([]))->run(new AppContext('', new DiContainer(), AppType::WEB));
 
         $this->assertTrue(true);
     }
 
     public function testPipelinePassesTheContextToEveryStage(): void
     {
-        $context = new AppContext('/test/dir', new DiContainer());
+        $context = new AppContext('/test/dir', new DiContainer(), AppType::WEB);
         $received = [];
 
         $stage = $this->createStage(function (AppContext $context) use (&$received): void {

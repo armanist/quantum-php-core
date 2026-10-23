@@ -6,13 +6,14 @@ use Quantum\App\Adapters\Console\Stages\Boot\SetupConsoleApplicationStage;
 use Quantum\App\Stages\Boot\LoadHelpersStage;
 use Symfony\Component\Console\Application;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\App\Enums\AppType;
 use Quantum\Di\Di;
 
 class SetupConsoleApplicationStageTest extends AppTestCase
 {
     public function setUp(): void
     {
-        $this->context = $this->createContext();
+        $this->context = $this->createContext(AppType::CONSOLE);
 
         (new LoadHelpersStage())->process($this->context);
 
@@ -59,7 +60,7 @@ class SetupConsoleApplicationStageTest extends AppTestCase
     {
         $application = new Application('Registered', '0.1');
 
-        $this->context = $this->createContext();
+        $this->context = $this->createContext(AppType::CONSOLE);
         (new LoadHelpersStage())->process($this->context);
         Di::set(Application::class, $application);
 

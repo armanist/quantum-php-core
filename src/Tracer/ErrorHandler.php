@@ -79,7 +79,7 @@ class ErrorHandler
      */
     public function handleException(Throwable $throwable): void
     {
-        if (PHP_SAPI === 'cli') {
+        if (is_console_app()) {
             $this->handleCliException($throwable);
         } else {
             $this->handleWebException($throwable);

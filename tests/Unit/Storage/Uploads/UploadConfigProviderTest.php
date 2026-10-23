@@ -25,7 +25,7 @@ class UploadConfigProviderTest extends AppTestCase
         $context = App::getContext();
 
         try {
-            App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer()));
+            App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer(), $context->getType()));
 
             $this->assertSame([], (new UploadConfigProvider())->getAllowedMimeTypesMap());
             $this->assertFalse(config()->has('uploads'));

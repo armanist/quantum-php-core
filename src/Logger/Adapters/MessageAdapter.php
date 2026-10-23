@@ -25,9 +25,23 @@ class MessageAdapter implements ReportableInterface
      */
     private array $messages = [];
 
+    /**
+     * The number of last messages kept; 0 keeps every message
+     */
+    private int $limit;
+
+    public function __construct(int $limit = 1000)
+    {
+        $this->limit = $limit;
+    }
+
     public function report(string $level, string|Stringable $message, ?array $context = []): void
     {
         $this->messages[] = [$level => $message];
+
+        if ($this->limit > 0 && count($this->messages) > $this->limit) {
+            $this->messages = array_slice($this->messages, -$this->limit);
+        }
     }
 
     /**

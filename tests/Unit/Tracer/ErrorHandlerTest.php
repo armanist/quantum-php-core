@@ -6,6 +6,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Quantum\Tracer\WebExceptionRenderer;
 use Quantum\Tests\Unit\AppTestCase;
 use Quantum\Tracer\ErrorHandler;
+use Quantum\App\Enums\AppType;
 use Quantum\Logger\Logger;
 use ReflectionException;
 use ErrorException;
@@ -92,6 +93,8 @@ class ErrorHandlerTest extends AppTestCase
 
     public function testHandleExceptionCliWritesExceptionMessage(): void
     {
+        $this->useAppType(AppType::CONSOLE);
+
         config()->set('app.debug', false);
 
         $output = new BufferedOutput();
@@ -104,6 +107,8 @@ class ErrorHandlerTest extends AppTestCase
 
     public function testHandleExceptionCliInDebugModeWritesVerboseDiagnostics(): void
     {
+        $this->useAppType(AppType::CONSOLE);
+
         config()->set('app.debug', true);
 
         $output = new BufferedOutput();
@@ -115,6 +120,21 @@ class ErrorHandlerTest extends AppTestCase
         $this->assertStringContainsString(Exception::class . ': CLI debug failure', $display);
         $this->assertStringContainsString('In ', $display);
         $this->assertStringContainsString(__FILE__, $display);
+    }
+
+    public function testHandleExceptionInWebAppRendersTheErrorPage(): void
+    {
+        config()->set('app.debug', true);
+
+        $output = new BufferedOutput();
+        $this->errorHandler->setCliOutput($output);
+
+        ob_start();
+        $this->errorHandler->handleException(new Exception('Web app failure'));
+        ob_get_clean();
+
+        $this->assertStringContainsString('Error :: Web app failure', response()->getContent());
+        $this->assertSame('', $output->fetch());
     }
 
     public function testHandleWebExceptionInDebugModeRendersTraceView(): void

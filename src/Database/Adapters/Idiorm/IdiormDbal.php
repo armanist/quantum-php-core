@@ -21,11 +21,11 @@ use Quantum\Database\Contracts\RelationalInterface;
 use Quantum\Database\Exceptions\DatabaseException;
 use Quantum\Database\Contracts\DbalInterface;
 use Quantum\App\Exceptions\BaseException;
+use Quantum\Di\Exceptions\DiException;
 use InvalidArgumentException;
+use ReflectionException;
 use ORM;
 use PDO;
-use Quantum\Di\Exceptions\DiException;
-use ReflectionException;
 
 /**
  * Class IdiormDbal
@@ -259,7 +259,7 @@ class IdiormDbal implements DbalInterface, RelationalInterface
     {
         return [
             'connection_string' => self::buildConnectionString($driver, $config),
-            'logging' => config()->get('app.debug', false),
+            'logging' => is_debug_mode(),
             'error_mode' => PDO::ERRMODE_EXCEPTION,
         ];
     }

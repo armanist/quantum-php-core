@@ -29,7 +29,7 @@ class EnvironmentTest extends AppTestCase
         $context = App::getContext();
 
         try {
-            App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer()));
+            App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer(), $context->getType()));
 
             $this->expectException(EnvException::class);
             $this->expectExceptionMessage('shared' . DS . 'config' . DS . 'env.php');
@@ -65,7 +65,7 @@ class EnvironmentTest extends AppTestCase
         $context = App::getContext();
 
         try {
-            App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer()));
+            App::setContext(new AppContext(PROJECT_ROOT . DS . 'cron-command-tests-empty', $context->getContainer(), $context->getType()));
 
             $environment->load();
 

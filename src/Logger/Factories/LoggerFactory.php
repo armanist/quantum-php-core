@@ -69,7 +69,7 @@ class LoggerFactory
             throw LoggerException::adapterNotSupported(LoggerType::MESSAGE);
         }
 
-        $adapter = $isDebug ? LoggerType::MESSAGE : ($adapter ?? config()->get('logging.default'));
+        $adapter = $isDebug && is_web_app() ? LoggerType::MESSAGE : ($adapter ?? config()->get('logging.default'));
 
         $adapterClass = $this->getAdapterClass($adapter);
 
@@ -86,7 +86,7 @@ class LoggerFactory
     private function createInstance(string $adapterClass, string $adapter): Logger
     {
         if ($adapter === LoggerType::MESSAGE) {
-            return new Logger(new MessageAdapter());
+            return new Logger(new MessageAdapter((int) config()->get('logging.message.limit', 1000)));
         }
 
         $adapterInstance = new $adapterClass(config()->get('logging.' . $adapter));

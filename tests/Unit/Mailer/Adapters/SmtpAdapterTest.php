@@ -5,6 +5,8 @@ namespace Quantum\Tests\Unit\Mailer\Adapters;
 use Quantum\Tests\Unit\Mailer\MailerTestCase;
 use Quantum\Mailer\Contracts\MailerInterface;
 use Quantum\Mailer\Adapters\SmtpAdapter;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use Quantum\Config\Setup;
 
@@ -112,6 +114,110 @@ class SmtpAdapterTest extends MailerTestCase
         $debugOutput('CLIENT -> SERVER: EHLO localhost', 2);
 
         $this->assertSame(['CLIENT -> SERVER: EHLO localhost'], $adapter->getTransportLog());
+    }
+
+    public function testSmtpAdapterCutsTheSmtpExchangeToItsLastLinesAtTheNextSend(): void
+    {
+        config()->set('app.debug', true);
+        config()->set('mailer.transport_log_limit', 2);
+
+        $adapter = new SmtpAdapter(config()->get('mailer.smtp'));
+
+        $debugOutput = $this->getPrivateProperty($adapter, 'mailer')->Debugoutput;
+
+        $debugOutput('CLIENT -> SERVER: EHLO localhost', 2);
+        $debugOutput('CLIENT -> SERVER: MAIL FROM:<john@hotmail.com>', 2);
+        $debugOutput('CLIENT -> SERVER: QUIT', 2);
+
+        $adapter->setFrom('john@hotmail.com', 'John Doe');
+        $adapter->setAddress('benny@gmail.com', 'Benny');
+        $adapter->setBody('Lorem ipsum dolor sit amet');
+
+        $this->assertTrue($adapter->send());
+
+        $this->assertSame(
+            ['CLIENT -> SERVER: MAIL FROM:<john@hotmail.com>', 'CLIENT -> SERVER: QUIT'],
+            $adapter->getTransportLog()
+        );
+    }
+
+    public function testSmtpAdapterKeepsTheSmtpExchangeOfAFailedSendAndCutsItAtTheNextSend(): void
+    {
+        config()->set('app.debug', true);
+        config()->set('mailer.mail_trap', false);
+        config()->set('mailer.transport_log_limit', 1);
+
+        $adapter = new SmtpAdapter(config()->get('mailer.smtp'));
+
+        $failingMailer = new class (true) extends PHPMailer {
+            public int $sends = 0;
+
+            public function send()
+            {
+                $this->sends++;
+
+                call_user_func($this->Debugoutput, 'Send ' . $this->sends . ': CLIENT -> SERVER: EHLO localhost', 2);
+                call_user_func($this->Debugoutput, 'Send ' . $this->sends . ': SERVER -> CLIENT: 554 Rejected', 2);
+
+                throw new Exception('SMTP Error: data not accepted.');
+            }
+        };
+
+        $failingMailer->Debugoutput = $this->getPrivateProperty($adapter, 'mailer')->Debugoutput;
+        $this->setPrivateProperty($adapter, 'mailer', $failingMailer);
+
+        for ($i = 1; $i <= 2; $i++) {
+            $adapter->setFrom('john@hotmail.com', 'John Doe');
+            $adapter->setAddress('benny@gmail.com', 'Benny');
+
+            try {
+                $adapter->send();
+                $this->fail('Expected the SMTP send to throw');
+            } catch (Exception $e) {
+                $this->assertSame('SMTP Error: data not accepted.', $e->getMessage());
+            }
+        }
+
+        $this->assertSame([
+            'Send 1: SERVER -> CLIENT: 554 Rejected',
+            'Send 2: CLIENT -> SERVER: EHLO localhost',
+            'Send 2: SERVER -> CLIENT: 554 Rejected',
+        ], $adapter->getTransportLog());
+    }
+
+    public function testSmtpAdapterSendsThroughTheTransportWhenMailTrapIsTheTextFalse(): void
+    {
+        config()->set('mailer.mail_trap', 'false');
+
+        $adapter = new SmtpAdapter(config()->get('mailer.smtp'));
+
+        $this->setPrivateProperty($adapter, 'mailer', new class (true) extends PHPMailer {
+            public function send()
+            {
+                throw new Exception('Sent through the transport');
+            }
+        });
+
+        $adapter->setFrom('john@hotmail.com', 'John Doe');
+        $adapter->setAddress('benny@gmail.com', 'Benny');
+        $adapter->setBody('Lorem ipsum dolor sit amet');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Sent through the transport');
+
+        $adapter->send();
+    }
+
+    public function testSmtpAdapterSavesToTheMailTrapWhenMailTrapIsTheTextTrue(): void
+    {
+        config()->set('mailer.mail_trap', 'true');
+
+        $this->adapter->setFrom('john@hotmail.com', 'John Doe');
+        $this->adapter->setAddress('benny@gmail.com', 'Benny');
+        $this->adapter->setSubject('Lorem');
+        $this->adapter->setBody('Lorem ipsum dolor sit amet');
+
+        $this->assertTrue($this->adapter->send());
     }
 
     public function testSmtpAdapterKeepsNoSmtpExchangeOutsideDebugMode(): void
