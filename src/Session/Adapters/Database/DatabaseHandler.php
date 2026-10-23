@@ -87,7 +87,7 @@ class DatabaseHandler implements SessionHandlerInterface
     /**
      * @inheritDoc
      */
-    public function gc($max_lifetime)
+    public function gc($max_lifetime): int|false
     {
         $old = time() - $max_lifetime;
 

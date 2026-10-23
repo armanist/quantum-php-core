@@ -4,6 +4,7 @@ namespace Quantum\Tests\Unit\HttpClient;
 
 use Quantum\HttpClient\ResponseHeaders;
 use Quantum\Tests\Unit\AppTestCase;
+use ReflectionMethod;
 
 class ResponseHeadersTest extends AppTestCase
 {
@@ -32,5 +33,32 @@ class ResponseHeadersTest extends AppTestCase
 
         $this->assertCount(0, $headers);
         $this->assertNull($headers['Content-Type']);
+    }
+
+    /**
+     * @dataProvider interfaceMethodProvider
+     */
+    public function testResponseHeadersDeclaresTheReturnTypeOfItsInterfaceMethods(string $method): void
+    {
+        $this->assertTrue((new ReflectionMethod(ResponseHeaders::class, $method))->hasReturnType());
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public function interfaceMethodProvider(): array
+    {
+        return [
+            'offsetSet' => ['offsetSet'],
+            'offsetExists' => ['offsetExists'],
+            'offsetUnset' => ['offsetUnset'],
+            'offsetGet' => ['offsetGet'],
+            'count' => ['count'],
+            'current' => ['current'],
+            'next' => ['next'],
+            'key' => ['key'],
+            'valid' => ['valid'],
+            'rewind' => ['rewind'],
+        ];
     }
 }
