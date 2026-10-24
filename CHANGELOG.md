@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog.
 
-## [3.1.0] - TBD
+## [3.1.0] - 2026-10-24
 
 ### Added
 - Added `Request::expectsJson()`: true when the `Accept` header lists a JSON media type (`application/json` or a `+json` type, parameters and case ignored), or for an AJAX request that accepts any content type (#581)
