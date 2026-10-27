@@ -11,11 +11,15 @@ class ResponseTest extends AppTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        request()->create('GET', 'http://example.com');
     }
 
     public function tearDown(): void
     {
         response()->flush();
+
+        server()->flush();
     }
 
     public function testResponseContentType(): void
@@ -54,6 +58,37 @@ class ResponseTest extends AppTestCase
         }
 
         $this->assertEquals('/home', $response->getHeader('Location'));
+
+        $this->assertEquals(301, $response->getStatusCode());
+    }
+
+    public function testResponseBackRedirectsToReferrer(): void
+    {
+        $referrer = 'https://example.com/page';
+
+        server()->set('HTTP_REFERER', $referrer);
+
+        $response = response()->back();
+
+        $this->assertEquals($referrer, $response->getHeader('Location'));
+
+        $this->assertEquals(302, $response->getStatusCode());
+    }
+
+    public function testResponseBackFallsBackToBaseUrl(): void
+    {
+        $response = response()->back();
+
+        $this->assertEquals(base_url(), $response->getHeader('Location'));
+
+        $this->assertEquals(302, $response->getStatusCode());
+    }
+
+    public function testResponseBackWithStatusCode(): void
+    {
+        $response = response()->back(301);
+
+        $this->assertEquals(base_url(), $response->getHeader('Location'));
 
         $this->assertEquals(301, $response->getStatusCode());
     }

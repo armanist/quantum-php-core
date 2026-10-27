@@ -10,7 +10,9 @@ declare(strict_types=1);
 
 namespace Quantum\Http\Traits\Response;
 
+use Quantum\Di\Exceptions\DiException;
 use Quantum\Http\Enums\ContentType;
+use ReflectionException;
 
 /**
  * Trait Header
@@ -93,5 +95,15 @@ trait Header
         $this->setStatusCode($code);
         $this->setHeader('Location', $url);
         return $this;
+    }
+
+    /**
+     * Redirects back to the referrer, falls back to the base url
+     * @return self
+     * @throws DiException|ReflectionException
+     */
+    public function back(int $code = 302): self
+    {
+        return $this->redirect(get_referrer() ?? base_url(), $code);
     }
 }
