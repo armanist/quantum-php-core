@@ -103,6 +103,48 @@ class ResponseTest extends AppTestCase
         }
     }
 
+    public function testResponseBackAcceptsSameOriginReferrerForms(): void
+    {
+        $base = parse_url(base_url());
+
+        $defaultPort = $base['scheme'] === 'https' ? 443 : 80;
+
+        foreach ([
+            strtoupper($base['scheme']) . '://' . strtoupper($base['host']) . '/page',
+            $base['scheme'] . '://' . $base['host'] . ':' . $defaultPort . '/page',
+            $base['scheme'] . '://' . $base['host'],
+        ] as $referrer) {
+            server()->set('HTTP_REFERER', $referrer);
+
+            $response = response()->back();
+
+            $this->assertEquals($referrer, $response->getHeader('Location'), $referrer);
+        }
+    }
+
+    public function testResponseBackWithHttpsBaseUrl(): void
+    {
+        $baseUrl = config()->get('app.base_url');
+
+        config()->set('app.base_url', 'https://example.com');
+
+        foreach (['https://example.com/page', 'https://example.com:443/page'] as $referrer) {
+            server()->set('HTTP_REFERER', $referrer);
+
+            $response = response()->back();
+
+            $this->assertEquals($referrer, $response->getHeader('Location'), $referrer);
+        }
+
+        server()->set('HTTP_REFERER', 'http://example.com/page');
+
+        $response = response()->back();
+
+        $this->assertEquals('https://example.com', $response->getHeader('Location'));
+
+        config()->set('app.base_url', $baseUrl);
+    }
+
     public function testResponseBackFallsBackToBaseUrlWithMalformedReferrer(): void
     {
         foreach ([

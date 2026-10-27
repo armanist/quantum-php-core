@@ -7,7 +7,7 @@ The format is based on Keep a Changelog.
 ## [Unreleased]
 
 ### Added
-- Added `Response::back()` and the `back()` helper, which redirect to the referrer and fall back to `base_url()` when the request has none, or when the referrer is not on the application origin (same scheme, host and port). They take the old input to keep for the next request, read with `old()` as after `redirectWith()`, and an optional status code (`back($data, $code)`) (#540)
+- Added `Response::back()` and the `back()` helper, which redirect to the referrer and fall back to `base_url()` when the request has none, or when the referrer is not on the application origin (same scheme, host and port), which is compared with `base_url()`: behind a proxy that terminates TLS, or where the `Host` header is not pinned, set `app.base_url`. They take the old input to keep for the next request, read with `old()` as after `redirectWith()`, and an optional status code (`back($data, $code)`) (#540)
 
 ## [3.1.0] - 2026-10-24
 
