@@ -65,7 +65,7 @@ class ResponseTest extends AppTestCase
 
     public function testResponseBackRedirectsToReferrer(): void
     {
-        $referrer = 'https://example.com/page';
+        $referrer = base_url() . '/page?id=1#top';
 
         server()->set('HTTP_REFERER', $referrer);
 
@@ -74,6 +74,52 @@ class ResponseTest extends AppTestCase
         $this->assertEquals($referrer, $response->getHeader('Location'));
 
         $this->assertEquals(302, $response->getStatusCode());
+    }
+
+    public function testResponseBackFallsBackToBaseUrlWithExternalReferrer(): void
+    {
+        server()->set('HTTP_REFERER', 'https://attacker.example/page');
+
+        $response = response()->back();
+
+        $this->assertEquals(base_url(), $response->getHeader('Location'));
+    }
+
+    public function testResponseBackFallsBackToBaseUrlWithOtherPortOrScheme(): void
+    {
+        $base = parse_url(base_url());
+
+        $otherScheme = $base['scheme'] === 'https' ? 'http' : 'https';
+
+        foreach ([
+            $base['scheme'] . '://' . $base['host'] . ':9999/page',
+            $otherScheme . '://' . $base['host'] . '/page',
+        ] as $referrer) {
+            server()->set('HTTP_REFERER', $referrer);
+
+            $response = response()->back();
+
+            $this->assertEquals(base_url(), $response->getHeader('Location'), $referrer);
+        }
+    }
+
+    public function testResponseBackFallsBackToBaseUrlWithMalformedReferrer(): void
+    {
+        foreach ([
+            'not a url',
+            '/page',
+            '//attacker.example/page',
+            'https:///page',
+            'javascript:alert(1)',
+            base_url() . '\\@attacker.example',
+            base_url() . '@attacker.example',
+        ] as $referrer) {
+            server()->set('HTTP_REFERER', $referrer);
+
+            $response = response()->back();
+
+            $this->assertEquals(base_url(), $response->getHeader('Location'), $referrer);
+        }
     }
 
     public function testResponseBackFallsBackToBaseUrl(): void
@@ -107,7 +153,7 @@ class ResponseTest extends AppTestCase
     {
         $session = SessionFactory::get();
 
-        $referrer = 'https://example.com/signup';
+        $referrer = base_url() . '/signup';
 
         server()->set('HTTP_REFERER', $referrer);
 
