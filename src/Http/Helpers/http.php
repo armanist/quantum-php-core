@@ -79,6 +79,16 @@ function redirectWith(string $url, array $data, int $code = StatusCode::FOUND): 
 }
 
 /**
+ * Redirect back to the referrer, falls back to the base url
+ * @param array<string, mixed> $data
+ * @throws ConfigException|DiException|BaseException|ReflectionException
+ */
+function back(array $data = [], int $code = StatusCode::FOUND): Response
+{
+    return response()->back($data, $code);
+}
+
+/**
  * Gets old input values after redirect
  * @return mixed|null
  * @throws ConfigException|DiException|BaseException|ReflectionException

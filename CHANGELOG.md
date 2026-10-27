@@ -7,7 +7,7 @@ The format is based on Keep a Changelog.
 ## [Unreleased]
 
 ### Added
-- Added `Response::back()`, which redirects to the referrer and falls back to `base_url()` when the request has none. It takes the old input to keep for the next request, read with `old()` as after `redirectWith()`, and an optional status code (`response()->back($data, $code)`) (#540)
+- Added `Response::back()` and the `back()` helper, which redirect to the referrer and fall back to `base_url()` when the request has none. They take the old input to keep for the next request, read with `old()` as after `redirectWith()`, and an optional status code (`back($data, $code)`) (#540)
 
 ## [3.1.0] - 2026-10-24
 
