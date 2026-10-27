@@ -29,6 +29,22 @@ class MessageAdapterTest extends AppTestCase
         $this->assertSame([['info' => 'Test message'], ['error' => 'Error message']], $this->adapter->getMessages());
     }
 
+    public function testReportKeepsTheArrayPayloadOfTheContext(): void
+    {
+        $payload = ['order' => 1042, 'items' => ['a', 'b']];
+
+        $this->adapter->report('info', json_encode($payload, JSON_PRETTY_PRINT), ['payload' => $payload]);
+
+        $this->assertSame([['info' => $payload]], $this->adapter->getMessages());
+    }
+
+    public function testReportKeepsTheMessageWhenTheContextHasNoPayload(): void
+    {
+        $this->adapter->report('info', 'Test message', ['trace' => 'the trace']);
+
+        $this->assertSame([['info' => 'Test message']], $this->adapter->getMessages());
+    }
+
     public function testReportKeepsOnlyTheLastMessagesOverTheLimit(): void
     {
         $adapter = new MessageAdapter(2);

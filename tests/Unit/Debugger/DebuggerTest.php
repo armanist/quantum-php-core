@@ -404,6 +404,20 @@ class DebuggerTest extends AppTestCase
         $this->assertSame([['info' => 'First message'], ['warning' => 'Second message']], $tabs[Debugger::MESSAGES]);
     }
 
+    public function testDebugbarRenderListsAnArrayMessageAsAnArrayInTheMessagesTab(): void
+    {
+        config()->set('app.debug', true);
+
+        $payload = ['order' => 1042, 'items' => ['a', 'b']];
+
+        logger()->info($payload);
+        logger()->warning('A text message');
+
+        $tabs = $this->renderTabs();
+
+        $this->assertSame([['info' => $payload], ['warning' => 'A text message']], $tabs[Debugger::MESSAGES]);
+    }
+
     public function testDebugbarRenderListsTheTransportLogOfTheMailerInTheMailsTab(): void
     {
         config()->set('app.debug', true);

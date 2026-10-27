@@ -20,8 +20,8 @@ use Stringable;
 class MessageAdapter implements ReportableInterface
 {
     /**
-     * Reported messages, as [level => message]
-     * @var array<int, array<string, string|Stringable>>
+     * Reported messages, as [level => message]; an array message is kept as the array
+     * @var array<int, array<string, string|Stringable|array<string, mixed>>>
      */
     private array $messages = [];
 
@@ -37,7 +37,7 @@ class MessageAdapter implements ReportableInterface
 
     public function report(string $level, string|Stringable $message, ?array $context = []): void
     {
-        $this->messages[] = [$level => $message];
+        $this->messages[] = [$level => $context['payload'] ?? $message];
 
         if ($this->limit > 0 && count($this->messages) > $this->limit) {
             $this->messages = array_slice($this->messages, -$this->limit);
@@ -46,7 +46,7 @@ class MessageAdapter implements ReportableInterface
 
     /**
      * Gets the reported messages in the order they were reported
-     * @return array<int, array<string, string|Stringable>>
+     * @return array<int, array<string, string|Stringable|array<string, mixed>>>
      */
     public function getMessages(): array
     {
