@@ -58,7 +58,7 @@ class CreateTable extends BaseMiddleware
     protected function respondWithError(Request $request, $message): Response
     {
         session()->setFlash('error', $message);
-        return redirect(get_referrer() ?? base_url());
+        return back();
     }
 
     /**

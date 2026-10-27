@@ -47,6 +47,7 @@ class RedirectTemplatesTest extends TestCase
     {
         return [
             'demo-web' => ['DemoWeb'],
+            'toolkit' => ['Toolkit'],
         ];
     }
 
