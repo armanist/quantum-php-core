@@ -52,7 +52,7 @@ class Comment extends BaseMiddleware
         $data = $request->all();
 
         session()->setFlash('error', $this->validator->getErrors());
-        return redirectWith(get_referrer() ?? base_url(), $data);
+        return back($data);
     }
 }
 

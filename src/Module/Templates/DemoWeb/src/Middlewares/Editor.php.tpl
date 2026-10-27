@@ -88,7 +88,7 @@ class Editor extends BaseMiddleware
         unset($data['image']);
 
         session()->setFlash('error', $this->validator->getErrors());
-        return redirectWith(get_referrer() ?? base_url(), $data);
+        return back($data);
     }
 }
 
