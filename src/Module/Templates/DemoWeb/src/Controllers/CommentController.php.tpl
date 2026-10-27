@@ -37,7 +37,7 @@ class CommentController extends BaseController
         $this->commentService->addComment($commentDto);
 
         session()->setFlash('success', t('common.comment_added'));
-        return redirect(get_referrer() ?? base_url());
+        return back();
     }
 
     /**
@@ -48,7 +48,7 @@ class CommentController extends BaseController
         $this->commentService->deleteComment($uuid);
 
         session()->setFlash('success', t('common.comment_deleted'));
-        return redirect(get_referrer() ?? base_url());
+        return back();
     }
 }
 

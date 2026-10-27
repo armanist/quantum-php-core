@@ -73,7 +73,7 @@ class Reset extends BaseMiddleware
         }
 
         session()->setFlash('error', $message);
-        return redirect(get_referrer() ?? base_url());
+        return back();
     }
 }
 

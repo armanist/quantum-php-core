@@ -9,6 +9,9 @@ The format is based on Keep a Changelog.
 ### Added
 - Added `Response::back()` and the `back()` helper, which redirect to the referrer and fall back to `base_url()` when the request has none, or when the referrer is not on the application origin (same scheme, host and port), which is compared with `base_url()`: behind a proxy that terminates TLS, or where the `Host` header is not pinned, set `app.base_url`. They take the old input to keep for the next request, read with `old()` as after `redirectWith()`, and an optional status code (`back($data, $code)`) (#540)
 
+### Changed
+- The `DemoWeb` and `Toolkit` module templates redirect back with `back()` instead of `redirect(get_referrer() ?? base_url())` and `redirectWith(get_referrer() ?? base_url(), $data)`, so generated code gets the same-origin check. Modules generated before keep their code (#541)
+
 ## [3.1.0] - 2026-10-24
 
 ### Added

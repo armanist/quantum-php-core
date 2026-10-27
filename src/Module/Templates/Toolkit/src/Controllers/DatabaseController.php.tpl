@@ -75,7 +75,7 @@ class DatabaseController extends BaseController
 
         $this->databaseService->createTableRow($tableName, $newData);
 
-        return redirect(get_referrer() ?? base_url());
+        return back();
     }
 
     public function update(Request $request): Response
