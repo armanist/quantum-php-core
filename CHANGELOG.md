@@ -12,6 +12,9 @@ The format is based on Keep a Changelog.
 ### Changed
 - The `DemoWeb` and `Toolkit` module templates redirect back with `back()` instead of `redirect(get_referrer() ?? base_url())` and `redirectWith(get_referrer() ?? base_url(), $data)`, so generated code gets the same-origin check. Modules generated before keep their code (#541)
 
+### Fixed
+- `logger()->info([...])` and the other `Logger` methods no longer throw a `TypeError` for an array message. The message is reported to the adapters as pretty-printed JSON, so the file adapters write it as before, and the original array travels in the `payload` key of the context: the debug-mode `MessageAdapter` keeps it as the array, so the debugbar `messages` tab shows it as an array. `ReportableInterface` is unchanged. The `Logger` level methods and `log()` now accept `string|Stringable|array`, so a class that extends `Logger` and overrides one of them with `string|Stringable` must accept an array too, since PHP rejects a narrower parameter in an override (#613)
+
 ## [3.1.0] - 2026-10-24
 
 ### Added
