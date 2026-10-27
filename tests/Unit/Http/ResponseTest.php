@@ -2,6 +2,7 @@
 
 namespace Quantum\Tests\Unit\Http;
 
+use Quantum\Session\Factories\SessionFactory;
 use Quantum\Http\Enums\ContentType;
 use Quantum\Tests\Unit\AppTestCase;
 use Throwable;
@@ -86,11 +87,43 @@ class ResponseTest extends AppTestCase
 
     public function testResponseBackWithStatusCode(): void
     {
-        $response = response()->back(301);
+        $response = response()->back([], 301);
 
         $this->assertEquals(base_url(), $response->getHeader('Location'));
 
         $this->assertEquals(301, $response->getStatusCode());
+    }
+
+    public function testResponseBackWithOldData(): void
+    {
+        $session = SessionFactory::get();
+
+        $referrer = 'https://example.com/signup';
+
+        server()->set('HTTP_REFERER', $referrer);
+
+        $response = response()->back(['firstname' => 'Josh', 'lastname' => 'Doe']);
+
+        $this->assertEquals($referrer, $response->getHeader('Location'));
+
+        $this->assertEquals('Josh', old('firstname'));
+
+        $this->assertEquals('Doe', old('lastname'));
+
+        $session->flush();
+    }
+
+    public function testResponseBackWithoutDataKeepsOldData(): void
+    {
+        $session = SessionFactory::get();
+
+        response()->back(['firstname' => 'Josh']);
+
+        response()->back();
+
+        $this->assertEquals('Josh', old('firstname'));
+
+        $session->flush();
     }
 
 }

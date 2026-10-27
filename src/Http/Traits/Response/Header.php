@@ -10,7 +10,10 @@ declare(strict_types=1);
 
 namespace Quantum\Http\Traits\Response;
 
+use Quantum\Config\Exceptions\ConfigException;
+use Quantum\App\Exceptions\BaseException;
 use Quantum\Di\Exceptions\DiException;
+use Quantum\App\Enums\ReservedKeys;
 use Quantum\Http\Enums\ContentType;
 use ReflectionException;
 
@@ -99,11 +102,16 @@ trait Header
 
     /**
      * Redirects back to the referrer, falls back to the base url
+     * @param array<string, mixed> $data Old input to keep for the next request
      * @return self
-     * @throws DiException|ReflectionException
+     * @throws ConfigException|DiException|BaseException|ReflectionException
      */
-    public function back(int $code = 302): self
+    public function back(array $data = [], int $code = 302): self
     {
+        if ($data !== []) {
+            session()->set(ReservedKeys::PREV_REQUEST, $data);
+        }
+
         return $this->redirect(get_referrer() ?? base_url(), $code);
     }
 }
