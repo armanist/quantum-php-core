@@ -112,6 +112,6 @@ trait Header
             session()->set(ReservedKeys::PREV_REQUEST, $data);
         }
 
-        return $this->redirect(get_referrer() ?? base_url(), $code);
+        return $this->redirect(get_referrer() ?: base_url(), $code);
     }
 }

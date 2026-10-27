@@ -85,6 +85,15 @@ class ResponseTest extends AppTestCase
         $this->assertEquals(302, $response->getStatusCode());
     }
 
+    public function testResponseBackFallsBackToBaseUrlWithEmptyReferrer(): void
+    {
+        server()->set('HTTP_REFERER', '');
+
+        $response = response()->back();
+
+        $this->assertEquals(base_url(), $response->getHeader('Location'));
+    }
+
     public function testResponseBackWithStatusCode(): void
     {
         $response = response()->back([], 301);
