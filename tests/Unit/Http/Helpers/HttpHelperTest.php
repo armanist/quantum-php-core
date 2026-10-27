@@ -156,4 +156,45 @@ class HttpHelperTest extends AppTestCase
 
         $this->session->flush();
     }
+
+    public function testRedirectingBack(): void
+    {
+        $this->request->create('GET', 'http://example.com');
+
+        $referrer = base_url() . '/page';
+
+        server()->set('HTTP_REFERER', $referrer);
+
+        $redirectResponse = back();
+
+        $this->assertSame($this->response, $redirectResponse);
+
+        $this->assertEquals($referrer, $this->response->getHeader('Location'));
+
+        $this->assertEquals(StatusCode::FOUND, $this->response->getStatusCode());
+
+        server()->flush();
+    }
+
+    public function testRedirectingBackFallsBackToBaseUrl(): void
+    {
+        back([], StatusCode::MOVED_PERMANENTLY);
+
+        $this->assertEquals(base_url(), $this->response->getHeader('Location'));
+
+        $this->assertEquals(StatusCode::MOVED_PERMANENTLY, $this->response->getStatusCode());
+    }
+
+    public function testRedirectingBackWithOldData(): void
+    {
+        $this->session = SessionFactory::get();
+
+        back(['firstname' => 'Josh', 'lastname' => 'Doe']);
+
+        $this->assertEquals('Josh', old('firstname'));
+
+        $this->assertEquals('Doe', old('lastname'));
+
+        $this->session->flush();
+    }
 }

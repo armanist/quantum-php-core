@@ -10,7 +10,13 @@ declare(strict_types=1);
 
 namespace Quantum\Http\Traits\Response;
 
+use Quantum\Config\Exceptions\ConfigException;
+use Quantum\App\Exceptions\BaseException;
+use Quantum\Di\Exceptions\DiException;
+use Quantum\App\Enums\ReservedKeys;
 use Quantum\Http\Enums\ContentType;
+use Quantum\Http\Request;
+use ReflectionException;
 
 /**
  * Trait Header
@@ -93,5 +99,58 @@ trait Header
         $this->setStatusCode($code);
         $this->setHeader('Location', $url);
         return $this;
+    }
+
+    /**
+     * Redirects back to the referrer when it is on the application origin,
+     * falls back to the base url otherwise
+     * @param array<string, mixed> $data Old input to keep for the next request
+     * @return self
+     * @throws ConfigException|DiException|BaseException|ReflectionException
+     */
+    public function back(array $data = [], int $code = 302): self
+    {
+        if ($data !== []) {
+            session()->set(ReservedKeys::PREV_REQUEST, $data);
+        }
+
+        $referrer = get_referrer();
+
+        return $this->redirect($referrer && $this->isSameOrigin($referrer) ? $referrer : base_url(), $code);
+    }
+
+    /**
+     * Checks that the url has the scheme, host and port of the base url
+     * @throws DiException|ReflectionException
+     */
+    private function isSameOrigin(string $url): bool
+    {
+        $target = parse_url($url);
+        $base = parse_url(base_url());
+
+        if (str_contains($url, '\\') || !is_array($target) || !is_array($base) || isset($target['user'])) {
+            return false;
+        }
+
+        $origin = $this->getOrigin($target);
+
+        return $origin !== null && $origin === $this->getOrigin($base);
+    }
+
+    /**
+     * Gets the scheme, host and port of the parsed url
+     * @param array<string, mixed> $parts
+     */
+    private function getOrigin(array $parts): ?string
+    {
+        if (!isset($parts['scheme'], $parts['host'])) {
+            return null;
+        }
+
+        $scheme = strtolower($parts['scheme']);
+
+        $port = $parts['port'] ?? ($scheme === 'https' ? Request::DEFAULT_HTTPS_PORT : Request::DEFAULT_HTTP_PORT);
+
+        return $scheme . '://' . strtolower($parts['host']) . ':' . $port;
     }
 }
