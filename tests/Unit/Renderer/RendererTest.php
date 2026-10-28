@@ -42,10 +42,6 @@ class RendererTest extends AppTestCase
 
     public function testRendererGetTwigAdapter(): void
     {
-        if (!class_exists('Twig\Environment')) {
-            $this->markTestSkipped('The optional twig/twig package is not installed.');
-        }
-
         $renderer = new Renderer(new TwigAdapter());
 
         $this->assertInstanceOf(TwigAdapter::class, $renderer->getAdapter());
