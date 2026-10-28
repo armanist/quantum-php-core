@@ -52,7 +52,8 @@
         "ezyang/htmlpurifier": "^4.18",
         "povils/figlet": "^0.1.0",
         "ramsey/uuid": "^4.2",
-        "dragonmantank/cron-expression": "^3.0"
+        "dragonmantank/cron-expression": "^3.0",
+        "twig/twig": "^3.27"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",
@@ -66,8 +67,7 @@
         "ext-dom": "Required for XML/HTML processing",
         "ext-zip": "Required for ZIP file handling",
         "ext-memcached": "Required for Memcached support",
-        "ext-redis": "Required for Redis support",
-        "twig/twig": "Required for the optional Twig renderer; secure Twig ^3.27 releases require PHP 8.1 or later"
+        "ext-redis": "Required for Redis support"
     },
     "autoload": {
         "psr-4": {
