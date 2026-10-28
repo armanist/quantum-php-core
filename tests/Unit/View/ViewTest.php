@@ -184,10 +184,6 @@ class ViewTest extends AppTestCase
 
     public function testRenderViewWithTwig(): void
     {
-        if (!class_exists('Twig\Environment')) {
-            $this->markTestSkipped('The optional twig/twig package is not installed.');
-        }
-
         $factory = Di::get(ViewFactory::class);
         $this->setPrivateProperty($factory, 'instance', null);
 

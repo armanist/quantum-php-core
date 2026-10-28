@@ -11,6 +11,7 @@ The format is based on Keep a Changelog.
 
 ### Changed
 - The `DemoWeb` and `Toolkit` module templates redirect back with `back()` instead of `redirect(get_referrer() ?? base_url())` and `redirectWith(get_referrer() ?? base_url(), $data)`, so generated code gets the same-origin check. Modules generated before keep their code (#541)
+- Twig is a required dependency again: `twig/twig` `^3.27` is in `require` and no longer only suggested, which reverses the 3.0.3 change that made it optional while the framework supported PHP 8.0 (#532). Twig `^3.27` needs PHP 8.1, the minimum since 3.1.0. An application that pins an older Twig must allow `^3.27`. Removed `RendererException::twigNotInstalled()` and the check in `TwigAdapter` that threw it when Twig was missing, and the Twig tests no longer skip (#626)
 
 ## [3.1.0] - 2026-10-24
 
