@@ -70,7 +70,7 @@ class LoggerTest extends AppTestCase
     /**
      * @return array<string, array{0: string, 1: string}>
      */
-    public function levelMethodProvider(): array
+    public static function levelMethodProvider(): array
     {
         return [
             'emergency' => ['emergency', LogLevel::EMERGENCY],

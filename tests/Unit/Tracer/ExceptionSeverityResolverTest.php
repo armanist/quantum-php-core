@@ -29,7 +29,7 @@ class ExceptionSeverityResolverTest extends TestCase
     /**
      * @return array<string, array{0: \Throwable, 1: string}>
      */
-    public function mappingProvider(): array
+    public static function mappingProvider(): array
     {
         return [
             'mapped-error-exception' => [new ErrorException('x', 0, E_WARNING), 'warning'],
