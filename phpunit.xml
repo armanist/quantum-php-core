@@ -6,6 +6,8 @@
         colors="true"
         stderr="true"
         stopOnFailure="false"
+        failOnWarning="true"
+        failOnRisky="true"
         cacheDirectory=".phpunit.cache"
 >
     <php>
