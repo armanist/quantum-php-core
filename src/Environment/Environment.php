@@ -173,7 +173,9 @@ class Environment
      */
     private function resolveEnvironmentFile(): array
     {
-        $filePath = base_dir() . DS . 'shared' . DS . 'config' . DS . 'env.php';
+        $baseDir = App::getBaseDir();
+
+        $filePath = $baseDir . DS . 'shared' . DS . 'config' . DS . 'env.php';
 
         if (!file_exists($filePath)) {
             throw EnvException::fileNotFound($filePath);
@@ -183,7 +185,7 @@ class Environment
         $appEnv = $envConfig['app_env'] ?? Env::PRODUCTION;
         $envFile = $this->getEnvFileName($appEnv);
 
-        if (!file_exists(App::getBaseDir() . DS . $envFile)) {
+        if (!file_exists($baseDir . DS . $envFile)) {
             throw EnvException::fileNotFound($envFile);
         }
 

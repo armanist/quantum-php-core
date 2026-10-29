@@ -5,6 +5,8 @@ namespace Quantum\Tests\Unit\ResourceCache;
 use Quantum\ResourceCache\Exceptions\ResourceCacheException;
 use Quantum\ResourceCache\ViewCache;
 use Quantum\Tests\Unit\AppTestCase;
+use Quantum\Router\MatchedRoute;
+use Quantum\Router\Route;
 use Quantum\Di\Di;
 
 class ViewCacheDouble extends ViewCache
@@ -152,6 +154,27 @@ HEREDOC;
         $this->viewCache->enableCaching(false);
 
         $this->assertFalse($this->viewCache->isEnabled());
+    }
+
+    public function testCacheDirIsTheViewsDirWhenThereIsNoModule(): void
+    {
+        $this->assertSame(
+            base_dir() . DS . 'cache' . DS . 'views',
+            $this->invokePrivateMethod($this->viewCache, 'getCacheDir')
+        );
+    }
+
+    public function testCacheDirHasTheLowercaseModuleNameWhenThereIsAModule(): void
+    {
+        request()->setMatchedRoute(new MatchedRoute(
+            (new Route(['GET'], '/current-route', 'TestController', 'tests'))->module('Test'),
+            []
+        ));
+
+        $this->assertSame(
+            base_dir() . DS . 'cache' . DS . 'views' . DS . 'test',
+            $this->invokePrivateMethod($this->viewCache, 'getCacheDir')
+        );
     }
 
 }
