@@ -103,7 +103,10 @@ trait SessionTrait
     public function flush(): void
     {
         self::$storage = [];
-        session_destroy();
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
     }
 
     /**

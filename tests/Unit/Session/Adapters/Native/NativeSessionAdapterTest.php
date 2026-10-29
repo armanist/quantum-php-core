@@ -81,6 +81,23 @@ class NativeSessionAdapterTest extends AppTestCase
         session_start();
     }
 
+    public function testNativeSessionFlushWithoutAnActiveSessionDoesNotWarn(): void
+    {
+        $oldLevel = error_reporting(E_ALL);
+
+        try {
+            $this->session->flush();
+
+            $this->session->flush();
+
+            $this->assertEmpty($this->session->all());
+        } finally {
+            error_reporting($oldLevel);
+
+            @session_start();
+        }
+    }
+
     public function testNativeSessionGetSessionId(): void
     {
         $this->assertEquals(session_id(), $this->session->getId());
