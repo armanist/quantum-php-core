@@ -145,7 +145,9 @@ class Config implements ConfigInterface
 
     private function resolveFilePath(Setup $setup): ?string
     {
-        $filePath = App::getBaseDir() . DS;
+        $baseDir = App::getBaseDir();
+
+        $filePath = $baseDir . DS;
 
         if ($setup->getModule()) {
             $filePath = modules_dir() . DS . $setup->getModule() . DS;
@@ -162,7 +164,7 @@ class Config implements ConfigInterface
         }
 
         if ($setup->getHierarchy()) {
-            $filePath = App::getBaseDir() . DS . 'shared' . DS
+            $filePath = $baseDir . DS . 'shared' . DS
                 . strtolower($setup->getPathPrefix() ?? '') . DS
                 . $setup->getFilename() . '.php';
 

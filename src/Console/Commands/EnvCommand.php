@@ -62,19 +62,21 @@ class EnvCommand extends CliCommand
     {
         $fs = FileSystemFactory::get();
 
-        if (!$fs->exists(App::getBaseDir() . DS . '.env.example')) {
+        $baseDir = App::getBaseDir();
+
+        if (!$fs->exists($baseDir . DS . '.env.example')) {
             $this->error('.env.example file not found');
             return;
         }
 
-        if ($fs->exists(App::getBaseDir() . DS . '.env') && !$this->getOption('yes') && !$this->confirm('The operation will overwrite values of the existing .env and will create new one from .env.example. Continue?')) {
+        if ($fs->exists($baseDir . DS . '.env') && !$this->getOption('yes') && !$this->confirm('The operation will overwrite values of the existing .env and will create new one from .env.example. Continue?')) {
             $this->info('Operation was canceled!');
             return;
         }
 
         $fs->copy(
-            App::getBaseDir() . DS . '.env.example',
-            App::getBaseDir() . DS . '.env'
+            $baseDir . DS . '.env.example',
+            $baseDir . DS . '.env'
         );
 
         $this->info('.env is successfully generated');
