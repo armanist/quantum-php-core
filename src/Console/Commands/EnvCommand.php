@@ -64,6 +64,7 @@ class EnvCommand extends CliCommand
 
         if (!$fs->exists(App::getBaseDir() . DS . '.env.example')) {
             $this->error('.env.example file not found');
+            return;
         }
 
         if ($fs->exists(App::getBaseDir() . DS . '.env') && !$this->getOption('yes') && !$this->confirm('The operation will overwrite values of the existing .env and will create new one from .env.example. Continue?')) {
