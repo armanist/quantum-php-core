@@ -4,10 +4,9 @@
         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
         bootstrap="tests/bootstrap.php"
         colors="true"
-        verbose="true"
         stderr="true"
         stopOnFailure="false"
-        convertDeprecationsToExceptions="false"
+        cacheDirectory=".phpunit.cache"
 >
     <php>
         <ini name="error_reporting" value="-1"/>
@@ -19,9 +18,9 @@
         </testsuite>
     </testsuites>
 
-    <coverage processUncoveredFiles="true">
+    <source>
         <include>
             <directory suffix=".php">./src</directory>
         </include>
-    </coverage>
+    </source>
 </phpunit>
