@@ -81,7 +81,7 @@ class OpenApiTemplatesTest extends TestCase
     /**
      * @return array<string, array{0: string}>
      */
-    public function apiTemplateProvider(): array
+    public static function apiTemplateProvider(): array
     {
         return [
             'default-api' => ['DefaultApi'],

@@ -216,7 +216,7 @@ class OpenApiCommandTest extends AppTestCase
         mkdir($controllersDir, 0777, true);
 
         file_put_contents($routesDir . DS . 'routes.php', "<?php\n\nreturn function (\$route) {\n};\n");
-        file_put_contents($controllersDir . DS . 'SpecController.php', "<?php\n\nuse OpenApi\\Attributes as OA;\n\n#[OA\\Info(title: 'Spec', version: '1.0.0')]\nclass " . $className . "\n{\n}\n");
+        file_put_contents($controllersDir . DS . 'SpecController.php', "<?php\n\nuse OpenApi\\Attributes as OA;\n\n#[OA\\Info(title: 'Spec', version: '1.0.0')]\nclass " . $className . "\n{\n    #[OA\\Get(path: '/spec', responses: [new OA\\Response(response: 200, description: 'OK')])]\n    public function index(): void\n    {\n    }\n}\n");
 
         require_once $controllersDir . DS . 'SpecController.php';
 
@@ -271,7 +271,7 @@ class OpenApiCommandTest extends AppTestCase
 
         mkdir($annotationDir, 0777, true);
         mkdir($specDir, 0777, true);
-        file_put_contents($annotationDir . DS . 'SpecController.php', "<?php\n\nuse OpenApi\\Attributes as OA;\n\n#[OA\\Info(title: 'Spec', version: '1.0.0')]\nclass " . $className . "\n{\n}\n");
+        file_put_contents($annotationDir . DS . 'SpecController.php', "<?php\n\nuse OpenApi\\Attributes as OA;\n\n#[OA\\Info(title: 'Spec', version: '1.0.0')]\nclass " . $className . "\n{\n    #[OA\\Get(path: '/spec', responses: [new OA\\Response(response: 200, description: 'OK')])]\n    public function index(): void\n    {\n    }\n}\n");
 
         require_once $annotationDir . DS . 'SpecController.php';
 

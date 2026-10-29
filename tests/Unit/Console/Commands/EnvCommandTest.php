@@ -109,6 +109,7 @@ class EnvCommandTest extends AppTestCase
 
             $output = $this->tester->getDisplay();
             $this->assertStringContainsString('.env.example file not found', $output);
+            $this->assertStringNotContainsString('.env is successfully generated', $output);
         } finally {
             if ($existed && file_exists($backup)) {
                 rename($backup, $envExample);

@@ -210,7 +210,7 @@ class DropboxFileSystemAdapter implements FilesystemAdapterInterface
     {
         try {
             $response = (array) $this->dropboxApp->rpcRequest(DropboxApp::ENDPOINT_LIST_FOLDER, $this->dropboxApp->path($dirname));
-            return $response['entries'];
+            return $response['entries'] ?? false;
         } catch (Exception) {
             return false;
         }

@@ -43,7 +43,7 @@ class RedirectTemplatesTest extends TestCase
     /**
      * @return array<string, array{0: string}>
      */
-    public function redirectTemplateProvider(): array
+    public static function redirectTemplateProvider(): array
     {
         return [
             'demo-web' => ['DemoWeb'],

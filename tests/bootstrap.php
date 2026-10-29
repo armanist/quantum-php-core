@@ -1,7 +1,5 @@
 <?php
 
-error_reporting(E_ALL & ~E_DEPRECATED);
-
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
 }

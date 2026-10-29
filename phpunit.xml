@@ -4,13 +4,14 @@
         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
         bootstrap="tests/bootstrap.php"
         colors="true"
-        verbose="true"
         stderr="true"
         stopOnFailure="false"
-        convertDeprecationsToExceptions="false"
+        failOnWarning="true"
+        failOnRisky="true"
+        cacheDirectory=".phpunit.cache"
 >
     <php>
-        <ini name="error_reporting" value="E_ALL &amp; ~E_DEPRECATED"/>
+        <ini name="error_reporting" value="-1"/>
     </php>
 
     <testsuites>
@@ -19,9 +20,9 @@
         </testsuite>
     </testsuites>
 
-    <coverage processUncoveredFiles="true">
+    <source>
         <include>
             <directory suffix=".php">./src</directory>
         </include>
-    </coverage>
+    </source>
 </phpunit>

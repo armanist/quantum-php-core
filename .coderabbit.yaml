@@ -1,0 +1,7 @@
+# CodeRabbit reviews pull requests into the default branch only, unless more branches are listed here.
+# Also review the pull requests into the maintenance branches (3.1.x, 3.2.x, ...), so a change is
+# reviewed in its own pull request and not only in the merge of the branch into master.
+reviews:
+  auto_review:
+    base_branches:
+      - '^\d+\.\d+\.x$'

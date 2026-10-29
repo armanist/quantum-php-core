@@ -27,30 +27,28 @@ class ErrorHandlerTest extends AppTestCase
         $this->errorHandler = new ErrorHandler();
     }
 
-    public function tearDown(): void
-    {
-        restore_error_handler();
-        restore_exception_handler();
-        parent::tearDown();
-    }
-
     public function testSetupRegistersErrorHandler(): void
     {
         $logger = Mockery::mock(Logger::class);
 
         $this->errorHandler->setup($logger);
 
-        $currentHandler = set_error_handler(function () {
-        });
-        restore_error_handler();
+        try {
+            $currentHandler = set_error_handler(function () {
+            });
+            restore_error_handler();
 
-        $this->assertNotNull($currentHandler);
-        $this->assertInstanceOf(Closure::class, $currentHandler);
+            $this->assertNotNull($currentHandler);
+            $this->assertInstanceOf(Closure::class, $currentHandler);
 
-        $reflection = new ReflectionFunction($currentHandler);
+            $reflection = new ReflectionFunction($currentHandler);
 
-        $this->assertInstanceOf(ErrorHandler::class, $reflection->getClosureThis());
-        $this->assertEquals('handleError', $reflection->getName());
+            $this->assertInstanceOf(ErrorHandler::class, $reflection->getClosureThis());
+            $this->assertEquals('handleError', $reflection->getName());
+        } finally {
+            restore_error_handler();
+            restore_exception_handler();
+        }
     }
 
     public function testSetupRegistersExceptionHandler(): void
@@ -59,17 +57,22 @@ class ErrorHandlerTest extends AppTestCase
 
         $this->errorHandler->setup($logger);
 
-        $currentHandler = set_exception_handler(function () {
-        });
-        restore_exception_handler();
+        try {
+            $currentHandler = set_exception_handler(function () {
+            });
+            restore_exception_handler();
 
-        $this->assertNotNull($currentHandler);
-        $this->assertInstanceOf(Closure::class, $currentHandler);
+            $this->assertNotNull($currentHandler);
+            $this->assertInstanceOf(Closure::class, $currentHandler);
 
-        $reflection = new ReflectionFunction($currentHandler);
+            $reflection = new ReflectionFunction($currentHandler);
 
-        $this->assertInstanceOf(ErrorHandler::class, $reflection->getClosureThis());
-        $this->assertEquals('handleException', $reflection->getName());
+            $this->assertInstanceOf(ErrorHandler::class, $reflection->getClosureThis());
+            $this->assertEquals('handleException', $reflection->getName());
+        } finally {
+            restore_error_handler();
+            restore_exception_handler();
+        }
     }
 
     public function testHandleErrorThrowsErrorException(): void
@@ -278,7 +281,7 @@ class ErrorHandlerTest extends AppTestCase
     /**
      * @return array<string, array{0: int}>
      */
-    public function deprecationSeverityProvider(): array
+    public static function deprecationSeverityProvider(): array
     {
         return [
             'deprecated' => [E_DEPRECATED],
@@ -299,7 +302,7 @@ class ErrorHandlerTest extends AppTestCase
     /**
      * @return array<string, array{0: \Throwable, 1: string}>
      */
-    public function errorTypeProvider(): array
+    public static function errorTypeProvider(): array
     {
         return [
             'mapped-error-exception' => [new ErrorException('x', 0, E_WARNING), 'warning'],
