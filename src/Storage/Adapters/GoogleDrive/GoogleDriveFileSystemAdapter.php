@@ -235,7 +235,7 @@ class GoogleDriveFileSystemAdapter implements FilesystemAdapterInterface
                 'fields' => '*',
             ];
             $response = (array) $this->googleDriveApp->rpcRequest(GoogleDriveApp::FILE_METADATA_URL . '?' . http_build_query($params), [], 'GET');
-            return $response['files'];
+            return $response['files'] ?? false;
         } catch (Exception) {
             return false;
         }
