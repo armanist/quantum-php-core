@@ -49,7 +49,7 @@ class LoadHelpersStage implements StageInterface
 
     private function loadModuleHelpers(): void
     {
-        $this->loadHelperFiles(App::getBaseDir() . DS . 'modules' . DS . '*' . DS . 'helpers');
+        $this->loadHelperFiles(modules_dir() . DS . '*' . DS . 'helpers');
     }
 
     private function loadHelperFiles(string $dir): void
