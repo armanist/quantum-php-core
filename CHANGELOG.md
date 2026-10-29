@@ -12,6 +12,12 @@ The format is based on Keep a Changelog.
 ### Changed
 - The `DemoWeb` and `Toolkit` module templates redirect back with `back()` instead of `redirect(get_referrer() ?? base_url())` and `redirectWith(get_referrer() ?? base_url(), $data)`, so generated code gets the same-origin check. Modules generated before keep their code (#541)
 - Twig is a required dependency again: `twig/twig` `^3.27` is in `require` and no longer only suggested, which reverses the 3.0.3 change that made it optional while the framework supported PHP 8.0 (#532). Twig `^3.27` needs PHP 8.1, the minimum since 3.1.0. An application that pins an older Twig must allow `^3.27`. Removed `RendererException::twigNotInstalled()` and the check in `TwigAdapter` that threw it when Twig was missing, and the Twig tests no longer skip (#626)
+- The test suite runs on PHPUnit `^10.5` (a development dependency) and `phpunit.xml` uses its schema. It now sets `error_reporting` to `-1`: it was the text `E_ALL & ~E_DEPRECATED`, which PHP reads as `0`, so every PHP warning was hidden in the tests (#622)
+
+### Fixed
+- `php qt core:env` no longer prints `.env is successfully generated` and no longer tries to copy the file when `.env.example` is missing: it stops after the error message (#622)
+- `flush()` of the session adapters no longer raises a warning when no session is active, so calling it twice, or before a session was started, no longer throws (#622)
+- `listDirectory()` of the Dropbox and Google Drive adapters returns `false`, as its contract says, when the API response has no `entries` or `files`. It could return `null` when PHP warnings were not reported (#622)
 
 ## [3.1.0] - 2026-10-24
 

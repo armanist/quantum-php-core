@@ -199,7 +199,7 @@ class GoogleDriveFileSystemAdapterTest extends AppTestCase
 
         self::$response = [];
 
-        $this->assertNull($this->fs->listDirectory('test'));
+        $this->assertFalse($this->fs->listDirectory('test'));
 
     }
 }

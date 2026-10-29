@@ -55,6 +55,9 @@ abstract class AppTestCase extends TestCase
         }
 
         $this->clearAppContext();
+
+        restore_error_handler();
+        restore_exception_handler();
     }
 
     protected function createContext(string $type = AppType::WEB): AppContext

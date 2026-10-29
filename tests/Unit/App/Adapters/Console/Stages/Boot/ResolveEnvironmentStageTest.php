@@ -89,7 +89,7 @@ class ResolveEnvironmentStageTest extends ConsoleStageTestCase
     /**
      * @return array<string, array{string}>
      */
-    public function commandsThatRunWithoutTheEnvironment(): array
+    public static function commandsThatRunWithoutTheEnvironment(): array
     {
         return [
             'a CliCommand that does not require the environment' => ['no:env'],
@@ -101,7 +101,7 @@ class ResolveEnvironmentStageTest extends ConsoleStageTestCase
     /**
      * @return array<string, array{array<string, string>}>
      */
-    public function inputsThatNeedTheEnvironment(): array
+    public static function inputsThatNeedTheEnvironment(): array
     {
         return [
             'a CliCommand that requires the environment' => [['command' => 'needs:env']],

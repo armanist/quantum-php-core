@@ -249,7 +249,7 @@ class Debugger
             $info['View'] = request()->getCurrentModule() . '/Views/' . $viewFile;
         }
 
-        return array_filter($info, fn ($value): bool => $value !== null && $value !== []);
+        return array_filter($info, fn (string|array|null $value): bool => $value !== null && $value !== []);
     }
 
     /**

@@ -46,7 +46,7 @@ class ResponseHeadersTest extends AppTestCase
     /**
      * @return array<string, array{0: string}>
      */
-    public function interfaceMethodProvider(): array
+    public static function interfaceMethodProvider(): array
     {
         return [
             'offsetSet' => ['offsetSet'],

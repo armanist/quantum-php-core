@@ -77,7 +77,7 @@ class MailerTest extends AppTestCase
     /**
      * @return array<string, array{0: class-string, 1: array<string, mixed>}>
      */
-    public function httpAdapterProvider(): array
+    public static function httpAdapterProvider(): array
     {
         return [
             'mailgun' => [MailgunAdapter::class, ['api_key' => 'test', 'domain' => 'test.com']],

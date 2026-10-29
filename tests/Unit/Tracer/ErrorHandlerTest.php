@@ -278,7 +278,7 @@ class ErrorHandlerTest extends AppTestCase
     /**
      * @return array<string, array{0: int}>
      */
-    public function deprecationSeverityProvider(): array
+    public static function deprecationSeverityProvider(): array
     {
         return [
             'deprecated' => [E_DEPRECATED],
@@ -299,7 +299,7 @@ class ErrorHandlerTest extends AppTestCase
     /**
      * @return array<string, array{0: \Throwable, 1: string}>
      */
-    public function errorTypeProvider(): array
+    public static function errorTypeProvider(): array
     {
         return [
             'mapped-error-exception' => [new ErrorException('x', 0, E_WARNING), 'warning'],
